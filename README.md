@@ -1,4 +1,4 @@
-## vid2cleantxt
+# vid2cleantxt
 
 vid2cleantxt: a pipeline for turning heavily speech-based video files into clean, readable text from the audio.
 
@@ -10,7 +10,7 @@ vid2cleantxt: a pipeline for turning heavily speech-based video files into clean
 
 When compared to text and pictures, video (specifically the audio) is an inefficient way to convey information, as in the base the viewer has to sit through the whole thing, while only part of the video may be relevant to them. This repo attempts to help solve that problem by converting long video files into text that you can read, CTRL+F, keyword extract, and summarize.
 	
-# Basic explanation of pipeline process
+## Basic explanation of pipeline process
 	
 	- Receive directory input from user. Iterate through that directory, find all video files
 	- FOR each video file 
@@ -28,17 +28,17 @@ When compared to text and pictures, video (specifically the audio) is an ineffic
 	
 	results are stored in /directory/w2v2_video_transcriptions and metadata in /directory/w2v2_transcription_metadata
 	
-# How to get this to work on your machine (aka installation)
+## How to get this to work on your machine (aka installation)
 
 * Currently, just normal Git methods. You can also download the .zip from the site, if you run the scripts in the same configuration it should work fine.
 	
 * Will make some changes that don't require vid2cleantxt_folder to be in the same folder as audio2text_functions for example.
 
-# Is there a jupyter notebook file?
+## Is there a jupyter notebook file?
 	
 No, but am working on a version in Google Colab. Will update repo when done.
 
-# Now I have a bunch of long text files. How are these useful?
+## Now I have a bunch of long text files. How are these useful?
 	
 * short answer: noam_chomsky.jpeg
 	
@@ -64,30 +64,30 @@ No, but am working on a version in Google Colab. Will update repo when done.
 	
 I do have some of my own code that does this (given the motivation statement) but it needs some work before I publish an initial commit. It will be in a public repo on this account. 
 	
-# TextHero example use case: 
+## TextHero example use case: 
 Clustering vectorized text files into k-means groups
 ![iml Plotting with TSNE + USE, Colored on Directory Name](https://user-images.githubusercontent.com/74869040/110546335-a0baaf80-812e-11eb-8d7d-48da00989dce.png)
 ![iml Plotting with TSNE + USE, Colored on K-Means Cluster](https://user-images.githubusercontent.com/74869040/110546452-c6e04f80-812e-11eb-9a4b-03213ec4a63b.png)
 
-# ScatterText example use case: 
+## ScatterText example use case: 
 Comparing frequency of terms in one body of text vs. another
 ![ST P 1 term frequency I ML 2021 Docs I ML Prior Exams_072122_](https://user-images.githubusercontent.com/74869040/110546149-69e49980-812e-11eb-9c94-81fcb395b907.png)
 
-# Why use wav2vec2 instead of SpeechRecognition or other transcription methods?
+## Why use wav2vec2 instead of SpeechRecognition or other transcription methods?
 
 	Google's SpeechRecognition (with the free API) requires optimization of three unknown parameters, which in my experience can vary widely among english as a second language speakers. With wav2vec2, the base model is pretrained, so a 'decent transcription' can be made without having to spend a bunch of time testing and optimizing parameters.
 	
 	Also, because it's an API you can't train it even if you wanted to, you have to be online for functionally most of the script runtime, and then of course you have privacy concerns with sending data out of your machine.
 	
-# What about a version where I don't need python at all?
+## What about a version where I don't need python at all?
 
 Work in progress the following package https://www.py2exe.org/. Will update repo when done
 	
-# How long does this take to run?
+## How long does this take to run?
 
 On my machine (CPU only due to AMD GPU) it takes approximately 80-120% of the total duration of input video files.
 
-Specs:
+** Specs: **
 	
 	Processor Intel(R) Core(TM) i7-8665U CPU @ 1.90GHz 
 	Speed 4.8 GHz 
@@ -103,31 +103,31 @@ Specs:
 	
 Note: if you change wav2vec2_model = "facebook/wav2vec2-large-960h-lv60-self" to wav2vec2_model = "facebook/wav2vec2-base-960h" the runtime will be considerably faster. I have not compared accuracy on my own use cases, but I am sure Facebook has.
 
-# How can I improve the performance of the model from a word-error-rate perspective?
+## How can I improve the performance of the model from a word-error-rate perspective?
 
 You can train the model, but that requires that you already have a transcription of that person's speech already. As you may find, manual transcription is a bit of a pain and therefore transcripts are rarely provided - hence this repo.
 
-# I've found x repo / script / concept that I think you should incorporate or collaborate with the author.
+## I've found x repo / script / concept that I think you should incorporate or collaborate with the author.
 
 Send me a message / start a discussion! Always looking to improve.
 		
-## TROUBLESHOOTING
+# TROUBLESHOOTING
 
-# I tried to transcribe an audio file and it gave me an error:
+## I tried to transcribe an audio file and it gave me an error:
 	
 Planning to update the code to detect audio files and handle those. For now, only works on video files. If you want to try yourself, convert_vidfile and convert_vid_for_transcription just need to be updated.
 	
-# My computer crashes once it starts running the wav2vec2 model:
+## My computer crashes once it starts running the wav2vec2 model:
 	
 Try decreasing 'chunk_length' in vid2cleantxt_folder.py or vid2cleantxt_single.py (whichever you use). Until you get to really small intervals (say < 10 seconds) each audio chunk can more or less be treated independently as they are different sentences.
 		
-## EXAMPLE 
+# EXAMPLE 
 
-# Description
+## Description
 
 The "example_JFK_speech" folder contains the results and interim files of running both the single file and folder version. NOTE: I had to split "GPU_President Kennedy speech on the space effort a" when pushing to Git, so there are 5 video files but when I ran the folder transcriber it was just one. Again, this shouldn't really be an issue as the audio is "independent"
 	
-# Output script run log for the "single_file" version:
+## Output script run log for the "single_file" version:
 
 	C:\Users\peter\AppData\Local\Microsoft\WindowsApps\python.exe C:/Users/peter/PycharmProjects/vid2cleantxt/vid2cleantxt/vid2cleantxt_single.py
 	2021-03-09 22:07:21.289433: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'cudart64_110.dll'; dlerror: cudart64_110.dll not found
@@ -206,7 +206,7 @@ The "example_JFK_speech" folder contains the results and interim files of runnin
 
 	Process finished with exit code 0
 
-# Citations (work in progress)
+## Citations (work in progress)
 	
 wav2vec2
 	
