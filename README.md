@@ -36,6 +36,8 @@ results are stored in ~/directory/w2v2_video_transcriptions and metadata in ~/di
 	
 ## How to get this to work on your machine (aka installation)
 
+**Important** the first time the code runs on your machine, it will download the pretrained transformers model (approx 1 gb). After the first run, it will be cached locally on your machine, and you will not need to sit through that again.
+
 * Currently, just normal Git methods. You can also download the .zip from the site, if you run the scripts in the same configuration it should work fine.
 	
 * Will make some changes that don't require vid2cleantxt_folder to be in the same folder as audio2text_functions for example.
