@@ -1,7 +1,5 @@
 # vid2cleantxt
 
-github readme start
-
 vid2cleantxt: a pipeline for turning heavily speech-based video files into clean, readable text from the audio.
 
 Motivation
@@ -11,12 +9,12 @@ Motivation
 Basic explanation of what this script is doing
 	
 	- Receive directory input from user. Iterate through that directory, find all video files
-	- for each video file 
+	- FOR each video file 
 		- convert video to .wav format audio chunks of duration X* seconds with MoviePy
 		- transcribe all X audio chunks through a pretrained wav2vec2model (transformers), store results in a list
 		- write all results of the list into a text file, store various runtime metrics into a separate text list 
 	- after above completed, create wo new files: one with all transcriptions appended, one with all metadata appended. 
-	- for each transcription text file:
+	- FOR each transcription text file:
 		- pass created textfile through a spell checker (PySpellChecker) and autocorrect spelling. save as new file
 		- use pySBD to infer sentence boundaries and add periods in to delineate sentences. Save as new file 
 		- run basic keyword extraction (via YAKE) on spell-corrected file. All keywords per file are stored in one dataframe for comparison , and exported to .xlsx format 
@@ -62,6 +60,13 @@ Now I have a bunch of long text files. How are these useful?
 	------------------------------------------------
 	
 	*of course I do have some of my own code that does this (given the motivation statement) but it needs some work before I publish an initial commit. It will be in a public repo on this account. 
+	
+TextHero example use case: Clustering vectorized text files into k-means groups
+![iml Plotting with TSNE + USE, Colored on Directory Name](https://user-images.githubusercontent.com/74869040/110546335-a0baaf80-812e-11eb-8d7d-48da00989dce.png)
+![iml Plotting with TSNE + USE, Colored on K-Means Cluster](https://user-images.githubusercontent.com/74869040/110546452-c6e04f80-812e-11eb-9a4b-03213ec4a63b.png)
+
+ScatterText example use case: Comparing frequency of terms in one body of text vs another
+![ST P 1 term frequency I ML 2021 Docs I ML Prior Exams_072122_](https://user-images.githubusercontent.com/74869040/110546149-69e49980-812e-11eb-9c94-81fcb395b907.png)
 
 Why use wav2vec2 instead of SpeechRecognition or other transcription methods?
 
@@ -94,7 +99,7 @@ How long does this take to run?
 
 How can I improve the performance of the model from a word-error-rate perspective?
 
-I've found x repo / script / concept that I think you should incorporate or collaborate with the author
+I've found x repo / script / concept that I think you should incorporate or collaborate with the author.
 
 	Send me a message / start a discussion! Always looking to improve.
 	
