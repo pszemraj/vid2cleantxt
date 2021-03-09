@@ -12,9 +12,9 @@ When compared to text and pictures, video (specifically the audio) is an ineffic
 	
 ## Basic explanation of pipeline process
 	
-	- Receive directory input from user. Iterate through that directory, find all video files
+	- Receive directory input from user in script run window*. Iterate through that directory, find all video files
 	- FOR each video file 
-		- convert video to .wav format audio chunks of duration X* seconds with MoviePy
+		- convert video to .wav format audio chunks of duration X** seconds with MoviePy
 		- transcribe all X audio chunks through a pretrained wav2vec2model (transformers), store results in a list
 		- write all results of the list into a text file, store various runtime metrics into a separate text list 
 	- after above completed, create wo new files: one with all transcriptions appended, one with all metadata appended. 
@@ -24,9 +24,11 @@ When compared to text and pictures, video (specifically the audio) is an ineffic
 		- run basic keyword extraction (via YAKE) on spell-corrected file. All keywords per file are stored in one dataframe for comparison , and exported to .xlsx format 
 	- cleanup tasks (delete the X .wav files created for audio transcription, etc), report runtime, and exit
 	
-	* (where X is some duration that does not overload your computer or crash your IDE)
+	* the 'single file' version needs to have the name defined in the python code itself
+	** (where X is some duration that does not overload your computer or crash your IDE)
 	
-	results are stored in /directory/w2v2_video_transcriptions and metadata in /directory/w2v2_transcription_metadata
+	
+results are stored in ~/directory/w2v2_video_transcriptions and metadata in ~/directory/w2v2_transcription_metadata
 	
 ## How to get this to work on your machine (aka installation)
 
@@ -40,9 +42,9 @@ No, but am working on a version in Google Colab. Will update repo when done.
 
 ## Now I have a bunch of long text files. How are these useful?
 	
-* short answer: noam_chomsky.jpeg
+short answer: noam_chomsky.jpeg
 	
-* more comprehensive answer:
+more comprehensive answer:
 	
 	A large corpus of text can be visualized / summarized / reduced in many ways with natural language processing / typical machine learning algorithms (i.e. classifying text, so on). Some packages to check out regarding this are TextHero and ScatterText. An example use case is combining the text from audio transcriptions with written documents (say textbooks or lecture slides converted to text) for comparison of how similar they are. You can also use topic models (available in ScatterText and many other packages) or statistical models (YAKE) to extract key topics from each file (or file group) and compare those (how they change over time, what are the key topics in practice exam PDF files, etc).
 	
@@ -75,9 +77,9 @@ Comparing frequency of terms in one body of text vs. another
 
 ## Why use wav2vec2 instead of SpeechRecognition or other transcription methods?
 
-	Google's SpeechRecognition (with the free API) requires optimization of three unknown parameters, which in my experience can vary widely among english as a second language speakers. With wav2vec2, the base model is pretrained, so a 'decent transcription' can be made without having to spend a bunch of time testing and optimizing parameters.
+Google's SpeechRecognition (with the free API) requires optimization of three unknown parameters, which in my experience can vary widely among english as a second language speakers. With wav2vec2, the base model is pretrained, so a 'decent transcription' can be made without having to spend a bunch of time testing and optimizing parameters.
 	
-	Also, because it's an API you can't train it even if you wanted to, you have to be online for functionally most of the script runtime, and then of course you have privacy concerns with sending data out of your machine.
+Also, because it's an API you can't train it even if you wanted to, you have to be online for functionally most of the script runtime, and then of course you have privacy concerns with sending data out of your machine.
 	
 ## What about a version where I don't need python at all?
 
@@ -111,7 +113,7 @@ You can train the model, but that requires that you already have a transcription
 
 Send me a message / start a discussion! Always looking to improve.
 		
-# TROUBLESHOOTING
+# Troubleshooting
 
 ## I tried to transcribe an audio file and it gave me an error:
 	
@@ -121,7 +123,9 @@ Planning to update the code to detect audio files and handle those. For now, onl
 	
 Try decreasing 'chunk_length' in vid2cleantxt_folder.py or vid2cleantxt_single.py (whichever you use). Until you get to really small intervals (say < 10 seconds) each audio chunk can more or less be treated independently as they are different sentences.
 		
-# EXAMPLE 
+# Example
+
+Transcription of Public Domain Speeches from President John F. Kennedy
 
 ## Description
 
