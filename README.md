@@ -1,7 +1,9 @@
 # vid2cleantxt
 
 vid2cleantxt: a pipeline for turning heavily speech-based video files into clean, readable text from the audio.
-
+	Note: this is a work-in-progress, and my first 'real' repo. 
+	As such, code isn't fully optimized or following software eng norms yet, but will continue to be improved over time.
+	All feedback is welcome!
 Motivation
 
 	When compared to text and pictures, video (specifically the audio) is an inefficient way to convey information, as in the base the viewer has to sit through the whole thing, while only part of the video may be relevant to them. This repo attempts to help solve that problem by converting long video files into text that you can read, CTRL+F, keyword extract, and summarize.
