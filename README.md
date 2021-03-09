@@ -8,27 +8,31 @@ vid2cleantxt: a pipeline for turning heavily speech-based video files into clean
 	
 # Motivation
 
-When compared to text and pictures, video (specifically the audio) is an inefficient way to convey information, as in the base the viewer has to sit through the whole thing, while only part of the video may be relevant to them. This repo attempts to help solve that problem by converting long video files into text that you can read, CTRL+F, keyword extract, and summarize.
+When compared to other media (such as text and pictures), video (specifically the audio) is an inefficient way to convey dense or technical information, as in the base case the viewer has to sit through the whole thing, while only part of the video may be relevant to them. Even worse, if you don't understand a statement or concept, you have to search through the video, or rewatch it, taking up significant amounts of time. This repo attempts to help solve that problem by converting long video files into text that you can read, CTRL+F, keyword extract, and summarize.
 	
-## Basic explanation of pipeline process
-	
-	- Receive directory input from user in script run window*. Iterate through that directory, find all video files
-	- FOR each video file 
+## Basic overview of pipeline process
+
+Here's a high-level overview of what happens in the vid2cleantxt_folder.py script:
+
+	- Imports relevant packages, and imports relevant functions from audio2text_functions.py
+	- Receive **directory** string input from user in "script run window*. Then iterates through that directory, and finds all video files
+	- FOR each video file found:
 		- convert video to .wav format audio chunks of duration X** seconds with MoviePy
 		- transcribe all X audio chunks through a pretrained wav2vec2model (transformers), store results in a list
 		- write all results of the list into a text file, store various runtime metrics into a separate text list 
-	- after above completed, create wo new files: one with all transcriptions appended, one with all metadata appended. 
-	- FOR each transcription text file:
-		- pass created textfile through a spell checker (PySpellChecker) and autocorrect spelling. save as new file
-		- use pySBD to infer sentence boundaries and add periods in to delineate sentences. Save as new file 
-		- run basic keyword extraction (via YAKE) on spell-corrected file. All keywords per file are stored in one dataframe for comparison , and exported to .xlsx format 
+		- Deletes .wav audio chunks after completed using them
+	- Next, create two new text files: one with all transcriptions appended, one with all metadata appended. 
+	- Then FOR each transcription text file:
+		- Pass the 'base' transcription text through a spell checker (symspellpy) and autocorrect spelling. save as new text file
+		- Use pySBD to infer sentence boundaries on the spell-corrected text and add periods in to delineate sentences. Save as new file 
+		- Run basic keyword extraction (via YAKE) on spell-corrected file. All keywords per file are stored in one dataframe for comparison, and exported to .xlsx format 
 	- cleanup tasks (delete the X .wav files created for audio transcription, etc), report runtime, and exit
 	
 	* the 'single file' version needs to have the name defined in the python code itself
 	** (where X is some duration that does not overload your computer or crash your IDE)
 	
 	
-results are stored in ~/directory/w2v2_video_transcriptions and metadata in ~/directory/w2v2_transcription_metadata
+results are stored in ~/directory/w2v2_video_transcriptions and metadata in ~/directory/w2v2_transcription_metadata (directory is what was provided)
 	
 ## How to get this to work on your machine (aka installation)
 
