@@ -1,0 +1,6 @@
+original file name: GPU_President Kennedy speech on the space effort a.mp4
+number of recorded audio chunks: 31 of lengths seconds each35
+approx 18.083333 minutes of input audio 
+transcription date: date_09_03_2021_time_21-20-56
+length of transcribed text: 12014 characters 
+total word count: 2244 words (based on spaces) 
