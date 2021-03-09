@@ -67,12 +67,17 @@ more comprehensive answer:
 I do have some of my own code that does this (given the motivation statement) but it needs some work before I publish an initial commit. It will be in a public repo on this account. 
 	
 ## TextHero example use case: 
+
 Clustering vectorized text files into k-means groups
+
 ![iml Plotting with TSNE + USE, Colored on Directory Name](https://user-images.githubusercontent.com/74869040/110546335-a0baaf80-812e-11eb-8d7d-48da00989dce.png)
+
 ![iml Plotting with TSNE + USE, Colored on K-Means Cluster](https://user-images.githubusercontent.com/74869040/110546452-c6e04f80-812e-11eb-9a4b-03213ec4a63b.png)
 
 ## ScatterText example use case: 
+
 Comparing frequency of terms in one body of text vs. another
+
 ![ST P 1 term frequency I ML 2021 Docs I ML Prior Exams_072122_](https://user-images.githubusercontent.com/74869040/110546149-69e49980-812e-11eb-9c94-81fcb395b907.png)
 
 ## Why use wav2vec2 instead of SpeechRecognition or other transcription methods?
