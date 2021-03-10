@@ -152,7 +152,6 @@ def validate_output_directories(directory):
 # -------------------------------------------------------
 # Main Script
 # -------------------------------------------------------
-# TODO create separate files with no import local functions
 # start tracking rt
 time_log = []
 time_log_desc = []

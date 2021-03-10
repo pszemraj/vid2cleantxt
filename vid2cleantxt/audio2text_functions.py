@@ -17,15 +17,13 @@ from os.path import isfile, join
 
 import moviepy.editor as mp
 import pandas as pd
+import pkg_resources
 import texthero as hero
 import wordninja
 import yake
 from natsort import natsorted
 from spellchecker import SpellChecker
-from texthero import preprocessing
-from texthero import stopwords as th_stopwords
-import pkg_resources
-from symspellpy import SymSpell, Verbosity
+from symspellpy import SymSpell
 
 
 def avg_word(sentence):
