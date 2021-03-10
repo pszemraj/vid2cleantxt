@@ -71,7 +71,7 @@ Here's a high-level overview of what happens in the vid2cleantxt_folder.py scrip
 
 ## Is there a jupyter notebook file?
 	
-No, but am working on a version in Google Colab. Will update repo when done.
+No, but there is a version of the [single-file transcription script on Google Colab](https://colab.research.google.com/drive/1TmRXA1o1ONsMg0tBg6KTxJmhasVnmnqX?usp=sharing). Still working on the "folder" version. From Colab you can download as .ipynb, but you may need to make some small changes (some directories, packages, etc. are specific to Colab's structure).
 
 ## Now I have a bunch of long text files. How are these useful?
 	
