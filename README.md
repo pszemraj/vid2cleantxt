@@ -12,7 +12,7 @@ When compared to other media (such as text and pictures), video (specifically th
 	
 ## Basic overview of pipeline process
 
-Example output text of a video transcription of ([JFK's peace speech](https://youtu.be/0fkKnfk4k40)):
+Example output text of a video transcription of [JFK's peace speech](https://youtu.be/0fkKnfk4k40):
 
 	president anderson members of the faculty board of trustees distinguished guests my old colleague senator bob bird to has earned his degree through many years of 
 	attending night for school while i am earning mine in the next thirty minutes distinguished guests ladies and gentlemen it is with great pride that i participate 
@@ -204,7 +204,7 @@ The "example_JFK_speech" folder contains the results and interim files of runnin
 
 ## Output (sentence boundary disambiguation) of the single file version:
 
-Input video was JFK_rice_moon_speech.mp4. Originally downloaded from ([C-Span](https://www.c-span.org/video/?96805-52/john-f-kennedy-audio-recording)):
+Input video was JFK_rice_moon_speech.mp4. Originally downloaded from [C-Span](https://www.c-span.org/video/?96805-52/john-f-kennedy-audio-recording):
 
 	transcription of of rice moon speech mp4 at date 09 03 2021 time 22 07 41. surely the opening vistas of space promise high costs and hardships as well as 
 	high reward so it is not surprising that some would have us stay where we are a little longer to rest to wait but this city of huston this state of texas
