@@ -73,6 +73,8 @@ Here's a high-level overview of what happens in the vid2cleantxt_folder.py scrip
 	
 No, but there is a version of the [single-file transcription script on Google Colab](https://colab.research.google.com/drive/1TmRXA1o1ONsMg0tBg6KTxJmhasVnmnqX?usp=sharing). Still working on the "folder" version. From Colab you can download as .ipynb, but you may need to make some small changes (some directories, packages, etc. are specific to Colab's structure).
 
+Some links I found helpful when new to Colab: [Google's FAQ](https://research.google.com/colaboratory/faq.html), [Medium Article on Colab + Large Datasets](https://satyajitghana.medium.com/working-with-huge-datasets-800k-files-in-google-colab-and-google-drive-bcb175c79477), [Google's Demo Notebook on IO](https://colab.research.google.com/notebooks/io.ipynb), [A better Colab Experience](https://towardsdatascience.com/10-tips-for-a-better-google-colab-experience-33f8fe721b82)
+
 ## Now I have a bunch of long text files. How are these useful?
 	
 short answer: noam_chomsky.jpeg
