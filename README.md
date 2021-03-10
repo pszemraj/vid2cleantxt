@@ -12,7 +12,35 @@ When compared to other media (such as text and pictures), video (specifically th
 	
 ## Basic overview of pipeline process
 
-Here's a high-level overview of what happens in the vid2cleantxt_folder.py script:
+Example output text of a video transcription of ([JFK's peace speech](https://youtu.be/0fkKnfk4k40)):
+
+	president anderson members of the faculty board of trustees distinguished guests my old colleague senator bob bird to has earned his degree through many years of 
+	attending night for school while i am earning mine in the next thirty minutes distinguished guests ladies and gentlemen it is with great pride that i participate 
+	in this ceremony of the american university. sponsored by the methodist hurst founded by bishop john fletcher host and first opened by president woodrow wilson in 
+	nineteen fourteen this is a young and growing university but it has already fulfilled bishop hurst in light hope for the study of history in public affairs in a
+	city devoted to the making of history and to the conduct of the public business by pondering this institution of higher learning. for all who wish to learn whatever 
+	their color or their creed the methodists of this area in the nation a serve the nations times and i command all those who are to day graduating professor wood in
+	wilson once said that every man sent out from a university should be a man of his nation as well as the man of his time and i am confident that the men and women 
+	who carry the honor of graduating from this institution vol continue to give from their lives. from their talents a high measure of public service and public 
+	support there are few earthly things more beautiful than a university wrote john mansfield in his tribute to english universities and his words are equally true 
+	to day he did not refer to towers or tho campuses he admired the splendid beauty of a university because it was he said a place were those who hate ignorance may 
+	strive to know were those who perceive truth. may strive to make others i i have therefore chosen this time and place to discuss a topic on which ignorance too 
+	often abounds but the truth too rarely perceived and that is the most important topic on earth peace what kind of peace do i mean and what kind of peace do were 
+	not a packs americana enforced on the world by american weapons of war not the peace of the grave or the security of the slave. i am talking about genuine peace 
+	the kind of peace that makes life on earth worth living be the kind that enables men and nations to grow and to hope and build a better life for their children 
+	not merely peace for americans but peace for all men and women not merely peace in our time but peace in all time i speak of peace because of the new face of war 
+	total war makes no sense in an age where. great powers can maintain large and relatively invulnerable nuclear forces and refuse to surrender without resort to 
+	those forces it makes no sense in an age were a single nuclear weapon contains almost ten times the explosive force delivered by all the allied air forces in the 
+	second world war it makes no sense in an age when the deadly poisons produced by a nuclear exchange. would be carried by wind and water and soil and seed to the 
+	far corners of the globe and he generations yet unborn to day the expenditure of billions of dollars every year on weapons acquired for the purpose of making sure 
+	we never need them is essential to the keeping of peace but surely the acquisition of such idle stock piles which can only destroy and never create is not the only 
+	much. as the most efficient means of assuring peace i speak of peace therefore as the necessary rational end of rational men i realize the pursuit of peace is not
+	as dramatic as the pursuit of war and frequently the words of the pursuers fall on deaf ears but we have no more urgent task some say that it is useless to speak
+	of peace or world law or world disarmament...
+	
+See the examples folder for more detail / full transcript.
+
+Here's a high-level overview of what happens in the vid2cleantxt_folder.py script to create the output shown above:
 
 	- Imports relevant packages, and imports relevant functions from audio2text_functions.py
 	- Receive **directory** string input from user in "script run window*. Then iterates through that directory, and finds all video files
@@ -152,7 +180,7 @@ Will add a more elegant solution to this in the future, but here is a list of al
 	from spellchecker import SpellChecker
 	from symspellpy import SymSpell
 	
-Enjoy your pip installs.
+All are the latest version (as of Mar 10, 2021) and don't conflict with each other. Enjoy your pip installs.
 
 ## I tried to transcribe an audio file and it gave me an error:
 	
@@ -172,7 +200,27 @@ The "example_JFK_speech" folder contains the results and interim files of runnin
 * for the single file version, you need to update two variables in the .py script representing the file directory and name. Then you run it
 * for the folder version, you just run the .py script, and it will prompt you for input. Paste the directory path (to the video files) and it will handle it from there.
 
-**FYI WITH RESPECT TO THE EXAMPLE: I had to split "GPU_President Kennedy speech on the space effort a" when pushing to Git due to file size constraints. As such, there are 5 video files (Parts 1-5) in the example for this speech but when I ran the folder transcriber it was just one. Again, this shouldn't really be an issue as the audio is "independent" in practicality as explained earlier**
+**FYI WITH RESPECT TO THE EXAMPLE:** I had to split "GPU_President Kennedy speech on the space effort a" when pushing to Git due to file size constraints. As such, there are 5 video files (Parts 1-5) in the example for this speech but when I ran the folder transcriber it was just one. Again, this shouldn't really be an issue as the audio is "independent" in practicality as explained earlier
+
+## Output (sentence boundary disambiguation) of the single file version:
+
+Input video was JFK_rice_moon_speech.mp4. Originally downloaded from ([C-Span](https://www.c-span.org/video/?96805-52/john-f-kennedy-audio-recording)):
+
+	transcription of of rice moon speech mp4 at date 09 03 2021 time 22 07 41. surely the opening vistas of space promise high costs and hardships as well as 
+	high reward so it is not surprising that some would have us stay where we are a little longer to rest to wait but this city of huston this state of texas
+	this country of the united states was not built by those who waited and rested but if i were to say my fellow citizens that we shall send to the moon two 
+	hundred and forty thousand. a away from the control station in huston a giant rocket more than three hundred feet tall the length of this football field 
+	made of new metal alloys some of which have not yet been invented capable of standing heat and stresses several times more than have ever been experienced 
+	fitted together with a precision better than the finest watch carrying all the equipment needed for propulsion guidance control communications food and 
+	survival on a. tried mission to an unknown celestial body and then return it safely to earth re entering the atmosphere at speeds of over twenty five 
+	thousand miles per hour causing heat about half that on the temperature of the sun almost as hot as it is here to day and do all this and do all this and 
+	do it right and do it first before the dictator out and be. i'm the one who is doing all the work to stay col for a minute however i think were going to 
+	do it and i think that we must pay what needs to be paid i don't think we ought to waste any money but i think we ought to do the job and this will be done
+	in the decade of the sixties it may be done while some of you are still here at school at this college university it will be done during the terms of office
+	of some of the people who sit here on this platform but it will be done many years ago the great british explorer george mallory. who was to die on mount everest
+	was asked why did he want to climb it he said because it is there or space is there and we are going to climb it and the moon and the planets are there and new
+	hopes for knowledge and peace are there and therefore as we set sail we ask gods blessing on the most hazardous and dangerous and greatest adventure on which
+	man has ever embarked a
 	
 ## Output script run log for the "single_file" version:
 
