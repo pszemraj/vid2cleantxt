@@ -60,9 +60,12 @@ Here's a high-level overview of what happens in the vid2cleantxt_folder.py scrip
 	** (where X is some duration that does not overload your computer or crash your IDE)
 	
 	
-results are stored in ~/directory/w2v2_video_transcriptions and metadata in ~/directory/w2v2_transcription_metadata (directory is what was provided)
+* results are stored in ~/directory/w2v2_video_transcriptions
+* metadata in ~/directory/w2v2_transcription_metadata 
+
+(where **directory** is path entered by user)
 	
-## How to get this to work on your machine (aka installation)
+## How to get this to work on your machine (installation)
 
 **Important** the first time the code runs on your machine, it will download the pretrained transformers model (approx 1 gb). After the first run, it will be cached locally on your machine, and you will not need to sit through that again.
 
