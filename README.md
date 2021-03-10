@@ -168,7 +168,11 @@ Transcription of Public Domain Speeches from President John F. Kennedy
 
 ## Description
 
-The "example_JFK_speech" folder contains the results and interim files of running both the single file and folder version. NOTE: I had to split "GPU_President Kennedy speech on the space effort a" when pushing to Git, so there are 5 video files but when I ran the folder transcriber it was just one. Again, this shouldn't really be an issue as the audio is "independent"
+The "example_JFK_speech" folder contains the results and interim files of running both the single file and folder version. Recap:
+* for the single file version, you need to update two variables in the .py script representing the file directory and name. Then you run it
+* for the folder version, you just run the .py script, and it will prompt you for input. Paste the directory path (to the video files) and it will handle it from there.
+
+**FYI WITH RESPECT TO THE EXAMPLE: I had to split "GPU_President Kennedy speech on the space effort a" when pushing to Git due to file size constraints. As such, there are 5 video files (Parts 1-5) in the example for this speech but when I ran the folder transcriber it was just one. Again, this shouldn't really be an issue as the audio is "independent" in practicality as explained earlier**
 	
 ## Output script run log for the "single_file" version:
 
