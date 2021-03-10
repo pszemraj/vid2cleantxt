@@ -16,13 +16,9 @@ Example output text of a video transcription of [JFK's peace speech](https://you
 
 	president anderson members of the faculty board of trustees distinguished guests my old colleague senator bob bird to has earned his degree through many years of 
 	attending night for school while i am earning mine in the next thirty minutes distinguished guests ladies and gentlemen it is with great pride that i participate 
-	in this ceremony of the american university. sponsored by the methodist hurst founded by bishop john fletcher host and first opened by president woodrow wilson in 
-	nineteen fourteen this is a young and growing university but it has already fulfilled bishop hurst in light hope for the study of history in public affairs in a
-	city devoted to the making of history and to the conduct of the public business by pondering this institution of higher learning. for all who wish to learn whatever 
-	their color or their creed the methodists of this area in the nation a serve the nations times and i command all those who are to day graduating professor wood in
-	wilson once said that every man sent out from a university should be a man of his nation as well as the man of his time and i am confident that the men and women 
-	who carry the honor of graduating from this institution vol continue to give from their lives. from their talents a high measure of public service and public 
-	support there are few earthly things more beautiful than a university wrote john mansfield in his tribute to english universities and his words are equally true 
+	in this ceremony of the american university. 
+	[ ... ]
+	there are few earthly things more beautiful than a university wrote john mansfield in his tribute to english universities and his words are equally true 
 	to day he did not refer to towers or tho campuses he admired the splendid beauty of a university because it was he said a place were those who hate ignorance may 
 	strive to know were those who perceive truth. may strive to make others i i have therefore chosen this time and place to discuss a topic on which ignorance too 
 	often abounds but the truth too rarely perceived and that is the most important topic on earth peace what kind of peace do i mean and what kind of peace do were 
