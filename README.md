@@ -1,11 +1,14 @@
 # vid2cleantxt
 
-vid2cleantxt: a pipeline for turning heavily speech-based video files into clean, readable text from the audio. TL;DR check out [this Colab script](https://colab.research.google.com/drive/1WfJ1yQn-jtyZsoQXdzXx91FPbLo5t7Mg?usp=sharing) to see a trancription and keyword extraction of a JFK speech.
+vid2cleantxt: a pipeline for turning heavily speech-based video files into clean, readable text from the audio. 
+
+TL;DR check out [this Colab script](https://colab.research.google.com/drive/1WfJ1yQn-jtyZsoQXdzXx91FPbLo5t7Mg?usp=sharing) to see a trancription and keyword extraction of a JFK speech.
 
 	Note: this is a work-in-progress, and my first 'real' repo. 
 	As such, code isn't fully optimized or following software eng norms yet, but will continue to be improved over time.
 	All feedback is welcome!
-	
+
+** **
 # Motivation
 
 When compared to other media (such as text and pictures), video (specifically the audio) is an inefficient way to convey dense or technical information, as in the base case the viewer has to sit through the whole thing, while only part of the video may be relevant to them. Even worse, if you don't understand a statement or concept, you have to search through the video, or rewatch it, taking up significant amounts of time. This repo attempts to help solve that problem by converting long video files into text that you can read, CTRL+F, keyword extract, and summarize.
@@ -71,14 +74,14 @@ Here's a high-level overview of what happens in the vid2cleantxt_folder.py scrip
 
 ## Is there a jupyter notebook file?
 	
-No, but there are versions of these scripts on Google Colab. From Colab you can download as .ipynb, but you may need to make some small changes (some directories, packages, etc. are specific to Colab's structure). Scripts:
+No, but there are versions of these scripts on Google Colab. From Colab you can download as .ipynb, but you may need to make some small changes (some directories, packages, etc. are specific to Colab's structure). Links to Colab Scripts:
 
 1. Single-File Version (Implements GPU) link [here](https://colab.research.google.com/drive/1WfJ1yQn-jtyZsoQXdzXx91FPbLo5t7Mg?usp=sharing)
-	* This script downloads the video from a public link to one of the JFK videos stored on my Google Drive. As such, no authentication  / etc. is required and this link is recommended for seeing how it works.
+	* This script downloads the video from a public link to one of the JFK videos stored on my Google Drive. As such, no authentication  / etc. is required and **this link is recommended for seeing how this pipeline works**.
 	* The only steps required are checking / adjusting the runtime to a GPU, and *Run All*
-3. Multi-File Version (Implements GPU link [here](https://colab.research.google.com/drive/1UMCSh9XdvUABjDJpFUrHPj4uy3Cc26DC?usp=sharing)
+2. Multi-File Version (Implements GPU link [here](https://colab.research.google.com/drive/1UMCSh9XdvUABjDJpFUrHPj4uy3Cc26DC?usp=sharing)
 	* This script connects to the user's google drive to convert a whole folder of videos using Google's Colab Python package. 
-	* It does require the video files to be hosted on the user's drive, as well as authorization of Colab (it will prompt you and walk you through this)
+	* It **does require the video files to be hosted on the user's drive**, as well as authorization of Colab (it will prompt you and walk you through this)
 
 Some links I found helpful when new to Colab: [Google's FAQ](https://research.google.com/colaboratory/faq.html), [Medium Article on Colab + Large Datasets](https://satyajitghana.medium.com/working-with-huge-datasets-800k-files-in-google-colab-and-google-drive-bcb175c79477), [Google's Demo Notebook on IO](https://colab.research.google.com/notebooks/io.ipynb), [A better Colab Experience](https://towardsdatascience.com/10-tips-for-a-better-google-colab-experience-33f8fe721b82)
 
@@ -88,25 +91,25 @@ short answer: noam_chomsky.jpeg
 	
 more comprehensive answer:
 	
-	A large corpus of text can be visualized / summarized / reduced in many ways with natural language processing / typical machine learning algorithms (i.e. classifying text, so on). Some packages to check out regarding this are TextHero and ScatterText. An example use case is combining the text from audio transcriptions with written documents (say textbooks or lecture slides converted to text) for comparison of how similar they are. You can also use topic models (available in ScatterText and many other packages) or statistical models (YAKE) to extract key topics from each file (or file group) and compare those (how they change over time, what are the key topics in practice exam PDF files, etc).
+A large corpus of text can be visualized / summarized / reduced in many ways with natural language processing / typical machine learning algorithms (i.e. classifying text, so on). Some packages to check out regarding this are TextHero and ScatterText. An example use case is combining the text from audio transcriptions with written documents (say textbooks or lecture slides converted to text) for comparison of how similar they are. You can also use topic models (available in ScatterText and many other packages) or statistical models (YAKE) to extract key topics from each file (or file group) and compare those (how they change over time, what are the key topics in practice exam PDF files, etc).
 	
-	Visualization and Analysis:
+### Visualization and Analysis:
 	
-	https://github.com/jbesomi/texthero
-	https://github.com/JasonKessler/scattertext
+1. https://github.com/jbesomi/texthero
+2. https://github.com/JasonKessler/scattertext
 	
-	Text Extraction / Manipulation:
+### Text Extraction / Manipulation:
 	
-	https://textract.readthedocs.io/
-	https://github.com/chartbeat-labs/textacy
-	https://github.com/LIAAD/yake
+1. [Textract](https://textract.readthedocs.io/)
+2. [Textacy](https://github.com/chartbeat-labs/textacy)
+3. [YAKE](https://github.com/LIAAD/yake)
+	* A brief YAKE analysis is completed in this pipeline after transcribing the audio.
 	
-	Text Summarization:
+### Text Summarization:
 	
-	https://huggingface.co/models?pipeline_tag=summarization
-	*I have personally found Google's T5 to be most effective for "lecture-esque" video conversion
+Several options are available on the [HuggingFace website](https://huggingface.co/models?pipeline_tag=summarization). I have personally found Google's T5 to be most effective for "lecture-esque" video conversion.
 	
-I do have some of my own code that does this (given the motivation statement) but it needs some work before I publish an initial commit. It will be in a public repo on this account. 
+I personally use several similar methods in combination with the transcription script, however it isn't in a place to post yet. It will be posted to a public repo on this account when ready. 
 	
 ## TextHero example use case: 
 
@@ -134,6 +137,8 @@ Work in progress the following package https://www.py2exe.org/. Will update repo
 	
 ## How long does this take to run?
 
+On Google Colab with a 16 gb GPU (should be available to free Colab accounts): approximately 8 minutes to transcribe ~90 minutes of audio.
+
 On my machine (CPU only due to AMD GPU) it takes approximately 80-120% of the total duration of input video files.
 
 ** Specs: **
@@ -159,7 +164,7 @@ You can train the model, but that requires that you already have a transcription
 ## I've found x repo / script / concept that I think you should incorporate or collaborate with the author.
 
 Send me a message / start a discussion! Always looking to improve.
-		
+** **	
 # Troubleshooting
 
 ## What python package dependencies does this repo have?
@@ -188,7 +193,7 @@ Will add a more elegant solution to this in the future, but here is a list of al
 	from spellchecker import SpellChecker
 	from symspellpy import SymSpell
 	
-All are the latest version (as of Mar 10, 2021) and don't conflict with each other. Enjoy your pip installs.
+All are the latest version (as of Mar 25, 2021) and don't conflict with each other. Enjoy your pip installs.
 
 ## I tried to transcribe an audio file and it gave me an error:
 	
