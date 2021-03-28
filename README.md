@@ -1,6 +1,6 @@
 # vid2cleantxt
 
-vid2cleantxt: a pipeline for turning heavily speech-based video files into clean, readable text from the audio.
+vid2cleantxt: a pipeline for turning heavily speech-based video files into clean, readable text from the audio. TL;DR check out [this Colab script](https://colab.research.google.com/drive/1WfJ1yQn-jtyZsoQXdzXx91FPbLo5t7Mg?usp=sharing) to see a trancription and keyword extraction of a JFK speech.
 
 	Note: this is a work-in-progress, and my first 'real' repo. 
 	As such, code isn't fully optimized or following software eng norms yet, but will continue to be improved over time.
@@ -71,7 +71,14 @@ Here's a high-level overview of what happens in the vid2cleantxt_folder.py scrip
 
 ## Is there a jupyter notebook file?
 	
-No, but there is a version of the [single-file transcription script on Google Colab](https://colab.research.google.com/drive/1TmRXA1o1ONsMg0tBg6KTxJmhasVnmnqX?usp=sharing). Still working on the "folder" version. From Colab you can download as .ipynb, but you may need to make some small changes (some directories, packages, etc. are specific to Colab's structure).
+No, but there are versions of these scripts on Google Colab. From Colab you can download as .ipynb, but you may need to make some small changes (some directories, packages, etc. are specific to Colab's structure). Scripts:
+
+1. Single-File Version (Implements GPU) link [here](https://colab.research.google.com/drive/1WfJ1yQn-jtyZsoQXdzXx91FPbLo5t7Mg?usp=sharing)
+	* This script downloads the video from a public link to one of the JFK videos stored on my Google Drive. As such, no authentication  / etc. is required and this link is recommended for seeing how it works.
+	* The only steps required are checking / adjusting the runtime to a GPU, and *Run All*
+3. Multi-File Version (Implements GPU link [here](https://colab.research.google.com/drive/1UMCSh9XdvUABjDJpFUrHPj4uy3Cc26DC?usp=sharing)
+	* This script connects to the user's google drive to convert a whole folder of videos using Google's Colab Python package. 
+	* It does require the video files to be hosted on the user's drive, as well as authorization of Colab (it will prompt you and walk you through this)
 
 Some links I found helpful when new to Colab: [Google's FAQ](https://research.google.com/colaboratory/faq.html), [Medium Article on Colab + Large Datasets](https://satyajitghana.medium.com/working-with-huge-datasets-800k-files-in-google-colab-and-google-drive-bcb175c79477), [Google's Demo Notebook on IO](https://colab.research.google.com/notebooks/io.ipynb), [A better Colab Experience](https://towardsdatascience.com/10-tips-for-a-better-google-colab-experience-33f8fe721b82)
 
