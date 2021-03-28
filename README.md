@@ -95,8 +95,12 @@ A large corpus of text can be visualized / summarized / reduced in many ways wit
 	
 ### Visualization and Analysis:
 	
-1. https://github.com/jbesomi/texthero
-2. https://github.com/JasonKessler/scattertext
+1. [TextHero](https://github.com/jbesomi/texthero) - cleans text, allows for visualization / clustering (k-means) / dimensionality reduction (PCA, TSNE)
+	* Use case here: I want to see how this speaker's speeches differ from each other. Which are "the most related"?
+3. [Scattertext](https://github.com/JasonKessler/scattertext) - allows for comparisons of one corpus of text to another via various methods and visualizes them.
+	* Use case here: I want to see how the speeches by this speaker compare to speeches by speaker B in terms of topics, word frequency.. so on
+
+Some examples from my own usage are illustrated below from both packages.
 	
 ### Text Extraction / Manipulation:
 	
