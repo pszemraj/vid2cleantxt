@@ -76,10 +76,12 @@ Here's a high-level overview of what happens in the vid2cleantxt_folder.py scrip
 	
 No, but there are versions of these scripts on Google Colab. From Colab you can download as .ipynb, but you may need to make some small changes (some directories, packages, etc. are specific to Colab's structure). Links to Colab Scripts:
 
-1. Single-File Version (Implements GPU) link [here](https://colab.research.google.com/drive/1WfJ1yQn-jtyZsoQXdzXx91FPbLo5t7Mg?usp=sharing)
+1. Single-File Version (Implements GPU) 
+	* Link [here](https://colab.research.google.com/drive/1WfJ1yQn-jtyZsoQXdzXx91FPbLo5t7Mg?usp=sharing)
 	* This script downloads the video from a public link to one of the JFK videos stored on my Google Drive. As such, no authentication  / etc. is required and **this link is recommended for seeing how this pipeline works**.
 	* The only steps required are checking / adjusting the runtime to a GPU, and *Run All*
-2. Multi-File Version (Implements GPU link [here](https://colab.research.google.com/drive/1UMCSh9XdvUABjDJpFUrHPj4uy3Cc26DC?usp=sharing)
+2. Multi-File Version (Implements GPU)
+	* Link [here](https://colab.research.google.com/drive/1UMCSh9XdvUABjDJpFUrHPj4uy3Cc26DC?usp=sharing)
 	* This script connects to the user's google drive to convert a whole folder of videos using Google's Colab Python package. 
 	* It **does require the video files to be hosted on the user's drive**, as well as authorization of Colab (it will prompt you and walk you through this)
 
