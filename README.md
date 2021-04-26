@@ -175,31 +175,23 @@ Send me a message / start a discussion! Always looking to improve.
 
 ## What python package dependencies does this repo have?
 
-Will add a more elegant solution to this in the future, but here is a list of all unique packages used:
+Contexts of requirements.txt as of April 25:
+```
+librosa==0.8.0
+moviepy==1.0.3
+natsort==7.1.1
+pandas==1.0.5
+pysbd==0.3.4
+symspellpy==6.7.0
+texthero==1.0.9
+torch==1.7.1
+transformers==4.3.2
+wordninja==2.0.0
+yake==0.4.3
 
-	import math
-	import os
-	import shutil
-	import time
-	from datetime import datetime
-	import librosa
-	import pandas as pd
-	import pysbd
-	import torch
-	from natsort import natsorted
-	from transformers import Wav2Vec2ForCTC, Wav2Vec2Tokenizer
-	import pprint as pp
-	import re
-	from os.path import isfile, join
-	import moviepy.editor as mp
-	import pkg_resources
-	import texthero as hero
-	import wordninja
-	import yake
-	from spellchecker import SpellChecker
-	from symspellpy import SymSpell
-	
-All are the latest version (as of Mar 25, 2021) and don't conflict with each other. Enjoy your pip installs.
+setuptools~=51.3.1
+```
+
 
 ## I tried to transcribe an audio file and it gave me an error:
 	
