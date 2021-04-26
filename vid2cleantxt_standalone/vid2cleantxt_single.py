@@ -59,6 +59,7 @@ def corr(s):
     # removes extra spaces
     return re.sub(r'\.(?! )', '. ', re.sub(r' +', ' ', s))
 
+
 def beautify_filename(filename, num_words=5, start_reverse=True):
     # takes a filename stored as text, removes extension, separates into X words, and returns
     # useful for when you are reading files, doing things to them, and making new files - you want to preserve some
@@ -348,6 +349,7 @@ def symspell_file(filepath, filename, dist=2, keep_numb_words=True, create_folde
         # "num_corrected": total_corrected
     }
     return corr_file_Data
+
 
 def transcribe_video_wav2vec(transcription_model, directory, vid_clip_name, chunk_length_seconds):
     # this is the same process as used in the single video transcription, now as a function. Note that spell correction
