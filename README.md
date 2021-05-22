@@ -377,14 +377,12 @@ Work in progress with [py2exe](https://www.py2exe.org/). Will update repo when c
 
 ## Citations
 
-wav2vec2
+wav2vec2 (fairseq)
 
-@inproceedings{ott2019fairseq,
-  title = {fairseq: A Fast, Extensible Toolkit for Sequence Modeling},
-  author = {Myle Ott and Sergey Edunov and Alexei Baevski and Angela Fan and Sam Gross and Nathan Ng and David Grangier and Michael Auli},
-  booktitle = {Proceedings of NAACL-HLT 2019: Demonstrations},
-  year = {2019},
-}
+- Myle Ott, Sergey Edunov, Alexei Baevski, Angela Fan, Sam Gross, Nathan
+Ng, David Grangier, and Michael Auli. fairseq: A fast, extensible toolkit for
+sequence modeling. In Proceedings of NAACL-HLT 2019: Demonstrations,
+2019.
 - repo [link](https://github.com/pytorch/fairseq)
 
 MoviePy
@@ -393,7 +391,8 @@ MoviePy
 
 symspellpy / symspell
 
-	https://github.com/mammothb/symspellpy/tree/e7a91a88f45dc4051b28b83e990fe072cabf0595
+- repo [link](https://github.com/mammothb/symspellpy/tree/e7a91a88f45dc4051b28b83e990fe072cabf0595)
+- copyright:
 
 	Copyright (c) 2020 Wolf Garbe
 	Version: 6.7
@@ -418,7 +417,7 @@ symspellpy / symspell
 
 YAKE (yet another keyword extractor)
 - repo [link](https://github.com/LIAAD/yake)
-
+- relevant citations:
 	In-depth journal paper at Information Sciences Journal
 
 	Campos, R., Mangaravite, V., Pasquali, A., Jatowt, A., Jorge, A., Nunes, C. and Jatowt, A. (2020). YAKE! Keyword Extraction from Single Documents using Multiple Local Features. In Information Sciences Journal. Elsevier, Vol 509, pp 257-289. pdf
