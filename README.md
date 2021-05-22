@@ -160,7 +160,7 @@ more comprehensive answer:
 
 A large corpus of text can be visualized / summarized / reduced in many ways with natural language processing / typical machine learning algorithms (i.e. classifying text, so on). Some packages to check out regarding this are TextHero and ScatterText. An example use case is combining the text from audio transcriptions with written documents (say textbooks or lecture slides converted to text) for comparison of how similar they are. You can also use topic models (available in ScatterText and many other packages) or statistical models (YAKE) to extract key topics from each file (or file group) and compare those (how they change over time, what are the key topics in practice exam PDF files, etc).
 
-### Visualization and Analysis:
+### Visualization and Analysis
 
 1. [TextHero](https://github.com/jbesomi/texthero) - cleans text, allows for visualization / clustering (k-means) / dimensionality reduction (PCA, TSNE)
 	* Use case here: I want to see how this speaker's speeches differ from each other. Which are "the most related"?
@@ -169,20 +169,20 @@ A large corpus of text can be visualized / summarized / reduced in many ways wit
 
 Some examples from my own usage are illustrated below from both packages.
 
-### Text Extraction / Manipulation:
+### Text Extraction / Manipulation
 
 1. [Textract](https://textract.readthedocs.io/)
 2. [Textacy](https://github.com/chartbeat-labs/textacy)
 3. [YAKE](https://github.com/LIAAD/yake)
 	* A brief YAKE analysis is completed in this pipeline after transcribing the audio.
 
-### Text Summarization:
+### Text Summarization
 
 Several options are available on the [HuggingFace website](https://huggingface.co/models?pipeline_tag=summarization). I have personally found Google's T5 to be most effective for "lecture-esque" video conversion.
 
 I personally use several similar methods in combination with the transcription script, however it isn't in a place to post yet. It will be posted to a public repo on this account when ready.
 
-## TextHero example use case:
+## TextHero example use case
 
 Clustering vectorized text files into k-means groups
 
@@ -190,7 +190,7 @@ Clustering vectorized text files into k-means groups
 
 ![iml Plotting with TSNE + USE, Colored on K-Means Cluster](https://user-images.githubusercontent.com/74869040/110546452-c6e04f80-812e-11eb-9a4b-03213ec4a63b.png)
 
-## ScatterText example use case:
+## ScatterText example use case
 
 Comparing frequency of terms in one body of text vs. another
 
@@ -281,41 +281,50 @@ Input video was JFK_rice_moon_speech.mp4. Originally downloaded from [C-Span](ht
 	Converting video to audio for file:  JFK_rice_moon_speech.mp4
 	============================================================
 
-	converting into 5 audio chunks
-	separating audio into chunks starting at  _22.07.39
-	Video conversion to Audio - chunks 20.000000 % done
-	Video conversion to Audio - chunks 40.000000 % done
-	Video conversion to Audio - chunks 60.000000 % done
-	Video conversion to Audio - chunks 80.000000 % done
-	Finished creating audio chunks at  _22.07.41
-	Files are located in  C:\Users\peter\PycharmProjects\vid2cleantxt\example_JFK_speech\audio_chunks
+	convert vid2audio: 100%
+	55/55 [02:24<00:00, 2.63s/it]
+
+	Finished creating audio chunks at  _22.14.44
 
 	============================================================
 	converted video to audio. About to start transcription loop for file:  JFK_rice_moon_speech.mp4
 	============================================================
 
+	Cuda availability (PyTorch):  True
 
-	Starting run   1 out of    5
-	Current time for this run is  date_09_03_2021_time_22-08-12
-	Based runtime average, ETA is   1.55  minutes
+	Gen RAM Free: 25.3 GB  | Proc size: 4.5 GB
+	GPU RAM Free: 14143MB | Used: 2137MB | Util  13% | Total 16280MB
 
-	Starting run   2 out of    5
-	Current time for this run is  date_09_03_2021_time_22-09-00
-	Based runtime average, ETA is   1.31  minutes
+	Converting Video: 100%
+	55/55 [01:55<00:00, 2.09s/it]
+	Cuda availability (PyTorch):  True
 
-	Starting run   3 out of    5
-	Current time for this run is  date_09_03_2021_time_22-09-45
-	Based runtime average, ETA is   0.69  minutes
+	Gen RAM Free: 25.3 GB  | Proc size: 4.5 GB
+	GPU RAM Free: 14143MB | Used: 2137MB | Util  13% | Total 16280MB
 
-	Starting run   4 out of    5
-	Current time for this run is  date_09_03_2021_time_22-10-27
-	Based runtime average, ETA is   0.00  minutes
+	Cuda availability (PyTorch):  True
+
+	Gen RAM Free: 25.3 GB  | Proc size: 4.5 GB
+	GPU RAM Free: 14143MB | Used: 2137MB | Util  13% | Total 16280MB
+
+	Cuda availability (PyTorch):  True
+
+	Gen RAM Free: 25.3 GB  | Proc size: 4.6 GB
+	GPU RAM Free: 14143MB | Used: 2137MB | Util  13% | Total 16280MB
+
+	Cuda availability (PyTorch):  True
+
+	Gen RAM Free: 25.3 GB  | Proc size: 4.6 GB
+	GPU RAM Free: 14143MB | Used: 2137MB | Util  13% | Total 16280MB
+
+
 
 	Finished audio transcription of JFK_rice_moon_speech.mp4 and now saving metrics.
 
 	Deleted Audio Chunk Folder + Files
 
-	Finished transcription successfully for JFK_rice_moon_speech.mp4 at date_09_03_2021_time_22-10-57
+	Finished transcription successfully for JFK_rice_moon_speech.mp4 at date_22_05_2021_time_22-16-39
+	completed transcription in 2.4121029416720075 minutes
 
 	 Starting to spell-correct and extract keywords
 
@@ -354,18 +363,33 @@ Input video was JFK_rice_moon_speech.mp4. Originally downloaded from [C-Span](ht
 Send me a message / start a discussion! Always looking to improve.
 
 ## Future Work
-
+1. Update spell correction to use [NeuSpell](https://github.com/neuspell/neuspell) so BERT can get involved
+2. Add additional features
+	- PDF gen
+	- Paragraph Disambiguation 
+	- T5 Summarization
+3. py2exe (once code optimized)
 
 ## What about a version where I don't need python at all?
 
 Work in progress with [py2exe](https://www.py2exe.org/). Will update repo when complete.
 
 
-## Citations (work in progress)
+## Citations
 
 wav2vec2
 
+@inproceedings{ott2019fairseq,
+  title = {fairseq: A Fast, Extensible Toolkit for Sequence Modeling},
+  author = {Myle Ott and Sergey Edunov and Alexei Baevski and Angela Fan and Sam Gross and Nathan Ng and David Grangier and Michael Auli},
+  booktitle = {Proceedings of NAACL-HLT 2019: Demonstrations},
+  year = {2019},
+}
+- repo [link](https://github.com/pytorch/fairseq)
+
 MoviePy
+
+- [link](https://github.com/Zulko/moviepy) to repo as no citation info given
 
 symspellpy / symspell
 
@@ -393,3 +417,14 @@ symspellpy / symspell
 	https://opensource.org/licenses/MIT
 
 YAKE (yet another keyword extractor)
+- repo [link](https://github.com/LIAAD/yake)
+
+	In-depth journal paper at Information Sciences Journal
+
+	Campos, R., Mangaravite, V., Pasquali, A., Jatowt, A., Jorge, A., Nunes, C. and Jatowt, A. (2020). YAKE! Keyword Extraction from Single Documents using Multiple Local Features. In Information Sciences Journal. Elsevier, Vol 509, pp 257-289. pdf
+
+	ECIR'18 Best Short Paper
+
+	Campos R., Mangaravite V., Pasquali A., Jorge A.M., Nunes C., and Jatowt A. (2018). A Text Feature Based Automatic Keyword Extraction Method for Single Documents. In: Pasi G., Piwowarski B., Azzopardi L., Hanbury A. (eds). Advances in Information Retrieval. ECIR 2018 (Grenoble, France. March 26 – 29). Lecture Notes in Computer Science, vol 10772, pp. 684 - 691. pdf
+
+	Campos R., Mangaravite V., Pasquali A., Jorge A.M., Nunes C., and Jatowt A. (2018). YAKE! Collection-independent Automatic Keyword Extractor. In: Pasi G., Piwowarski B., Azzopardi L., Hanbury A. (eds). Advances in Information Retrieval. ECIR 2018 (Grenoble, France. March 26 – 29). Lecture Notes in Computer Science, vol 10772, pp. 806 - 810. pdf
