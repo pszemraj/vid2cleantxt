@@ -2,7 +2,7 @@
 
 vid2cleantxt: a pipeline for turning heavily speech-based video files into clean, readable text from the audio.
 
-TL;DR check out [this Colab script](https://colab.research.google.com/drive/1WfJ1yQn-jtyZsoQXdzXx91FPbLo5t7Mg?usp=sharing) to see a trancription and keyword extraction of a JFK speech.
+TL;DR check out [this Colab script](https://colab.research.google.com/drive/1WfJ1yQn-jtyZsoQXdzXx91FPbLo5t7Mg?usp=sharing) to see a trancription and keyword extraction of a JFK speech by simply running all cells.
 
 *Note: this is a work-in-progress, and my first 'real' repo. All feedback is welcome!*
 
