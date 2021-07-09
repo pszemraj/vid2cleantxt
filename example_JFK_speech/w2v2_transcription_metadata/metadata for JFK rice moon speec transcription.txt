@@ -1,6 +1,0 @@
-original file name: JFK_rice_moon_speech.mp4
-number of recorded audio chunks: 5 of lengths seconds each35
-approx 2.916667 minutes of input audio 
-transcription date: date_09_03_2021_time_21-23-21
-length of transcribed text: 2201 characters 
-total word count: 423 words (based on spaces) 

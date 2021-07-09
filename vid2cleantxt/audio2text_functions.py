@@ -24,6 +24,7 @@ import yake
 from natsort import natsorted
 from spellchecker import SpellChecker
 from symspellpy import SymSpell
+from tqdm.auto import tqdm
 
 
 def avg_word(sentence):
@@ -35,17 +36,28 @@ def avg_word(sentence):
     return sum(len(word) for word in words) / num_words
 
 
-# returns number of numeric "words" (i.e. digits that are surrounded by spaces)
+# returns number of numeric "words" (i.e., digits that are surrounded by spaces)
 def num_numeric_chars(free_text):
     # returns number of numeric words in your text "I love 202 memes" --> 202 is one numeric word
     num_numeric_words = len([free_text for free_text in free_text.split() if free_text.isdigit()])
     return num_numeric_words
 
 
+def shorten_title(title_text, max_no=20):
+    if len(title_text) < max_no:
+        return title_text
+    else:
+        return title_text[:max_no] + "..."
+
+
 def corr(s):
     # adds space after period if there isn't one
     # removes extra spaces
     return re.sub(r'\.(?! )', '. ', re.sub(r' +', ' ', s))
+
+
+def create_folder(new_path):
+    os.makedirs(new_path, exist_ok=True)
 
 
 def beautify_filename(filename, num_words=5, start_reverse=True):
@@ -74,7 +86,8 @@ def beautify_filename(filename, num_words=5, start_reverse=True):
     return pretty_name[: (len(pretty_name) - 1)]  # there is a space always at the end, so -1
 
 
-def convert_vidfile(vidfilename, start_time=0, end_time=6969, input_directory="", output_directory="", new_filename=""):
+def convert_vidfile(vidfilename, start_time=0, end_time=6969, input_directory="", output_directory="",
+                    new_filename=""):
     # takes a video file and creates an audiofile with various parameters
     # NOTE video filename is required
     if len(input_directory) < 1:
@@ -107,21 +120,19 @@ def convert_vidfile(vidfilename, start_time=0, end_time=6969, input_directory=""
     return audio_conv_results
 
 
-def convert_vid_for_transcription(vid2beconv, len_chunks, input_directory, output_directory):
+def convert_vid_for_transcription(vid2beconv, len_chunks, input_directory, output_directory, verbose=False):
     # Oriented specifically for the "wav2vec2" model speech to text transcription
     # takes a video file, turns it into .wav audio chunks of length <input> and stores them in a specific location
     # TODO add try/except clause in case the user already has an audio file the want to transcribe
     my_clip = mp.VideoFileClip(join(input_directory, vid2beconv))
     number_of_chunks = math.ceil(my_clip.duration / len_chunks)  # to get in minutes
-    print('converting into ' + str(number_of_chunks) + ' audio chunks')
+    if verbose: print('converting into ' + str(number_of_chunks) + ' audio chunks')
     preamble = beautify_filename(vid2beconv)
     outfilename_storage = []
-    print('separating audio into chunks starting at ', datetime.now().strftime("_%H.%M.%S"))
+    if verbose: print('separating audio into chunks starting at ', datetime.now().strftime("_%H.%M.%S"))
     update_incr = math.ceil(number_of_chunks / 10)
 
-    for i in range(number_of_chunks):
-        if i % update_incr == 0 and i > 0:
-            print('Video conversion to Audio - chunks {0:5f} % done'.format(100 * i / number_of_chunks))
+    for i in tqdm(range(number_of_chunks), total=number_of_chunks, desc="Converting Video to Audio"):
         start_time = i * len_chunks
         if i == number_of_chunks - 1:
             this_clip = my_clip.subclip(t_start=start_time)
@@ -132,12 +143,13 @@ def convert_vid_for_transcription(vid2beconv, len_chunks, input_directory, outpu
         this_clip.audio.write_audiofile(join(output_directory, this_filename), logger=None)
 
     print('Finished creating audio chunks at ', datetime.now().strftime("_%H.%M.%S"))
-    print('Files are located in ', output_directory)
+    if verbose: print('Files are located in ', output_directory)
+
     return outfilename_storage
 
 
 def spellcorrect_freetext(input_text, dist=2, del_single_char=False, keep_nw=True, save_results=False,
-                          print_results=False):
+                          verbose=False):
     spell = SpellChecker(distance=dist, case_sensitive=False)
 
     # because it's a huge issue, extremely specific misunderstandings are (currently) manually replaced here
@@ -193,7 +205,7 @@ def spellcorrect_freetext(input_text, dist=2, del_single_char=False, keep_nw=Tru
         perc_corr = 100
     else:
         perc_corr = 100 * num_corrected / num_misspelled
-    if print_results:
+    if verbose:
         print("Spell correct finished.")
         print("Total input wordcount was {0:6d} words.".format(corrected_dict.get("input_wordcount")))
         print("Out of {0:6d} misspelled words, ".format(num_misspelled),
@@ -303,23 +315,26 @@ def spellcorrect_line(line_o_text, search_dist=2, k_n_w=True, r_s_c=False):
 
 
 def spellcorrect_file(filepath, filename, dist=2, remove_single_chars=False, keep_numb_words=True,
-                      create_folder=False, save_metrics=False, print_results=False):
+                      create_folder=False, save_metrics=False, verbose=False):
     # given a text (has to be text) file, reads the file, autocorrects any words it deems misspelled, saves as new file
     # it can store the new file in a sub-folder it creates as needed
     # distance represents how far it searches for a better spelling. higher dist = higher RT. See PySpellChecker docs
 
     script_start_time = time.time()
-    print("Starting to check and correct the file: ", filename)
+    if verbose: print("Starting to check and correct the file: ", filename)
     spell = SpellChecker(distance=dist, case_sensitive=False)  # create spellchecker instance
 
     # delete the three lines below if you do not have a custom frequency dict
     db_fname = 'en.json'
     db_folder = r"C:\Users\peter\PycharmProjects\directory_txt_editing\data"
-    spell.word_frequency.load_dictionary(join(db_folder, db_fname))
+    try:
+        spell.word_frequency.load_dictionary(join(db_folder, db_fname))
+    except:
+        print("\n\nWARNING - unable to load spelling frequency dictionary from {}".format(db_folder))
 
     if save_metrics:
         # adjust for weird case
-        print_results = True
+        verbose = True
 
     # ------------------------------------
     # v3 updates so it reads lines
@@ -331,7 +346,8 @@ def spellcorrect_file(filepath, filename, dist=2, remove_single_chars=False, kee
         # create a folder
         output_folder_name = "spell_corrected_v2_docs"
         if not os.path.isdir(join(filepath, output_folder_name)):
-            os.mkdir(join(filepath, output_folder_name))  # make a place to store outputs if one does not exist
+            os.mkdir(
+                join(filepath, output_folder_name))  # make a place to store outputs if one does not exist
         filepath = join(filepath, output_folder_name)
 
     corrected_list = []
@@ -345,7 +361,8 @@ def spellcorrect_file(filepath, filename, dist=2, remove_single_chars=False, kee
     print("loaded text with {0:6d} lines ".format(len(textlines)))
 
     # iterate through list of lines. Pass each line to be corrected. Append / sum results from each line till done
-    for line in textlines:
+    for line in tqdm(textlines, total=len(textlines),
+                     desc="spell correcting - {}".format(shorten_title(filename))):
         if line == "":
             # blank line, skip to next run
             continue
@@ -371,7 +388,7 @@ def spellcorrect_file(filepath, filename, dist=2, remove_single_chars=False, kee
     corrected_doc = " ".join(corrected_list)
     total_corrected = num_corrected_fp + num_corrected_sp
     total_rem = num_misspelled - total_corrected
-    corrected_fname = "Coorected+v3" + beautify_filename(filename, num_words=9, start_reverse=False) + ".txt"
+    corrected_fname = "Corrected-v3" + beautify_filename(filename, num_words=9, start_reverse=False) + ".txt"
 
     # compute % corrected:
     if num_misspelled == 0:
@@ -380,16 +397,18 @@ def spellcorrect_file(filepath, filename, dist=2, remove_single_chars=False, kee
         perc_corr = 100 * total_corrected / num_misspelled
 
     # print results depending on user pref
-    if print_results:
+    if verbose:
         print("Finished. Found {0:6d} misspellings in the file. ".format(num_misspelled),
               "A total of {0:6d} were able to be corrected".format(
                   total_corrected))
         print("Therefore {0:5f} Percent Corrected \n".format(perc_corr))
         metric_list_names = ['# of Words (Total)', '# of Words (Misspelled)', '# Corrected 1st Pass',
                              '# Corrected 2nd Pass', '# Corrected Total', '# of Words Not Fixed']
-        metric_list_vals = [input_len, num_misspelled, num_corrected_fp, num_corrected_sp, total_corrected, total_rem]
+        metric_list_vals = [input_len, num_misspelled, num_corrected_fp, num_corrected_sp, total_corrected,
+                            total_rem]
         print("==========Metrics: ==========")
-        sc_metric_db = pd.DataFrame(list(zip(metric_list_names, metric_list_vals)), columns=['Name', 'Value (int)'])
+        sc_metric_db = pd.DataFrame(list(zip(metric_list_names, metric_list_vals)),
+                                    columns=['Name', 'Value (int)'])
         pp.pp(sc_metric_db)
         print("==========First 5 Corrections: ==========")
         corr_log_dict = {
@@ -413,14 +432,13 @@ def spellcorrect_file(filepath, filename, dist=2, remove_single_chars=False, kee
         print("Therefore {0:5f} Percent Corrected \n".format(perc_corr))
 
     # proceed to saving
-    file_out = open(join(filepath, corrected_fname), 'w', encoding="utf-8", errors='ignore')
-    file_out.writelines(corrected_doc)
-    file_out.close()
+    with open(join(filepath, corrected_fname), 'w', encoding="utf-8", errors='ignore') as file_out:
+        file_out.writelines(corrected_doc)
 
     # report RT
     script_rt_m = (time.time() - script_start_time) / 60
-    print("RT for this file was {0:5f} minutes".format(script_rt_m))
-    print("Finished correcting ", filename, " at time: ", datetime.now().strftime("%H:%M:%S"), "\n")
+    if verbose: print("RT for this file was {0:5f} minutes".format(script_rt_m))
+    print("\nFinished correcting ", filename, " at time: ", datetime.now().strftime("%H:%M:%S"), "\n")
 
     corr_file_Data = {
         "corrected_text": corrected_doc,
@@ -554,8 +572,8 @@ def digest_text_fn(direct, iden='', w_folder=False):
     pp.pprint(output_path_full)
 
 
-def symspell_file(filepath, filename, dist=2, keep_numb_words=True, create_folder=True, save_metrics=False,
-                  print_results=False):
+def symspell_file(filepath, filename, dist=2, keep_numb_words=True, want_folder=True, save_metrics=False,
+                  verbose=False):
     # given a text (has to be text) file, reads the file, autocorrects any words it deems misspelled, saves as new file
     # it can store the new file in a sub-folder it creates as needed
     # distance represents how far it searches for a better spelling. higher dist = higher RT.
@@ -565,33 +583,29 @@ def symspell_file(filepath, filename, dist=2, keep_numb_words=True, create_folde
     sym_spell = SymSpell(max_dictionary_edit_distance=dist, prefix_length=7)
     print("PySymSpell - Starting to check and correct the file: ", filename)
 
-    dictionary_path = pkg_resources.resource_filename(
-        "symspellpy", "frequency_dictionary_en_82_765.txt")
-    bigram_path = pkg_resources.resource_filename(
-        "symspellpy", "frequency_bigramdictionary_en_243_342.txt")
-    # term_index is the column of the term and count_index is the
-    # column of the term frequency
+    dictionary_path = pkg_resources.resource_filename("symspellpy", "frequency_dictionary_en_82_765.txt")
+    bigram_path = pkg_resources.resource_filename("symspellpy", "frequency_bigramdictionary_en_243_342.txt")
+    # term_index is the column of the term and count_index is the column of the term frequency
     sym_spell.load_dictionary(dictionary_path, term_index=0, count_index=1)
     sym_spell.load_bigram_dictionary(bigram_path, term_index=0, count_index=2)
 
     # if save_metrics:
     #     adjust for weird case
-    # print_results = True
+    # verbose = True
 
     # ------------------------------------
-    file = open(join(filepath, filename), 'r', encoding="utf-8", errors='ignore')
-    textlines = file.readlines()  # return a list
-    file.close()
+    with open(join(filepath, filename), 'r', encoding="utf-8", errors='ignore') as file:
+        textlines = file.readlines()  # return a list
 
-    if create_folder:
+    if want_folder:
         # create a folder
         output_folder_name = "pyymspell_corrections_SD=" + str(dist)
-        if not os.path.isdir(join(filepath, output_folder_name)):
-            os.mkdir(join(filepath, output_folder_name))  # make a place to store outputs if one does not exist
-        filepath = join(filepath, output_folder_name)
+        out_folder: str = join(filepath, output_folder_name)
+        create_folder(out_folder)
+        filepath = out_folder  # override
 
     corrected_list = []
-    print("loaded text with {0:6d} lines ".format(len(textlines)))
+    if verbose: print("loaded text with {0:6d} lines ".format(len(textlines)))
 
     # iterate through list of lines. Pass each line to be corrected. Append / sum results from each line till done
     for line in textlines:
@@ -600,7 +614,8 @@ def symspell_file(filepath, filename, dist=2, keep_numb_words=True, create_folde
             continue
 
         # correct the line of text using spellcorrect_line() which returns a dictionary
-        suggestions = sym_spell.lookup_compound(phrase=line, max_edit_distance=dist, ignore_non_words=keep_numb_words,
+        suggestions = sym_spell.lookup_compound(phrase=line, max_edit_distance=dist,
+                                                ignore_non_words=keep_numb_words,
                                                 ignore_term_with_digits=keep_numb_words)
         all_sugg_for_line = []
         for suggestion in suggestions:
@@ -613,17 +628,18 @@ def symspell_file(filepath, filename, dist=2, keep_numb_words=True, create_folde
     # finished iterating through lines. Now sum total metrics
 
     corrected_doc = "".join(corrected_list)
-    corrected_fname = "Corrected_SSP_" + beautify_filename(filename, num_words=9, start_reverse=False) + ".txt"
+    corrected_fname = "Corrected_SSP_" + beautify_filename(filename, num_words=9,
+                                                           start_reverse=False) + ".txt"
 
     # proceed to saving
-    file_out = open(join(filepath, corrected_fname), 'w', encoding="utf-8", errors='ignore')
-    file_out.writelines(corrected_doc)
-    file_out.close()
+    with open(join(filepath, corrected_fname), 'w', encoding="utf-8", errors='ignore') as file_out:
+        file_out.writelines(corrected_doc)
 
     # report RT
     script_rt_m = (time.time() - script_start_time) / 60
     print("RT for this file was {0:5f} minutes".format(script_rt_m))
-    print("Finished correcting w/ symspell", filename, " at time: ", datetime.now().strftime("%H:%M:%S"), "\n")
+    print("Finished correcting w/ symspell", filename, " at time: ", datetime.now().strftime("%H:%M:%S"),
+          "\n")
 
     corr_file_Data = {
         "corrected_ssp_text": corrected_doc,

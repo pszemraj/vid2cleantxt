@@ -1,0 +1,41 @@
+C:\Users\peter\AppData\Local\Programs\Python\Python39\python.exe C:/Users/peter/GIT_repos/vid2cleantxt/vid2cleantxt/vid2cleantxt_single.py
+Will transcribe the file President John F. Kennedy's Peace Speech.mp4 stored in:
+ C:\Users\peter\GIT_repos\vid2cleantxt\example_JFK_speech\TEST_singlefile
+
+
+Preparing to load model: facebook/wav2vec2-large-960h-lv60-self
+Some weights of Wav2Vec2ForCTC were not initialized from the model checkpoint at facebook/wav2vec2-large-960h-lv60-self and are newly initialized: ['wav2vec2.masked_spec_embed']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Converting Video to Audio: 100%|██████████| 55/55 [02:18<00:00,  2.51s/it]
+Finished creating audio chunks at  _02.14.22
+Transcribing President John F. Ke...: 100%|██████████| 55/55 [26:38<00:00, 29.07s/it]
+
+ Starting to spell-correct and extract keywords
+
+PySymSpell - Starting to check and correct the file:  President John F Kennedy ' Peace Speec_tscript__02.41.01.txt
+RT for this file was 0.147500 minutes
+Finished correcting w/ symspell President John F Kennedy ' Peace Speec_tscript__02.41.01.txt  at time:  02:41:10
+
+Top Key Phrases from YAKE, with max n-gram length:  3
+
+                  key_phrase  ...  freq_in_text
+0        nations world peace  ...             1
+1              war total war  ...             1
+2   interests nuclear powers  ...             1
+3      world security system  ...             1
+4         soviet union adopt  ...             1
+5         peace corps abroad  ...             1
+6     ends americans weapons  ...             1
+7  safeguard human interests  ...             1
+8       kennedy peace speech  ...             1
+9       cold war remembering  ...             1
+
+[10 rows x 4 columns]
+
+
+----------------------------------- Script Complete -------------------------------
+Transcription file + more can be found here:  C:\Users\peter\GIT_repos\vid2cleantxt\example_JFK_speech\TEST_singlefile\w2v2_video_transcriptions
+Metadata for each transcription is located:  C:\Users\peter\GIT_repos\vid2cleantxt\example_JFK_speech\TEST_singlefile\w2v2_transcription_metadata
+total runtime was 29.345329  minutes
+
+Process finished with exit code 0
