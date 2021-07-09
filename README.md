@@ -87,22 +87,27 @@ See the examples folder for more detail / full transcript.
 
 Here's a high-level overview of what happens in the ```vid2cleantxt_folder.py``` script to create the output shown above:
 
-	- Imports relevant packages, and imports relevant functions from audio2text_functions.py
-	- Receive **directory** string input from user in "script run window*. Then iterates through that directory, and finds all video files
-	- FOR each video file found:
-		- convert video to .wav format audio chunks of duration X** seconds with MoviePy
-		- transcribe all X audio chunks through a pretrained wav2vec2model (transformers), store results in a list
-		- write all results of the list into a text file, store various runtime metrics into a separate text list
-		- Deletes .wav audio chunks after completed using them
-	- Next, create two new text files: one with all transcriptions appended, one with all metadata appended.
-	- Then FOR each transcription text file:
-		- Pass the 'base' transcription text through a spell checker (symspellpy) and autocorrect spelling. save as new text file
-		- Use pySBD to infer sentence boundaries on the spell-corrected text and add periods in to delineate sentences. Save as new file
-		- Run basic keyword extraction (via YAKE) on spell-corrected file. All keywords per file are stored in one dataframe for comparison, and exported to .xlsx format
-	- cleanup tasks (delete the X .wav files created for audio transcription, etc), report runtime, and exit
+1. Imports relevant packages, and imports relevant functions from audio2text_functions.py
+2. Receive **directory** string input from user in "script run window*. Then iterates through that directory, and finds all video files
+3. FOR each video file found:
+    - convert video to .wav format audio chunks of duration X** seconds with MoviePy
+    - transcribe all X audio chunks through a [pretrained wav2vec2 model](https://github.com/pytorch/fairseq/tree/master/examples/wav2vec) 
+      (in this repo - using huggingface transformers) and store the resulting text in a list
+    - write all results of the list into a text file, store various runtime metrics into a separate text list
+    - Delete .wav audio chunk directory after completed using them
+4. Next, create two new text files: one with all transcriptions appended, one with all metadata appended.
+5. Then FOR each transcription text file:
+    - Pass the 'base' transcription text through a spell checker (symspellpy) and autocorrect spelling. 
+      save as new text file.
+    - Use pySBD to infer sentence boundaries on the spell-corrected text and add periods in to delineate sentences. 
+      Save as new file.
+    - Run basic keyword extraction (via YAKE) on spell-corrected file. All keywords per file are stored in one dataframe 
+      for comparison, and exported to .xlsx format.
+6. cleanup tasks, report runtime, and exit.
 
-	* the 'single file' version needs to have the name defined in the python code itself
-	** (where X is some duration that does not overload your computer or crash your IDE)
+_* the 'single file' version needs to have the name defined in the python code itself_
+
+_** (where X is some duration that does not overload your computer or crash your IDE)_
 
 By default,
 
@@ -119,13 +124,14 @@ By default,
 After the first run, it will be cached locall, and you will not need to sit through that again.
 
 1. fastest:
+```
+git clone https://github.com/pszemraj/vid2cleantxt.git
+pip install -r requirements.txt
+python -m vid2cleantxt_folder.py
+```
 
-- ```git clone https://github.com/pszemraj/vid2cleantxt.git```
-- ```pip install -r requirements.txt```
-- ```vid2cleantxt_folder.py```
-
-* Will make some changes that don't require vid2cleantxt_folder to be in the same folder as audio2text_functions for
-  example.
+2. Using github desktop - run vid2cleantxt_folder.py from your IDE
+3. If neither of those are convenient, see the next section on how to use Colab 
 
 ## Is there a jupyter notebook file?
 
@@ -300,126 +306,91 @@ Transcription of Public Domain Speeches from President John F. Kennedy
 The "example_JFK_speech" folder contains the results and interim files of running both the single file and folder
 version. Recap:
 
-- for the single file version, you need to update to update the ```input_file``` variable with the filepath to the
+- for the single file version, you need to update the ```input_file``` variable with the filepath to the
   desired video file.
-    - if the path to videofile does not exist, it should prompt the user to enter a new one
-- for the folder version, just run the .py script, and it will prompt the user for input. Paste the directory path (to
-  the video file folder), and it will handle it from there.
-
-**FYI WITH RESPECT TO THE EXAMPLE:** I had to split "GPU_President Kennedy speech on the space effort a" when pushing to
-Git due to file size constraints. As such, there are 5 video files (Parts 1-5) in the example for this speech but when I
-ran the folder transcriber it was just one. Again, this shouldn't really be an issue as the audio is "independent" in
-practicality as explained earlier
-
-## Output (sentence boundary disambiguation) of the single file version:
+    - if the path to the video file does not exist, the console should prompt the user to enter a new path
+- for the folder version, just run the .py script, and the console will prompt the user for input right away. 
+  Paste the directory path (to the video file folder), and it will handle it from there.
+- output files from already-run scripts on the examples are located in 
+  ```vid2cleantxt\example_JFK_speech\TEST_folder_edition```  and  
+  ```vid2cleantxt\example_JFK_speech\TEST_singlefile``` for the folder and single-file versions respectively.
+  
+## Output (sentence boundary disambiguation) of JFK's Moon Speech @ Rice University:
 
 Input video was JFK_rice_moon_speech.mp4. Originally downloaded
 from [C-Span](https://www.c-span.org/video/?96805-52/john-f-kennedy-audio-recording):
 
-	transcription of of rice moon speech mp4 at date 09 03 2021 time 22 07 41. surely the opening vistas of space promise high costs and hardships as well as
-	high reward so it is not surprising that some would have us stay where we are a little longer to rest to wait but this city of huston this state of texas
-	this country of the united states was not built by those who waited and rested but if i were to say my fellow citizens that we shall send to the moon two
-	hundred and forty thousand. a away from the control station in huston a giant rocket more than three hundred feet tall the length of this football field
-	made of new metal alloys some of which have not yet been invented capable of standing heat and stresses several times more than have ever been experienced
-	fitted together with a precision better than the finest watch carrying all the equipment needed for propulsion guidance control communications food and
-	survival on a. tried mission to an unknown celestial body and then return it safely to earth re entering the atmosphere at speeds of over twenty five
-	thousand miles per hour causing heat about half that on the temperature of the sun almost as hot as it is here to day and do all this and do all this and
-	do it right and do it first before the dictator out and be. i'm the one who is doing all the work to stay col for a minute however i think were going to
-	do it and i think that we must pay what needs to be paid i don't think we ought to waste any money but i think we ought to do the job and this will be done
-	in the decade of the sixties it may be done while some of you are still here at school at this college university it will be done during the terms of office
-	of some of the people who sit here on this platform but it will be done many years ago the great british explorer george mallory. who was to die on mount everest
-	was asked why did he want to climb it he said because it is there or space is there and we are going to climb it and the moon and the planets are there and new
-	hopes for knowledge and peace are there and therefore as we set sail we ask gods blessing on the most hazardous and dangerous and greatest adventure on which
-	man has ever embarked a
+```
+transcription of rice moon speech mp4 at date 09 07 2021. surely the opening vistas of space 
+promise high costs and hardships as well as high reward so it is not surprising that some would have us stay where  
+we are a little longer to rest to wait but this city of huston this state of texas this country of the united states 
+was not built by those who waited and rested but if i were to say my fellow citizens. that we shall send to the moon 
+two hundred  and forty thousand miles away from the control station in houston a giant rocket more than three 
+hundred feet tall the  length of this football field made of new metal alloys some of which have not yet been 
+invented  capable of standing heat and stresses several times more than have ever been experienced fitted together 
+with  a precision better than the. test watch carrying all the equipment needed for propulsion guidance control  
+communications food and survival on an untried mission to an unknown celestial body and then return it safely to earth 
+re entering the atmosphere at speeds of over twenty five thousand miles per hour causing heat about half that on the
+temperature of the sun almost as hot as it is here to day and do all this. and do all this and do it right and do it 
+first before this dictate is out then we must be to i'm the one who is doing all the work so to semi to stay cool for 
+a minute however i think were going to do it and i think that we must pay what needs to be paid i don't think we ought 
+to waste any. money but i think we ought to do the job and this will be done in the decade of the sixty it may be done
+while some of you are still here at school at this college and university it will be done during the terms of office of
+some of the people who sit here on this platform but it will be done many years ago the great british explorer george 
+mallory who was to die on mount everest was asked why did he want to climb it he said because it is there well space is 
+there. and were going to climb it and the moon and the planets are there and new hopes for knowledge and peace are 
+there and therefore as we set sail we ask gods blessing on the most hazardous and dangerous and greatest adventure on 
+which man has ever embarked thank you
+```
 
 ## Output script run log for the "single_file" version:
 
-	C:\Users\peter\AppData\Local\Microsoft\WindowsApps\python.exe C:/Users/peter/PycharmProjects/vid2cleantxt/vid2cleantxt/vid2cleantxt_single.py
-	2021-03-09 22:07:21.289433: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'cudart64_110.dll'; dlerror: cudart64_110.dll not found
-	2021-03-09 22:07:21.289808: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+A transcription of the **President John F. Kennedy's Peace Speech.mp4** video file. The output of this is shown at the 
+top of the README here, or the .txt can be read (in the examples folder).
 
-	Preparing to load model: facebook/wav2vec2-large-960h-lv60-self
-
-	============================================================
-	Converting video to audio for file:  JFK_rice_moon_speech.mp4
-	============================================================
-
-	convert vid2audio: 100%
-	55/55 [02:24<00:00, 2.63s/it]
-
-	Finished creating audio chunks at  _22.14.44
-
-	============================================================
-	converted video to audio. About to start transcription loop for file:  JFK_rice_moon_speech.mp4
-	============================================================
-
-	Cuda availability (PyTorch):  True
-
-	Gen RAM Free: 25.3 GB  | Proc size: 4.5 GB
-	GPU RAM Free: 14143MB | Used: 2137MB | Util  13% | Total 16280MB
-
-	Converting Video: 100%
-	55/55 [01:55<00:00, 2.09s/it]
-	Cuda availability (PyTorch):  True
-
-	Gen RAM Free: 25.3 GB  | Proc size: 4.5 GB
-	GPU RAM Free: 14143MB | Used: 2137MB | Util  13% | Total 16280MB
-
-	Cuda availability (PyTorch):  True
-
-	Gen RAM Free: 25.3 GB  | Proc size: 4.5 GB
-	GPU RAM Free: 14143MB | Used: 2137MB | Util  13% | Total 16280MB
-
-	Cuda availability (PyTorch):  True
-
-	Gen RAM Free: 25.3 GB  | Proc size: 4.6 GB
-	GPU RAM Free: 14143MB | Used: 2137MB | Util  13% | Total 16280MB
-
-	Cuda availability (PyTorch):  True
-
-	Gen RAM Free: 25.3 GB  | Proc size: 4.6 GB
-	GPU RAM Free: 14143MB | Used: 2137MB | Util  13% | Total 16280MB
+```
+C:\Users\peter\AppData\Local\Programs\Python\Python39\python.exe C:/Users/peter/GIT_repos/vid2cleantxt/vid2cleantxt/vid2cleantxt_single.py
+Will transcribe the file President John F. Kennedy's Peace Speech.mp4 stored in:
+ C:\Users\peter\GIT_repos\vid2cleantxt\example_JFK_speech\TEST_singlefile
 
 
+Preparing to load model: facebook/wav2vec2-large-960h-lv60-self
+Some weights of Wav2Vec2ForCTC were not initialized from the model checkpoint at facebook/wav2vec2-large-960h-lv60-self and are newly initialized: ['wav2vec2.masked_spec_embed']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Converting Video to Audio: 100%|██████████| 55/55 [02:18<00:00,  2.51s/it]
+Finished creating audio chunks at  _02.14.22
+Transcribing President John F. Ke...: 100%|██████████| 55/55 [26:38<00:00, 29.07s/it]
 
-	Finished audio transcription of JFK_rice_moon_speech.mp4 and now saving metrics.
+ Starting to spell-correct and extract keywords
 
-	Deleted Audio Chunk Folder + Files
+PySymSpell - Starting to check and correct the file:  President John F Kennedy ' Peace Speec_tscript__02.41.01.txt
+RT for this file was 0.147500 minutes
+Finished correcting w/ symspell President John F Kennedy ' Peace Speec_tscript__02.41.01.txt  at time:  02:41:10
 
-	Finished transcription successfully for JFK_rice_moon_speech.mp4 at date_22_05_2021_time_22-16-39
-	completed transcription in 2.4121029416720075 minutes
+Top Key Phrases from YAKE, with max n-gram length:  3
 
-	 Starting to spell-correct and extract keywords
+                  key_phrase  ...  freq_in_text
+0        nations world peace  ...             1
+1              war total war  ...             1
+2   interests nuclear powers  ...             1
+3      world security system  ...             1
+4         soviet union adopt  ...             1
+5         peace corps abroad  ...             1
+6     ends americans weapons  ...             1
+7  safeguard human interests  ...             1
+8       kennedy peace speech  ...             1
+9       cold war remembering  ...             1
 
-	PySymSpell - Starting to check and correct the file:  JFK rice moon speec_tscript__22.10.58.txt
-	loaded text with      6 lines
-	RT for this file was 0.085566 minutes
-	Finished correcting w/ symspell JFK rice moon speec_tscript__22.10.58.txt  at time:  22:11:04
-
-	Top Key Phrases from YAKE, with max n-gram length:  3
-
-							key_phrase  ...  freq_in_text
-	0                 rice moon speech  ...             1
-	1               promise high costs  ...             1
-	2                hundred feet tall  ...             1
-	3  guidance control communications  ...             1
-	4                hour causing heat  ...             1
-	5              football field made  ...             1
-	6            finest watch carrying  ...             1
-	7           unknown celestial body  ...             1
-	8           great british explorer  ...             1
-	9                      high reward  ...             1
-
-	[10 rows x 4 columns]
+[10 rows x 4 columns]
 
 
-	----------------------------------- Script Complete -------------------------------
-	Transcription file + more can be found here:  C:\Users\peter\PycharmProjects\vid2cleantxt\example_JFK_speech\wav2vec2_sf_transcript
-	Metadata for each transcription is located:  C:\Users\peter\PycharmProjects\vid2cleantxt\example_JFK_speech\wav2vec2_sf_metadata
-	total runtime was 3.600498  minutes
+----------------------------------- Script Complete -------------------------------
+Transcription file + more can be found here:  C:\Users\peter\GIT_repos\vid2cleantxt\example_JFK_speech\TEST_singlefile\w2v2_video_transcriptions
+Metadata for each transcription is located:  C:\Users\peter\GIT_repos\vid2cleantxt\example_JFK_speech\TEST_singlefile\w2v2_transcription_metadata
+total runtime was 29.345329  minutes
 
-	Process finished with exit code 0
-
+Process finished with exit code 0
+```
 ---
 
 # Future Work, Collaboration, & Citations
@@ -428,7 +399,8 @@ from [C-Span](https://www.c-span.org/video/?96805-52/john-f-kennedy-audio-record
 
 A *rough* timeline of what has been going on in the repo:
 
-- 
+- July 2021: Python scripts and 
+- April - June: Work done mostly on Colab improving saving, grammar correction, etc. 
 - March 2021: public repository added
 ## Future Work
 
