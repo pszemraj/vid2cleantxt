@@ -108,8 +108,11 @@ Essentially, clone the repo, and run `vid2cleantxt/vid2cleantxt_folder.py`. The 
 
 
     `git clone https://github.com/pszemraj/vid2cleantxt.git`
+    
     `pip install -r requirements.txt`
+    
     `python -m vid2cleantxt/vid2cleantxt_folder.py`
+    
 
 2.  Clone with github desktop - run `vid2cleantxt/vid2cleantxt_folder.py` from your IDE
     -   `vid2cleantxt_standalone.py` contains all the python functions, classes, etc. to run a transcription. If you are experiencing issues, try to see if running this script (from whatever location) works.
@@ -126,7 +129,7 @@ make some small changes (some directories, packages, etc. are specific to Colab'
         authentication / etc. is required and **this link is recommended for seeing how this pipeline works**.
     -   The only steps required are checking / adjusting the runtime to a GPU, and _Run All_
 2.  Multi-File Version (Implements GPU)
-    -   Link [here](https://colab.research.google.com/drive/1UMCSh9XdvUABjDJpFUrHPj4uy3Cc26DC?usp=sharing)
+    -   Link [here](https://colab.research.google.com/drive/1qOUkiPMaUZgBTMfCFF-fCRTPCMg1997J?usp=sharing), *note file was updated and posted to the repo July 13, 2021.*
     -   This script connects to the user's google drive to convert a whole folder of videos using Google's Colab Python
         package.
     -   It **does require the video files to be hosted on the user's drive**, as well as authorization of Colab (it will
