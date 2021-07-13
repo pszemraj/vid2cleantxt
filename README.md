@@ -199,7 +199,7 @@ Some examples from my own usage are illustrated below from both packages.
 
 Several options are available on the [HuggingFace website](https://huggingface.co/models?pipeline_tag=summarization). I have personally found [Google's pegasus](https://huggingface.co/google/pegasus-xsum) to be most effective for "lecture-esque" video conversion.
 
-I personally use several similar methods in combination with the transcription script, however it isn't in a place to posted yet. It will be posted to a public repo on this account when ready.
+I personally use several similar methods in combination with the transcription script, however it isn't in a place to be officially posted yet. It will be posted to a public repo on this account when ready. For now, you can check out [this Colab notebook](https://colab.research.google.com/drive/1BSIsYHH0w5pdVxqo_nK5vHgMeBiJKKGm?usp=sharing) using the same example text that is output when the JFK speeches are transcribed.
 
 ## TextHero example use case
 
