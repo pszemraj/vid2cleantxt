@@ -107,9 +107,9 @@ Essentially, clone the repo, and run `vid2cleantxt/vid2cleantxt_folder.py`. The 
 1.  fastest:
 
 
-    git clone https://github.com/pszemraj/vid2cleantxt.git
-    pip install -r requirements.txt
-    python -m vid2cleantxt/vid2cleantxt_folder.py
+    `git clone https://github.com/pszemraj/vid2cleantxt.git`
+    `pip install -r requirements.txt`
+    `python -m vid2cleantxt/vid2cleantxt_folder.py`
 
 2.  Clone with github desktop - run `vid2cleantxt/vid2cleantxt_folder.py` from your IDE
     -   `vid2cleantxt_standalone.py` contains all the python functions, classes, etc. to run a transcription. If you are experiencing issues, try to see if running this script (from whatever location) works.
@@ -218,7 +218,7 @@ Comparing frequency of terms in one body of text vs. another
 
 ## What python package dependencies does this repo have?
 
-Upon cloning the repo, run the command `pip install -r requirements.txt` in a terminal opened in the project directory. As of July 11th, 2021, requirements are as follows:
+Upon cloning the repo, run the command `pip install -r requirements.txt` in a terminal opened in the project directory. As of July 13th, 2021, requirements are as follows:
 
     librosa==0.8.1
     moviepy==1.0.3
@@ -281,9 +281,9 @@ The "example_JFK_speech" folder contains the results and interim files of runnin
 
 ## Output (sentence boundary disambiguation) of JFK's Moon Speech @ Rice University:
 
-Input video was `example_JFK_speech/TEST_folder_edition/completed/GPU_President Kennedy speech on the space effort a_part_1.mp4`. The video was originally downloaded from [C-Span](https://www.c-span.org/video/?96805-52/john-f-kennedy-audio-recording):
+The input video was `example_JFK_speech/TEST_folder_edition/completed/GPU_President Kennedy speech on the space effort a_part_1.mp4`. The video was originally downloaded from [C-Span](https://www.c-span.org/video/?96805-52/john-f-kennedy-audio-recording):
 
-`President pitzer minister vice president governor congressman thomas senator widely and congressman miller minister web mystery bill scientists distinguished guest of ladies and gentlemen and appreciate your president having made me an honorary visiting professor and I will assure you that my first letter will be a very. If I am delighted to be here and I am particularly delighted to be here on this occasion we meet at a college noted for knowledge in a city noted for progress in a state noted for strength and we stand in need of all three of we meet in an hour of change and challenge in a decade of hope and fear in an age of both knowledge and ignorance the greater. Our knowledge increases the greater our ignorance unfolds despite the striking fact that most of the scientists that the world has ever known are alive and working to say despite the fact that this nation ' s own scientific human power is doubling every twelve years in a rate of growth more than three times that of our population as a whole despite that. The vast stretches of the unknown and the unanswered and the unfinished still far outstripped are collective comprehension no man can fully grasp how far and how fast we have come but immense if you will the fifty thousand years of man ' s recorded history in a time span of about half a century. Stated in these terms we know very little about the first forty years except at the end of them advanced men had learned to use the skins of animals to cover them then about ten years ago under this standard man emerged from his caves to construct other kinds of shelter only five years ago man learned to write and use a cart with wheels christianity began. Less than two years ago the printing press came this year and then less than two months ago during this whole fifty years span of human history the steam engine provided a new source of power network explored the meaning of gravity last month electric lights and telephones and automobiles and airplanes became available only last week. Did we develop penecilum and television and nuclear power and now if america ' s new spacecraft succeeds in reaching Venus we will have literally reached the start before midnight to night this is a breath taking place and such a pace cannot help but create new ills as it dispels old new ignorance new problems new dangers. Surely the opening vistas of space promise`
+> President pitzer minister vice president governor congressman thomas senator widely and congressman miller minister web mystery bill scientists distinguished guest of ladies and gentlemen and appreciate your president having made me an honorary visiting professor and I will assure you that my first letter will be a very. If I am delighted to be here and I am particularly delighted to be here on this occasion we meet at a college noted for knowledge in a city noted for progress in a state noted for strength and we stand in need of all three of we meet in an hour of change and challenge in a decade of hope and fear in an age of both knowledge and ignorance the greater. Our knowledge increases the greater our ignorance unfolds despite the striking fact that most of the scientists that the world has ever known are alive and working to say despite the fact that this nation's own scientific human power is doubling every twelve years in a rate of growth more than three times that of our population as a whole despite that. The vast stretches of the unknown and the unanswered and the unfinished still far outstripped are collective comprehension no man can fully grasp how far and how fast we have come but immense if you will the fifty thousand years of man's recorded history in a time span of about half a century. Stated in these terms we know very little about the first forty years except at the end of them advanced men had learned to use the skins of animals to cover them then about ten years ago under this standard man emerged from his caves to construct other kinds of shelter only five years ago man learned to write and use a cart with wheels christianity began. Less than two years ago the printing press came this year and then less than two months ago during this whole fifty years span of human history the steam engine provided a new source of power network explored the meaning of gravity last month electric lights and telephones and automobiles and airplanes became available only last week. Did we develop penecilum and television and nuclear power and now if america's new spacecraft succeeds in reaching Venus we will have literally reached the start before midnight to night this is a breath taking place and such a pace cannot help but create new ills as it dispels old new ignorance new problems new dangers. Surely the opening vistas of space promise
 
 (continued in next video file + transcription)
 
@@ -417,43 +417,43 @@ Send me a message / start a discussion! Always looking to improve.
 
 -   repo [link](https://github.com/mammothb/symspellpy/tree/e7a91a88f45dc4051b28b83e990fe072cabf0595)
 -   copyright:
-    >     Copyright (c) 2020 Wolf Garbe Version: 6.7 Author: Wolf Garbe <mailto:wolf.garbe@seekstorm.com>
-    >     Maintainer: Wolf Garbe <mailto:wolf.garbe@seekstorm.com>
-    >     URL: <https://github.com/wolfgarbe/symspell>
-    >     Description: <https://medium.com/@wolfgarbe/1000x-faster-spelling-correction-algorithm-2012-8701fcd87a5f>
+    > Copyright (c) 2020 Wolf Garbe Version: 6.7 Author: Wolf Garbe <mailto:wolf.garbe@seekstorm.com>
+    > Maintainer: Wolf Garbe <mailto:wolf.garbe@seekstorm.com>
+    > URL: <https://github.com/wolfgarbe/symspell>
+    > Description: <https://medium.com/@wolfgarbe/1000x-faster-spelling-correction-algorithm-2012-8701fcd87a5f>
     >
-    >     MIT License
+    > MIT License
     >
-    >     Copyright (c) 2020 Wolf Garbe
+    > Copyright (c) 2020 Wolf Garbe
     >
-    >     Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-    >     documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
-    >     rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
-    >     persons to whom the Software is furnished to do so, subject to the following conditions:
+    > Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+    > documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+    > rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+    > persons to whom the Software is furnished to do so, subject to the following conditions:
     >
-    >     The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
-    >     Software.
+    > The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+    > Software.
     >
-    >     <https://opensource.org/licenses/MIT>
+    > <https://opensource.org/licenses/MIT>
 
 **YAKE (yet another keyword extractor)**
 
 -   repo [link](https://github.com/LIAAD/yake)
 -   relevant citations:
-    >     In-depth journal paper at Information Sciences Journal
+    > In-depth journal paper at Information Sciences Journal
     >
-    >     Campos, R., Mangaravite, V., Pasquali, A., Jatowt, A., Jorge, A., Nunes, C. and Jatowt, A. (2020). YAKE! Keyword
-    >     Extraction from Single Documents using Multiple Local Features. In Information Sciences Journal. Elsevier, Vol 509, pp
-    >     257-289. pdf
+    > Campos, R., Mangaravite, V., Pasquali, A., Jatowt, A., Jorge, A., Nunes, C. and Jatowt, A. (2020). YAKE! Keyword
+    > Extraction from Single Documents using Multiple Local Features. In Information Sciences Journal. Elsevier, Vol 509, pp
+    > 257-289. pdf
     >
-    >     ECIR'18 Best Short Paper
+    > ECIR'18 Best Short Paper
     >
-    >     Campos R., Mangaravite V., Pasquali A., Jorge A.M., Nunes C., and Jatowt A. (2018). A Text Feature Based Automatic
-    >     Keyword Extraction Method for Single Documents. In: Pasi G., Piwowarski B., Azzopardi L., Hanbury A. (eds). Advances
-    >     in Information Retrieval. ECIR 2018 (Grenoble, France. March 26 – 29). Lecture Notes in Computer Science, vol 10772,
-    >     pp. 684 - 691. pdf
+    > Campos R., Mangaravite V., Pasquali A., Jorge A.M., Nunes C., and Jatowt A. (2018). A Text Feature Based Automatic
+    > Keyword Extraction Method for Single Documents. In: Pasi G., Piwowarski B., Azzopardi L., Hanbury A. (eds). Advances
+    > in Information Retrieval. ECIR 2018 (Grenoble, France. March 26 – 29). Lecture Notes in Computer Science, vol 10772,
+    > pp. 684 - 691. pdf
     >
-    >     Campos R., Mangaravite V., Pasquali A., Jorge A.M., Nunes C., and Jatowt A. (2018). YAKE!
-    >     Collection-independent Automatic Keyword Extractor. In: Pasi G., Piwowarski B., Azzopardi L., Hanbury A. (eds).
-    >     Advances in Information Retrieval. ECIR 2018 (Grenoble, France. March 26 – 29). Lecture Notes in Computer Science, vol
-    >     10772, pp. 806 - 810. pdf
+    > Campos R., Mangaravite V., Pasquali A., Jorge A.M., Nunes C., and Jatowt A. (2018). YAKE!
+    > Collection-independent Automatic Keyword Extractor. In: Pasi G., Piwowarski B., Azzopardi L., Hanbury A. (eds).
+    > Advances in Information Retrieval. ECIR 2018 (Grenoble, France. March 26 – 29). Lecture Notes in Computer Science, vol
+    > 10772, pp. 806 - 810. pdf
