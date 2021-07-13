@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CsvFileAttributes">
+    <option name="attributeMap">
+      <map>
+        <entry key="\example_JFK_speech\TEST_folder_edition\v2clntxt_transc_metadata\metadata for gpu_president_kennedy_speech_on_the_space_effort_apart_ transcription.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\example_JFK_speech\TEST_folder_edition\v2clntxt_transc_metadata\metadata for jfk_rice_moon_speec transcription.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\example_JFK_speech\TEST_folder_edition\v2clntxt_transc_metadata\metadata for president_john_f_kennedys_peace_speec transcription.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\example_JFK_speech\TEST_folder_edition\v2clntxt_transcriptions\YAKE - keywords for all transcripts in run.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

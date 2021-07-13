@@ -1,3 +1,5 @@
+# this is the script you should run to transcribe files in 95+% of cases.
+
 """
 vid2clntext by Peter Szemraj
 Pipeline for Zero-shot transcription of a lecture video file to text using facebook's wav2vec2 model
@@ -18,117 +20,106 @@ sections in this file:
 
 * (where X is some duration that does not overload your computer or crash your IDE)
 """
-
 import math
-import os
 import shutil
+import sys
 import time
 from datetime import datetime
-from os import listdir
-from os.path import isfile
 from os.path import join
 
 import librosa
 import pandas as pd
-import pysbd
 import torch
-from natsort import natsorted
 from tqdm.auto import tqdm
 from transformers import Wav2Vec2ForCTC, Wav2Vec2Tokenizer
 
-from audio2text_functions import beautify_filename, convert_vid_for_transcription, create_folder, digest_text_fn, \
-    quick_keys, shorten_title, symspell_file
+from audio2text_functions import beautify_filename, convert_vid_for_transcription, corr, create_metadata_df, \
+    init_neuspell, \
+    init_symspell, quick_keys, spellcorrect_pipeline, validate_output_directories
+from v2ct_utils import check_runhardware, create_folder, digest_txt_directory, load_imm_dir_files, move2completed, \
+    NullIO, shorten_title, \
+    torch_validate_cuda
 
 
 # -------------------------------------------------------
 # Function Definitions
 # -------------------------------------------------------
 
-def transcribe_video_wav2vec(transcription_model, directory, vid_clip_name, chunk_length_seconds, verbose=False):
-    # this is the same process as used in the single video transcription, now as a function. Note that spell correction
-    # and keyword extraction are now done separately in the script
-    # user needs to pass in: the model, the folder the video is in, and the name of the video
-    output_path_full = directory
-    # Split Video into Audio Chunks-----------------------------------------------
 
+def transcribe_video_wav2vec(transcription_model, directory, vid_clip_name, chunk_length_seconds,
+                             verbose=False):
+    # this is the same process as used in the single video transcription, now as a function. Note that spell
+    # correction and keyword extraction are now done separately in the script  user needs to pass in: the model,
+    # the folder the video is in, and the name of the video
+
+    # Split Video into Audio Chunks-----------------------------------------------
+    if verbose: print("Starting to transcribe {} @ {}".format(vid_clip_name, datetime.now()))
     # create audio chunk folder
     output_folder_name = "audio_chunks"
-    if not os.path.isdir(join(directory, output_folder_name)):
-        os.mkdir(join(directory, output_folder_name))  # make a place to store outputs if one does not exist
     path2audiochunks = join(directory, output_folder_name)
+    create_folder(path2audiochunks)
     chunk_directory = convert_vid_for_transcription(vid2beconv=vid_clip_name, input_directory=directory,
-                                                    len_chunks=chunk_length_seconds,
-                                                    output_directory=path2audiochunks)
-
+                                                    len_chunks=chunk_length_seconds, output_directory=path2audiochunks)
+    torch_validate_cuda()
+    check_runhardware()
     full_transcription = []
-    header = "Transcription of " + vid_clip_name + " at: " + \
-             datetime.now().strftime("date_%d_%m_%Y_time_%H-%M-%S")
-    full_transcription.append(header + "\n")
-    before_loop_st = time.time()
-    update_incr = math.ceil(len(chunk_directory) / 10)
+    GPU_update_incr = math.ceil(len(chunk_directory) / 2)
+
     # Load audio chunks by name, pass into model, append output text-----------------------------------------------
+
     for audio_chunk in tqdm(chunk_directory, total=len(chunk_directory),
-                            desc="Transcribing {}".format(shorten_title(vid_clip_name))):
+                            desc="Transcribing {} ".format(shorten_title(vid_clip_name))):
+
         current_loc = chunk_directory.index(audio_chunk)
 
+        if (current_loc % GPU_update_incr == 0) and (GPU_update_incr != 0):
+            # provide update on GPU usage
+            check_runhardware()
+
+        # load dat chunk
         audio_input, rate = librosa.load(join(path2audiochunks, audio_chunk), sr=16000)
-        input_values = tokenizer(audio_input, return_tensors="pt", padding="longest",
-                                 truncation=True).input_values
+        # MODEL
+        device = "cuda:0" if torch.cuda.is_available() else "cpu"
+        input_values = tokenizer(audio_input, return_tensors="pt", padding="longest", truncation=True).input_values.to(
+            device)
+        transcription_model = transcription_model.to(device)
         logits = transcription_model(input_values).logits
         predicted_ids = torch.argmax(logits, dim=-1)
-        transcription = tokenizer.batch_decode(predicted_ids)[0]
+        transcription = str(tokenizer.batch_decode(predicted_ids)[0])
         full_transcription.append(transcription + "\n")
+        # empty memory so you don't overload the GPU
+        del input_values
+        del logits
+        del predicted_ids
+        torch.cuda.empty_cache()
 
     if verbose: print("\nFinished audio transcription of " + vid_clip_name + " and now saving metrics.")
 
     # build metadata log -------------------------------------------------
-    mdata = []
-    mdata.append('original file name: ' + vid_clip_name + '\n')
-    mdata.append(
-        'number of recorded audio chunks: ' + str(len(chunk_directory)) + " of lengths seconds each" + str(
-            chunk_length_seconds) + '\n')
+    md_df = create_metadata_df()  # makes a blank df with column names
     approx_input_len = (len(chunk_directory) * chunk_length_seconds) / 60
-    mdata.append('approx {0:3f}'.format(approx_input_len) + ' minutes of input audio \n')
-    mdata.append('transcription date: ' + datetime.now().strftime("date_%d_%m_%Y_time_%H-%M-%S") + '\n')
-    full_text = ' '.join(full_transcription)
-    transcript_length = len(full_text)
-    mdata.append("length of transcribed text: " + str(transcript_length) + ' characters \n')
-    t_word_count = len(full_text.split(' '))
-    mdata.append("total word count: " + str(t_word_count) + ' words (based on spaces) \n')
-
+    transc_dt = datetime.now().strftime("date_%d_%m_%Y_time_%H-%M-%S")
+    full_text = corr(' '.join(full_transcription))
+    md_df.loc[len(md_df), :] = [vid_clip_name, len(chunk_directory), chunk_length_seconds, approx_input_len,
+                                transc_dt, full_text, len(full_text), len(full_text.split(' '))]
+    md_df.transpose(copy=False)
     # delete audio chunks in folder -------------------------------------------------
     try:
         shutil.rmtree(path2audiochunks)
         if verbose: print("\nDeleted Audio Chunk Folder + Files")
     except:
-        print("WARNING - unable to remove the folder {} containingg .WAV files")
+        print("WARNING - unable to clean up + delete the audio_chunks folder for {}".format(vid_clip_name))
 
     # compile results -------------------------------------------------
     transcription_results = {
         "audio_transcription": full_transcription,
-        "metadata": mdata
+        "metadata": md_df
     }
+
     if verbose: print("\nFinished transcription successfully for " + vid_clip_name + " at "
                       + datetime.now().strftime("date_%d_%m_%Y_time_%H-%M-%S"))
 
     return transcription_results
-
-
-def validate_output_directories(directory):
-    t_folder_name = "w2v2_video_transcriptions"
-    m_folder_name = "w2v2_transcription_metadata"
-
-    t_path_full = join(directory, t_folder_name)
-    create_folder(t_path_full)
-
-    m_path_full = join(directory, m_folder_name)
-    create_folder(m_path_full)
-
-    output_locs = {
-        "t_out": t_path_full,
-        "m_out": m_path_full
-    }
-    return output_locs
 
 
 # -------------------------------------------------------
@@ -136,40 +127,30 @@ def validate_output_directories(directory):
 # -------------------------------------------------------
 
 if __name__ == "__main__":
-    # start tracking rt
-    st = time.time()
+    st = time.time()  # start tracking rt
+    directory = str(input("\n Enter full path to directory containing videos ---->"))  # Ask user for folder
 
     # load pretrained model
     # if running for first time on local machine, start with "facebook/wav2vec2-base-960h" for both tokenizer and model
-    wav2vec2_model = "facebook/wav2vec2-large-960h-lv60-self"  # tested up to 35 second chunks
+    wav2vec2_model = "facebook/wav2vec2-large-960h-lv60-self"  # load pretrained model
     # wav2vec2_model = "facebook/wav2vec2-base-960h" # tested up to 90 second chunks. Faster, but less accurate
     print("\nPreparing to load model: " + wav2vec2_model + " - ", datetime.now())
     tokenizer = Wav2Vec2Tokenizer.from_pretrained(wav2vec2_model)
     model = Wav2Vec2ForCTC.from_pretrained(wav2vec2_model)
-    chunk_length = 30  # (in seconds) if model fails to work or errors out (and there isn't some other
-    # obvious error, reduce this number.
+    chunk_length = 30  # (in seconds) if model fails to work or errors out, try reducing this number.
 
-    # Ask user for folder
-    directory = str(input("\n Enter full path to directory containing videos ---->"))
-    tr_db_name = 'runtime data for of ' + ''.join(ch for ch in directory if ch.isalnum()) + " transcription.xlsx"
+    sys.stdout = NullIO()  # hide printing to console for initializations below:
+    checker = init_neuspell()
+    sym_spell = init_symspell()
+    sys.stdout = sys.__stdout__  # return to default of print-to-console
 
     # iterate through directory and get list of only video files --------------------------------------------------
-
-    files_to_munch = natsorted([f for f in listdir(directory) if isfile(join(directory, f))])
-    total_files_1 = len(files_to_munch)
-    removed_count_1 = 0
+    vid_extensions = [".mp4", ".mov", ".avi"]
     approved_files = []
-    # remove non-.txt files
-    for prefile in files_to_munch:
-        if prefile.endswith(".mp4") or prefile.endswith(".mov") or prefile.endswith(".avi"):
-            approved_files.append(prefile)
-        else:
-            files_to_munch.remove(prefile)
-            removed_count_1 += 1
+    for ext in vid_extensions:
+        approved_files.extend(load_imm_dir_files(directory, req_ext=ext, full_path=False))
 
-    print(
-        "\nFrom {} file(s) originally in the folder, {} non-video files removed".format(total_files_1, removed_count_1))
-    print('{} file(s) in folder will be transcribed.\n'.format(len(approved_files)))
+    print("\n# of video files with valid extensions {} in src dir is {}".format(vid_extensions, len(approved_files)))
 
     # iterate through list of video files, transcribing one at a time --------------------------------------------------
     storage_locs = validate_output_directories(directory)  # create and get output folders
@@ -184,84 +165,62 @@ if __name__ == "__main__":
         metadata = t_results.get('metadata')
 
         # label and store this transcription
-        vid_preamble = beautify_filename(filename, num_words=15,
-                                         start_reverse=False)  # gets a nice phrase from filename
+        vid_preamble = beautify_filename(filename, num_words=15, start_reverse=False)
         # transcription
         transcribed_filename = vid_preamble + '_tscript_' + datetime.now().strftime("_%H.%M.%S") + '.txt'
         transcribed_file = open(join(out_p_tscript, transcribed_filename), 'w', encoding="utf-8", errors='ignore')
         with open(join(out_p_tscript, transcribed_filename), 'w', encoding="utf-8", errors='ignore') as tf:
             tf.writelines(full_transcription)  # save transcription
 
-        metadata_filename = 'metadata for ' + vid_preamble + " transcription.txt"
-        with open(join(out_p_metadata, metadata_filename), 'w', encoding="utf-8", errors='ignore') as md:
-            md.writelines(metadata)  # save metadata
+        metadata_filename = 'metadata for ' + vid_preamble + " transcription.csv"
+        metadata.to_csv(join(out_p_metadata, metadata_filename), index=True)
+
+        move2completed(directory, filename=filename)
+
+    print("\n----------------------------")
+    print("transcription process completed - ", datetime.now(), "\n")
 
     # ----------------------------------- Merge Text Files  -------------------------------
     # makes things easier to review when you only have to open one file instead of N
 
     pr_stamp = datetime.now().strftime("date_%d_%m_%Y_time_%H")
-    digest_text_fn(out_p_tscript, iden="original_tscripts" + pr_stamp, w_folder=True)
-    digest_text_fn(out_p_metadata, iden="metadata_for_tscript_run" + pr_stamp)
+    digest_txt_directory(out_p_tscript, identifer="original_tscripts" + pr_stamp)
+    digest_txt_directory(out_p_metadata, identifer="metadata_for_tscript_run" + pr_stamp, make_folder=False)
 
     # ----------------------------------- Improve Base Transcriptions  -------------------------------
-    # iterate through list of transcribed files, correcting spelling and generating keywords
+    # Validate text files to spell-check (in case there was a change)
+    total_files = len(load_imm_dir_files(out_p_tscript, req_ext=".txt"))
+    approved_txt_files = load_imm_dir_files(out_p_tscript, req_ext=".txt", verbose=True, full_path=False)
+    print("from {} file(s) in dir, loading {} .txt files".format(total_files, len(approved_txt_files)))
 
-    # first, you need to go through the output directory of transcripts and make sure that all those files are gucci
-    transcripts_to_munch = natsorted(
-        [f for f in listdir(out_p_tscript) if isfile(join(out_p_tscript, f))])
-    t_files = len(transcripts_to_munch)
-    removed_count_t = 0
-    # remove non-.txt files
-    for tfile in transcripts_to_munch:
-        if tfile.endswith(".txt"):
-            continue
-        else:
-            transcripts_to_munch.remove(tfile)
-            removed_count_t += 1
+    # Spellcorrect Pipeline
+    transcript_run_qk = pd.DataFrame()  # empty df to hold all the keywords
 
-    print("from {} file(s) originally in the folder, {} non-txt files removed".format(t_files, removed_count_t))
+    max_item = len(approved_txt_files)
 
-    # Go through base transcription files and spell correct them and get keywords
-    seg = pysbd.Segmenter(language="en", clean=True)  # loads pySBD
-    keyphrase_df_transc = pd.DataFrame()
-    kp_fname = "YAKE_keywords_for_all_transcr.xlsx"
-    for textfile in tqdm(transcripts_to_munch, total=len(transcripts_to_munch), desc="Spell Correct & Keywords"):
-        tf_pretty_name = beautify_filename(textfile, start_reverse=False, num_words=10)
+    for origi_tscript in tqdm(approved_txt_files, total=len(approved_txt_files),
+                              desc="SC_pipeline - transcribed audio"):
+        current_loc = approved_txt_files.index(origi_tscript) + 1  # add 1 bc start at 0
+        PL_out = spellcorrect_pipeline(out_p_tscript, origi_tscript, verbose=False, ns_checker=checker)
+        # get locations of where corrected files were saved
+        directory_for_keywords = PL_out.get("spell_corrected_dir")
+        filename_for_keywords = PL_out.get("sc_filename")
+        # extract keywords from the saved file
+        qk_df = quick_keys(filepath=directory_for_keywords, filename=filename_for_keywords,
+                           num_keywords=25, max_ngrams=3, save_db=False, verbose=False)
 
-        # auto-correct spelling (wav2vec2 doesn't enforce spelling on its output)
-        corr_results_fl = symspell_file(filepath=out_p_tscript, filename=textfile, keep_numb_words=True,
-                                        want_folder=True, dist=2)
-        output_path_impr = corr_results_fl.get("output_path")
+        transcript_run_qk = pd.concat([transcript_run_qk, qk_df], axis=1)
 
-        # Write version of transcription with sentences / boundaries inferred with periods. All text in one line
-        seg_list = seg.segment(corr_results_fl.get("corrected_ssp_text"))
-        seg_text = '. '.join(seg_list)
-        seg_outname = "SegTEXT " + tf_pretty_name + ".txt"
-        with open(join(output_path_impr, seg_outname), 'w', encoding="utf-8", errors='ignore') as fs:
-            fs.write(seg_text)
+    # save overall transcription file
+    keyword_db_name = "YAKE - keywords for all transcripts in run.csv"
+    transcript_run_qk.to_csv(join(out_p_tscript, "YAKE - keywords for all transcripts in run.csv"),
+                             index=True)
 
-        # extract keywords from transcription (once spell-corrected)
-        key_phr_fl = quick_keys(filepath=output_path_impr, filename=corr_results_fl.get("corrected_ssp_fname"),
-                                num_keywords=50, max_ngrams=3, save_db=False)
+    print("Transcription files used to extract KW can be found in: \n ", directory_for_keywords)
+    print("A file with keyword results is in {} \ntitled {}".format(out_p_tscript, keyword_db_name))
 
-        # edit returned keyword dataframe from quick_keys() and append to total one
-        db_col_name = ''.join(list([val for val in tf_pretty_name if val.isalnum()]))
-        key_phr_fl.drop(key_phr_fl.columns[[1, 2]], axis=1, inplace=True)
-        key_phr_fl.columns = ["YAKE_keywords_from_" + db_col_name, "freq_of_kw_in_" + db_col_name]
-
-        if transcripts_to_munch.index(textfile) == 0:
-            # on first iteration set blank df equal to keyword df from first file
-            keyphrase_df_transc = key_phr_fl
-        else:
-            # update the dataframe adding columns on the right (colnames should be unique from manual naming above)
-            keyphrase_df_transc = pd.concat([keyphrase_df_transc, key_phr_fl], axis=1)
-
-        # save & overwrite each iteration
-        keyphrase_df_transc.to_excel(join(out_p_tscript, kp_fname))
-
-    # ----------------------------------- END -------------------------------
     print("\n\n----------------------------------- Script Complete -------------------------------")
+    print(datetime.now())
     print("Transcription files + more in folder: \n", out_p_tscript)
     print("Metadata for each transcription located @ \n", out_p_metadata)
-    # save runtime database one last time
     print("total runtime was {} minutes".format(round((time.time() - st) / 60), 2))

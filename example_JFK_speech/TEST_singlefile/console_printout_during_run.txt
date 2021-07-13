@@ -1,0 +1,76 @@
+C:\Users\peter\AppData\Local\Programs\Python\Python39\python.exe C:/Users/peter/GIT_repos/vid2cleantxt/vid2cleantxt/vid2cleantxt_single.py
+data folder is set to `C:\Users\peter\AppData\Local\Programs\Python\Python39\lib\site-packages
+\neuspell\../data` script
+
+ Enter full path to the video to be transcribed ---->C:\Users\peter\GIT_repos\vid2cleantxt\exa
+mple_JFK_speech\TEST_singlefile\President John F. Kennedy's Peace Speech.mp4
+
+Preparing to load model: facebook/wav2vec2-large-960h-lv60-self -  2021-07-13 01:09:57.762653
+Some weights of Wav2Vec2ForCTC were not initialized from the model checkpoint at facebook/wav2
+vec2-large-960h-lv60-self and are newly initialized: ['wav2vec2.masked_spec_embed']
+You should probably TRAIN this model on a down-stream task to be able to use it for prediction
+s and inference.
+Some weights of the model checkpoint at bert-base-cased were not used when initializing BertMo
+del: ['cls.predictions.transform.dense.bias', 'cls.predictions.decoder.weight', 'cls.predictio
+ns.transform.dense.weight', 'cls.seq_relationship.weight', 'cls.predictions.bias', 'cls.predic
+tions.transform.LayerNorm.bias', 'cls.predictions.transform.LayerNorm.weight', 'cls.seq_relati
+onship.bias']
+- This IS expected if you are initializing BertModel from the checkpoint of a model trained on
+ another task or with another architecture (e.g. initializing a BertForSequenceClassification
+model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertModel from the checkpoint of a model that y
+ou expect to be exactly identical (initializing a BertForSequenceClassification model from a B
+ertForSequenceClassification model).
+Converting Video to Audio: 100%|█████████████████████████████| 55/55 [03:29<00:00,  3.80s/it]
+Finished creating audio chunks at  _01.14.09
+WARNING - unable to start CUDA. If you wanted to use a GPU, exit and check hardware.
+
+Gen RAM Free: 8.8 GB  | Proc size: 3.1 GB  | 8 CPUs  loaded at 34.8 % |
+No GPU being used :(
+-----------------
+
+Transcribing President John F. Ke... :   0%|                          | 0/55 [00:00<?, ?it/s]
+Gen RAM Free: 8.8 GB  | Proc size: 3.1 GB  | 8 CPUs  |
+No GPU being used :(
+-----------------
+
+2021-07-13 01:14:13.854223: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Co
+uld not load dynamic library 'cudart64_110.dll'; dlerror: cudart64_110.dll not found
+2021-07-13 01:14:13.867744: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above
+cudart dlerror if you do not have a GPU set up on your machine.
+Transcribing President John F. Ke... :  51%|████████▋        | 28/55 [17:51<16:56, 37.65s/it]
+Gen RAM Free: 13.6 GB  | Proc size: 1.5 GB  | 8 CPUs  loaded at 67.2 % |
+No GPU being used :(
+-----------------
+
+Transcribing President John F. Ke... : 100%|█████████████████| 55/55 [34:19<00:00, 37.45s/it]
+successfully moved the file President John F. Kennedy's Peace Speech.mp4 to */completed.
+
+----------------------------
+transcription process completed -  2021-07-13 01:48:29.504284
+
+top 5 phrases are:
+
+['nations world peace',
+ 'war total war',
+ 'interests nuclear powers',
+ 'world security system',
+ 'peace corps abroad']
+Transcription files used to extract KW can be found in:
+  C:\Users\peter\GIT_repos\vid2cleantxt\example_JFK_speech\TEST_singlefile\v2clntxt_transcript
+ions\neuspell_sc
+
+
+----------------------------------- Script Complete -------------------------------
+2021-07-13 01:49:20.620811
+Transcription files + more in folder:
+ C:\Users\peter\GIT_repos\vid2cleantxt\example_JFK_speech\TEST_singlefile\v2clntxt_transcripti
+ons
+Metadata for each transcription located @
+ C:\Users\peter\GIT_repos\vid2cleantxt\example_JFK_speech\TEST_singlefile\v2clntxt_transc_meta
+data
+total runtime was 40 minutes
+
+Process finished with exit code 0
+
+
