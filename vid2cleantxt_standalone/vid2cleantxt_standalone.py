@@ -1,3 +1,7 @@
+# this script is the same as the others, but has all of the functions, etc. in one .py script in case there are issues
+# using the other versions. Primary use case for this would be debugging what is going on, or understanding
+# the overall pipeline.
+
 """
 Pipeline for Zero-shot transcription of a lecture video file to text using facebook's wav2vec2 model
 This script is the 'single-file' edition
