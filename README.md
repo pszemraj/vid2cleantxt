@@ -221,28 +221,29 @@ Comparing frequency of terms in one body of text vs. another
 
 ## What python package dependencies does this repo have?
 
-Upon cloning the repo, run the command `pip install -r requirements.txt` in a terminal opened in the project directory. As of July 13th, 2021, requirements are as follows:
+Upon cloning the repo, run the command `pip install -r requirements.txt` in a terminal opened in the project directory. As of July 31st, 2021, requirements are as follows:
 
-    librosa==0.8.1
+    GPUtil>=1.4.0
+    clean-text>=0.4.0
+    humanize>=3.10.0
+    librosa>=0.8.1
     moviepy==1.0.3
-    natsort==7.1.1
-    pandas==1.3.0
-    pysbd==0.3.4
-    symspellpy==6.7.0
-    texthero==1.1.0
-    torch~=1.9.0
-    transformers==4.8.2
-    wordninja==2.0.0
-    yake==0.4.8
+    natsort>=7.1.1
+    neuspell>=1.0.0
+    openpyxl >=3
+    pandas>=1.2.5
+    plotly>=5.1.0
+    psutil>=5.8.0
+    pysbd>=0.3.4
     pyspellchecker>=0.6.2
     spellchecker>=0.4
-    openpyxl >=3
+    symspellpy>=6.7.0
+    texthero>=1.1.0
+    torch~=1.9.0
     tqdm>=4.61.2
-    neuspell>=1.0.0
-    humanize>=3.10.0
-    psutil>=5.8.0
-    GPUtil>=1.4.0
-    plotly>=5.1.0
+    transformers>=4.8.2
+    wordninja>=2.0.0
+    yake>=0.4.8
 
 ## I tried to transcribe an audio file, and it gave me an error:
 
