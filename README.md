@@ -1,5 +1,7 @@
 # vid2cleantxt
 
+![vid2cleantext simple](https://user-images.githubusercontent.com/74869040/131500291-ed0a9d7f-8be7-4f4b-9acf-c360cfd46f1f.png)
+
 **vid2cleantxt**: a [transformers-based](https://huggingface.co/facebook/wav2vec2-large-960h-lv60-self) pipeline for turning heavily speech-based video files into clean, readable text from the audio.
 
 TL;DR check out [this Colab script](https://colab.research.google.com/drive/1WfJ1yQn-jtyZsoQXdzXx91FPbLo5t7Mg?usp=sharing) to see a transcription and keyword extraction of a speech by John F. Kennedy by simply running all cells.
@@ -62,6 +64,8 @@ Example output text of a video transcription of [JFK's peace speech](https://you
 See the examples folder for more detail / full transcript.
 
 ## Pipeline Intro
+
+![vid2cleantxt detailed](https://user-images.githubusercontent.com/74869040/131499569-c894c096-b6b8-4d17-b99c-a4cfce395ea8.png)
 
 Here's a high-level overview of what happens in the `vid2cleantxt_folder.py` script to create the output shown above:
 
