@@ -224,29 +224,36 @@ Comparing frequency of terms in one body of text vs. another
 
 ## What python package dependencies does this repo have?
 
-Upon cloning the repo, run the command `pip install -r requirements.txt` in a terminal opened in the project directory. As of July 31st, 2021, requirements are as follows:
+Upon cloning the repo, run the command `pip install -r requirements.txt` in a terminal opened in the project directory. Requirements (upd. Oct 12, 2021) are:
 
-    GPUtil>=1.4.0
-    clean-text>=0.4.0
-    humanize>=3.10.0
-    librosa>=0.8.1
-    moviepy==1.0.3
-    natsort>=7.1.1
-    neuspell>=1.0.0
-    openpyxl >=3
-    pandas>=1.2.5
-    plotly>=5.1.0
-    psutil>=5.8.0
-    pysbd>=0.3.4
-    pyspellchecker>=0.6.2
-    spellchecker>=0.4
-    symspellpy>=6.7.0
-    texthero>=1.1.0
-    torch~=1.9.0
-    tqdm>=4.61.2
-    transformers>=4.8.2
-    wordninja>=2.0.0
-    yake>=0.4.8
+```
+GPUtil>=1.4.0
+clean-text>=0.4.0
+humanize>=3.10.0
+librosa>=0.8.1
+moviepy==1.0.3
+natsort>=7.1.1
+neuspell>=1.0.0
+openpyxl >=3
+pandas>=1.2.5
+plotly>=5.1.0
+psutil>=5.8.0
+pysbd>=0.3.4
+pyspellchecker>=0.6.2
+spacy>=3.0.0,<4.0.0
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.0.0/en_core_web_sm-3.0.0.tar.gz#egg=en_core_web_sm
+spellchecker>=0.4
+symspellpy>=6.7.0
+texthero>=1.1.0
+torch~=1.9.0
+tqdm>=4.61.2
+transformers>=4.8.2
+wordninja>=2.0.0
+yake>=0.4.8
+```
+
+- _Note: the github link in the reqs above downloads the spaCy model `en_core_web_sm` as part of the setup/installation process so you don't have to manually type `python -m spacy download en_core_web_sm` into the terminal to be able to run the code. More on this is described on spaCy's website [here](https://spacy.io/usage/models#production)_
+
 
 ## I tried to transcribe an audio file, and it gave me an error:
 
