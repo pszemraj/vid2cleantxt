@@ -108,14 +108,13 @@ Essentially, clone the repo, and run `vid2cleantxt/vid2cleantxt_folder.py`. The 
 > **Note:** the first time the code runs on your machine, it will download the pretrained transformers model (~1
 > gb). After the first run, it will be cached locally, and you will not need to sit through that again.
 
-1.  fastest:
+1.  fastest (in bash command line):
 
 
-    `git clone https://github.com/pszemraj/vid2cleantxt.git`
-    
-    `pip install -r requirements.txt`
-    
-    `python -m vid2cleantxt/vid2cleantxt_folder.py`
+    1. `git clone https://github.com/pszemraj/vid2cleantxt.git` 
+    2. `cd vid2cleantxt/`
+    3. `pip install -r requirements.txt`
+    4. `python vid2cleantxt/vid2cleantxt_folder.py`
     
 
 2.  Clone with github desktop - run `vid2cleantxt/vid2cleantxt_folder.py` from your IDE
@@ -382,6 +381,7 @@ For a transcription of the **President John F. Kennedy's Peace Speech.mp4** vide
 
 A _rough_ timeline of what has been going on in the repo:
 
+-   Sept-Oct 2021: Fixing bugs, formatting code. 
 -   July 12, 2021 - sync work from Colab notebooks: add CUDA support for pytorch in the `.py` versions, added Neuspell as a spell checker. General organization and formatting improvements.
 -   July 8, 2021 - python scripts cleaned and updated.
 -   April - June: Work done mostly on Colab improving saving, grammar correction, etc.
