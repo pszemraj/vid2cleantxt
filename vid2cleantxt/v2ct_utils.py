@@ -20,12 +20,23 @@ from natsort import natsorted
 
 # basics
 
-def load_imm_dir_files(src_dir, req_ext=".txt", return_type="list", full_path=True, verbose=False):
+
+def load_imm_dir_files(
+    src_dir, req_ext=".txt", return_type="list", full_path=True, verbose=False
+):
     # returns the full path for every file with extension req_ext ONLY in the immediate directory specified
     if full_path:
-        appr_files = [join(src_dir, f) for f in listdir(src_dir) if isfile(join(src_dir, f)) and f.endswith(req_ext)]
+        appr_files = [
+            join(src_dir, f)
+            for f in listdir(src_dir)
+            if isfile(join(src_dir, f)) and f.endswith(req_ext)
+        ]
     else:
-        appr_files = [f for f in listdir(src_dir) if isfile(join(src_dir, f)) and f.endswith(req_ext)]
+        appr_files = [
+            f
+            for f in listdir(src_dir)
+            if isfile(join(src_dir, f)) and f.endswith(req_ext)
+        ]
     appr_files = natsorted(appr_files)  # sort
 
     if verbose:
@@ -39,7 +50,8 @@ def load_imm_dir_files(src_dir, req_ext=".txt", return_type="list", full_path=Tr
     if return_type.lower() == "list":
         return appr_files
     else:
-        if verbose: print("returning dictionary")
+        if verbose:
+            print("returning dictionary")
 
         appr_file_dict = {}
         for this_file in appr_files:
@@ -48,7 +60,9 @@ def load_imm_dir_files(src_dir, req_ext=".txt", return_type="list", full_path=Tr
         return appr_file_dict
 
 
-def load_all_dir_files(src_dir, req_ext=".txt", return_type="list", full_path=True, verbose=False):
+def load_all_dir_files(
+    src_dir, req_ext=".txt", return_type="list", full_path=True, verbose=False
+):
     # returns the full path for every file with extension req_ext in the directory (and its sub-directories)
     appr_files = []
     # r=root, d=directories, f = files
@@ -75,7 +89,8 @@ def load_all_dir_files(src_dir, req_ext=".txt", return_type="list", full_path=Tr
     if return_type.lower() == "list":
         return appr_files
     else:
-        if verbose: print("returning dictionary")
+        if verbose:
+            print("returning dictionary")
 
         appr_file_dict = {}
         for this_file in appr_files:
@@ -101,7 +116,7 @@ class NullIO(StringIO):
         pass
 
 
-def move2completed(from_dir, filename, new_folder='completed', verbose=False):
+def move2completed(from_dir, filename, new_folder="completed", verbose=False):
     # this is the better version
     old_filepath = join(from_dir, filename)
 
@@ -118,45 +133,49 @@ def move2completed(from_dir, filename, new_folder='completed', verbose=False):
         shutil.move(old_filepath, new_filepath)
         print("successfully moved the file {} to */completed.".format(filename))
     except:
-        print("ERROR! unable to move file to \n{}. Please investigate".format(new_filepath))
+        print(
+            "ERROR! unable to move file to \n{}. Please investigate".format(
+                new_filepath
+            )
+        )
 
 
 def cleantxt_wrap(ugly_text):
     # a wrapper for clean text with options different than default
 
     # https://pypi.org/project/clean-text/
-    cleaned_text = clean(ugly_text,
-                         fix_unicode=True,  # fix various unicode errors
-                         to_ascii=True,  # transliterate to closest ASCII representation
-                         lower=True,  # lowercase text
-                         no_line_breaks=True,  # fully strip line breaks as opposed to only normalizing them
-                         no_urls=True,  # replace all URLs with a special token
-                         no_emails=True,  # replace all email addresses with a special token
-                         no_phone_numbers=True,  # replace all phone numbers with a special token
-                         no_numbers=False,  # replace all numbers with a special token
-                         no_digits=False,  # replace all digits with a special token
-                         no_currency_symbols=True,  # replace all currency symbols with a special token
-                         no_punct=True,  # remove punctuations
-                         replace_with_punct="",  # instead of removing punctuations you may replace them
-                         replace_with_url="<URL>",
-                         replace_with_email="<EMAIL>",
-                         replace_with_phone_number="<PHONE>",
-                         replace_with_number="<NUM>",
-                         replace_with_digit="0",
-                         lang="en"  # set to 'de' for German special handling
-                         )
+    cleaned_text = clean(
+        ugly_text,
+        fix_unicode=True,  # fix various unicode errors
+        to_ascii=True,  # transliterate to closest ASCII representation
+        lower=True,  # lowercase text
+        no_line_breaks=True,  # fully strip line breaks as opposed to only normalizing them
+        no_urls=True,  # replace all URLs with a special token
+        no_emails=True,  # replace all email addresses with a special token
+        no_phone_numbers=True,  # replace all phone numbers with a special token
+        no_numbers=False,  # replace all numbers with a special token
+        no_digits=False,  # replace all digits with a special token
+        no_currency_symbols=True,  # replace all currency symbols with a special token
+        no_punct=True,  # remove punctuations
+        replace_with_punct="",  # instead of removing punctuations you may replace them
+        replace_with_url="<URL>",
+        replace_with_email="<EMAIL>",
+        replace_with_phone_number="<PHONE>",
+        replace_with_number="<NUM>",
+        replace_with_digit="0",
+        lang="en",  # set to 'de' for German special handling
+    )
 
     return cleaned_text
 
 
-def beautify_filename(filename, num_words=20, start_reverse=False,
-                      word_separator="_"):
+def beautify_filename(filename, num_words=20, start_reverse=False, word_separator="_"):
     # takes a filename stored as text, removes extension, separates into X words ...
     # and returns a nice filename with the words separateed by
     # useful for when you are reading files, doing things to them, and making new files
 
     filename = str(filename)
-    index_file_Ext = filename.rfind('.')
+    index_file_Ext = filename.rfind(".")
     current_name = str(filename)[:index_file_Ext]  # get rid of extension
     clean_name = cleantxt_wrap(current_name)  # wrapper with custom defs
     file_words = wordninja.split(clean_name)
@@ -172,10 +191,13 @@ def beautify_filename(filename, num_words=20, start_reverse=False,
     pretty_name = word_separator.join(t_file_words)  # see function argument
 
     # NOTE IT DOES NOT RETURN THE EXTENSION
-    return pretty_name[: (len(pretty_name) - 1)]  # there is a always space at the end, so -1
+    return pretty_name[
+        : (len(pretty_name) - 1)
+    ]  # there is a always space at the end, so -1
 
 
 # Hardware
+
 
 def check_runhardware_torch(verbose=False):
     # https://www.run.ai/guides/gpu-deep-learning/pytorch-gpu/
@@ -194,7 +216,9 @@ def check_runhardware_torch(verbose=False):
         # Get Id of default device
         torch.cuda.current_device()
         if verbose:
-            print("Name of GPU: ", torch.cuda.get_device_name(device=0))  # '0' is the id of your GPU
+            print(
+                "Name of GPU: ", torch.cuda.get_device_name(device=0)
+            )  # '0' is the id of your GPU
             print("------------------------------\n")
         return True
 
@@ -209,10 +233,15 @@ def torch_validate_cuda(verbose=False):
     try:
         torch.cuda.init()
         if not torch.cuda.is_available():
-            print("WARNING - CUDA is not being used in processing - expect longer runtime")
-            if verbose: print("GPU util detects {} GPUs on your system".format(num_gpus))
+            print(
+                "WARNING - CUDA is not being used in processing - expect longer runtime"
+            )
+            if verbose:
+                print("GPU util detects {} GPUs on your system".format(num_gpus))
     except:
-        print("WARNING - unable to start CUDA. If you wanted to use a GPU, exit and check hardware.")
+        print(
+            "WARNING - unable to start CUDA. If you wanted to use a GPU, exit and check hardware."
+        )
 
 
 def check_runhardware(verbose=False):
@@ -225,7 +254,8 @@ def check_runhardware(verbose=False):
     try:
         gpu = GPUs[0]
     except:
-        if verbose: print("GPU not available - ", datetime.now())
+        if verbose:
+            print("GPU not available - ", datetime.now())
         gpu = None
     process = psutil.Process(os.getpid())
 
@@ -235,30 +265,40 @@ def check_runhardware(verbose=False):
     else:
         # the first time process.cpu_percent() is called it returns 0 which can be confusing
         cpu_load_string = "|"
-    print("\nGen RAM Free: " + humanize.naturalsize(psutil.virtual_memory().available),
-          " | Proc size: " + humanize.naturalsize(process.memory_info().rss),
-          " | {} CPUs ".format(psutil.cpu_count()), cpu_load_string)
+    print(
+        "\nGen RAM Free: " + humanize.naturalsize(psutil.virtual_memory().available),
+        " | Proc size: " + humanize.naturalsize(process.memory_info().rss),
+        " | {} CPUs ".format(psutil.cpu_count()),
+        cpu_load_string,
+    )
     if verbose:
         cpu_trend = [x / psutil.cpu_count() * 100 for x in psutil.getloadavg()]
-        print("CPU load vs. time: 5 mins - {}% | 10 mins - {}% | 15 mins - {}% |".format(cpu_trend[0], cpu_trend[1],
-                                                                                         cpu_trend[2]))
+        print(
+            "CPU load vs. time: 5 mins - {}% | 10 mins - {}% | 15 mins - {}% |".format(
+                cpu_trend[0], cpu_trend[1], cpu_trend[2]
+            )
+        )
 
     if len(GPUs) > 0 and GPUs is not None:
-        print("GPU RAM Free: {0:.0f}MB | Used: {1:.0f}MB | Util {2:3.0f}% | Total {3:.0f}MB\n".format(gpu.memoryFree,
-                                                                                                      gpu.memoryUsed,
-                                                                                                      gpu.memoryUtil * 100,
-                                                                                                      gpu.memoryTotal))
+        print(
+            "GPU RAM Free: {0:.0f}MB | Used: {1:.0f}MB | Util {2:3.0f}% | Total {3:.0f}MB\n".format(
+                gpu.memoryFree, gpu.memoryUsed, gpu.memoryUtil * 100, gpu.memoryTotal
+            )
+        )
     else:
         print("No GPU being used :(", "\n-----------------\n")
 
 
-def digest_txt_directory(file_dir, identifer="", verbose=False,
-                         make_folder=True):
+def digest_txt_directory(file_dir, identifer="", verbose=False, make_folder=True):
     run_date = datetime.now()
     if len(identifer) < 1:
         identifer = str(shorten_title(beautify_filename(dirname(file_dir))))
-    files_to_merge = natsorted([f for f in listdir(file_dir) if isfile(join(file_dir, f)) & f.endswith('.txt')])
-    outfilename = '[All-Merged-Text]' + identifer + run_date.strftime("_%d%m%Y_%H") + ".txt"
+    files_to_merge = natsorted(
+        [f for f in listdir(file_dir) if isfile(join(file_dir, f)) & f.endswith(".txt")]
+    )
+    outfilename = (
+        "[All-Merged-Text]" + identifer + run_date.strftime("_%d%m%Y_%H") + ".txt"
+    )
 
     og_wd = os.getcwd()
     os.chdir(file_dir)
@@ -268,15 +308,16 @@ def digest_txt_directory(file_dir, identifer="", verbose=False,
         output_loc = join(file_dir, folder_name)
         create_folder(output_loc)
         outfilename = join(folder_name, outfilename)
-        if verbose: print("created new folder. new full path is: \n", output_loc)
+        if verbose:
+            print("created new folder. new full path is: \n", output_loc)
 
     count = 0
-    with open(outfilename, 'w') as outfile:
+    with open(outfilename, "w") as outfile:
 
         for names in files_to_merge:
             with open(names) as infile:
                 count += 1
-                outfile.write("Start of: " + names + '\n')
+                outfile.write("Start of: " + names + "\n")
                 outfile.writelines(infile.readlines())
 
             outfile.write("\n")
