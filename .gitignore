@@ -1,7 +1,4 @@
 
-# Created by https://www.toptal.com/developers/gitignore/api/python,jupyternotebooks
-# Edit at https://www.toptal.com/developers/gitignore?templates=python,jupyternotebooks
-
 ### JupyterNotebooks ###
 # gitignore template for Jupyter Notebooks
 # website: http://jupyter.org/
@@ -114,13 +111,6 @@ target/
 # PEP 582; used by e.g. github.com/David-OConnor/pyflow
 __pypackages__/
 
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
 # Environments
 # .env
 .env/
@@ -131,10 +121,6 @@ ENV/
 env.bak/
 venv.bak/
 pythonenv*
-
-# Spyder project settings
-.spyderproject
-.spyproject
 
 # Rope project settings
 .ropeproject
@@ -147,8 +133,6 @@ pythonenv*
 .dmypy.json
 dmypy.json
 
-# Pyre type checker
-.pyre/
 
 # pytype static type analyzer
 .pytype/
@@ -165,3 +149,7 @@ Thumbs.db
 # IDE-related files
 .github
 .idea
+
+# local temp dirs
+scratch
+notebooks
