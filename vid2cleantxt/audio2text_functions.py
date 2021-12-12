@@ -267,7 +267,7 @@ def quick_keys(
     ]
     if save_db:  # saves individual file if user asks
         yake_fname = (
-            trim_fname(filename=filename, start_reverse=False)
+            trim_fname(filename=filename, start_rev=False)
             + "_top_phrases_YAKE.xlsx"
         )
         kw_report.to_excel(join(filepath, yake_fname), index=False)
@@ -511,7 +511,7 @@ def spellcorrect_pipeline(filepath, filename, ns_checker=None, verbose=False):
     create_folder(join(filepath, loc_SC))
 
     sc_outname = (
-        "NSC_" + trim_fname(filename, num_words=15, start_reverse=False) + ".txt"
+        "NSC_" + trim_fname(filename, num_words=15, start_rev=False) + ".txt"
     )
 
     with open(
@@ -545,7 +545,7 @@ def spellcorrect_pipeline(filepath, filename, ns_checker=None, verbose=False):
     create_folder(join(filepath, loc_SBD))
 
     SBD_outname = (
-        "FIN_" + trim_fname(filename, num_words=15, start_reverse=False) + ".txt"
+        "FIN_" + trim_fname(filename, num_words=15, start_rev=False) + ".txt"
     )
 
     with open(

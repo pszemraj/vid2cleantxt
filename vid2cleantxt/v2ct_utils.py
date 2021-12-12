@@ -15,6 +15,7 @@ import GPUtil as GPU
 import humanize
 import psutil
 import torch
+from torch._C import device
 import wordninja
 from cleantext import clean
 from natsort import natsorted
@@ -167,57 +168,61 @@ def cleantxt_wrap(ugly_text):
     return cleaned_text
 
 
-def trim_fname(filename, num_words=20, start_reverse=False, word_separator="_"):
-    # takes a filename stored as text, removes extension, separates into X words ...
-    # and returns a nice filename with the words separateed by
-    # useful for when you are reading files, doing things to them, and making new files
+def trim_fname(filename, num_words=20, start_rev=False, word_separator="_"):
+    """
+    trim_fname - trim a filename to a specified number of words
+
+    Parameters
+    ----------
+    filename : str
+    num_words : int, optional, default=20
+    start_reverse : bool, optional
+        [description], by default False
+    word_separator : str, optional
+        [description], by default "_"
+
+    Returns
+    -------
+    [type]
+        [description]
+    """
+
 
     filename = str(filename)
     index_file_Ext = filename.rfind(".")
     current_name = str(filename)[:index_file_Ext]  # get rid of extension
-    clean_name = cleantxt_wrap(current_name)  # wrapper with custom defs
-    file_words = wordninja.split(clean_name)
-    # splits concatenated text into a list of words based on common word freq
-    if len(file_words) <= num_words:
-        num_words = len(file_words)
+    clean_name = cleantxt_wrap(current_name)  # helper fn to clean up text
+    file_words = wordninja.split(clean_name) # split into words
+    num_words = len(file_words) if len(file_words) <= num_words else num_words
 
-    if start_reverse:
-        t_file_words = file_words[-num_words:]
-    else:
-        t_file_words = file_words[:num_words]
-
-    pretty_name = word_separator.join(t_file_words)  # see function argument
-
-    # NOTE IT DOES NOT RETURN THE EXTENSION
-    return pretty_name[
-        : (len(pretty_name) - 1)
-    ]  # there is a always space at the end, so -1
+    t_file_words = file_words[:num_words] if not start_rev else file_words[-num_words:]
+    new_name = word_separator.join(t_file_words)
+    return new_name.strip()
 
 
 # Hardware
 
 
 def check_runhardware_torch(verbose=False):
+    """
+    check_runhardware_torch - check if the machine has the correct hardware for torch
+
+   Returns: True if the machine has the correct hardware for torch
+    """
     # https://www.run.ai/guides/gpu-deep-learning/pytorch-gpu/
 
     GPUs = GPU.getGPUs()
 
     if len(GPUs) > 0:
-        if verbose:
-            print("\n ------------------------------")
-            print("Checking CUDA status for PyTorch")
 
         torch.cuda.init()
 
         print("Cuda availability (PyTorch): ", torch.cuda.is_available())
-
-        # Get Id of default device
-        torch.cuda.current_device()
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         if verbose:
             print(
-                "Name of GPU: ", torch.cuda.get_device_name(device=0)
-            )  # '0' is the id of your GPU
-            print("------------------------------\n")
+                "Active GPU device: ", torch.cuda.get_device_name(device=device)
+            )
         return True
 
     else:
@@ -238,8 +243,7 @@ def torch_validate_cuda(verbose=False):
             print(
                 "WARNING - CUDA is not being used in processing - expect longer runtime"
             )
-            if verbose:
-                print("GPU util detects {} GPUs on your system".format(num_gpus))
+            if verbose: print(f"CUDA is not available, but {num_gpus} GPU(s) detected")
     except Exception as e:
         print(
             "WARNING - CUDA is not being used in processing - expect longer runtime"
@@ -248,33 +252,35 @@ def torch_validate_cuda(verbose=False):
 
 
 def check_runhardware(verbose=False):
-    # ML package agnostic hardware check
+    """
+    check_runhardware - checks if CUDA is available and if it is, it checks if the GPU is available.
+
+    """
     GPUs = GPU.getGPUs()
 
-    if verbose:
-        print("\n ------------------------------")
-        print("Checking hardware with psutil")
     try:
         gpu = GPUs[0]
-    except:
-        if verbose:
-            print("GPU not available - ", datetime.now())
-        gpu = None
+    except Exception as e:
+        print("No GPU detected")
+        print(e)
+        GPUs = gpu = None
     process = psutil.Process(os.getpid())
 
     CPU_load = psutil.cpu_percent()
     if CPU_load > 0:
-        cpu_load_string = "loaded at {} % |".format(CPU_load)
+        cpu_load_string = f"loaded at {CPU_load} % |"
     else:
         # the first time process.cpu_percent() is called it returns 0 which can be confusing
         cpu_load_string = "|"
     print(
-        "\nGen RAM Free: " + humanize.naturalsize(psutil.virtual_memory().available),
-        " | Proc size: " + humanize.naturalsize(process.memory_info().rss),
-        " | {} CPUs ".format(psutil.cpu_count()),
+        "\nGen RAM Free: {ram} | Proc size: {proc} | {n_cpu} CPUs ".format(
+            ram=humanize.naturalsize(psutil.virtual_memory().available),
+            proc=humanize.naturalsize(process.memory_info().rss),
+            n_cpu=psutil.cpu_count()),
         cpu_load_string,
     )
     if verbose:
+        # prints out load on each core vs time
         cpu_trend = [x / psutil.cpu_count() * 100 for x in psutil.getloadavg()]
         print(
             "CPU load vs. time: 5 mins - {}% | 10 mins - {}% | 15 mins - {}% |".format(
@@ -283,13 +289,14 @@ def check_runhardware(verbose=False):
         )
 
     if len(GPUs) > 0 and GPUs is not None:
+        # display GPU name, memory, etc
         print(
             "GPU RAM Free: {0:.0f}MB | Used: {1:.0f}MB | Util {2:3.0f}% | Total {3:.0f}MB\n".format(
                 gpu.memoryFree, gpu.memoryUsed, gpu.memoryUtil * 100, gpu.memoryTotal
             )
         )
     else:
-        print("No GPU being used :(", "\n-----------------\n")
+        print("No GPU being used :(\n")
 
 
 def digest_txt_directory(file_dir, identifer="", verbose=False, make_folder=True):

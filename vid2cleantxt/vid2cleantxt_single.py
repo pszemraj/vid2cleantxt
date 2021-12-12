@@ -208,7 +208,7 @@ if __name__ == "__main__":
     metadata = t_results.get("metadata")
 
     # label and store this transcription
-    vid_preamble = trim_fname(filename, num_words=15, start_reverse=False)
+    vid_preamble = trim_fname(filename, num_words=15, start_rev=False)
     # transcription
     transcribed_filename = (
         vid_preamble + "_tscript_" + datetime.now().strftime("_%H.%M.%S") + ".txt"

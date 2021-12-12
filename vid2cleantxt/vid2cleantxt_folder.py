@@ -278,7 +278,7 @@ if __name__ == "__main__":
         metadata = t_results.get("metadata")
 
         # label and store transcription
-        v_lbl = trim_fname(filename, num_words=15, start_reverse=False)
+        v_lbl = trim_fname(filename, num_words=15, start_rev=False)
         t_file = f"vid2text_{v_lbl}_tranc_{get_timestamp()}.txt"
 
         with open(
