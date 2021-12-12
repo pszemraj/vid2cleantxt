@@ -212,9 +212,9 @@ def quick_keys(
     txt_lang="en",
     ddup_thresh=0.3,
 ):
-    
+
     """
-    quick_keys - Extracts keywords from a text file.  
+    quick_keys - Extracts keywords from a text file.
     uses YAKE to quickly determine keywordse. Saves Keywords and YAKE score (0 means very important) in a dataframe
 
     Returns

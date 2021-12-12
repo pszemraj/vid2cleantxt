@@ -622,7 +622,7 @@ def symspell_freetext(
 
 
 def init_neuspell(verbose=False):
-    # TODO check if options for diferent languages with Neuspell
+    # TODO: check if options for diferent languages with Neuspell
     if verbose:
         checker = neuspell.SclstmbertChecker()
         checker.from_pretrained()
@@ -836,7 +836,7 @@ def convert_vid_for_transcription(
     vid2beconv, len_chunks, input_directory, output_directory, verbose=False
 ):
     # takes a video file, turns it into .wav audio chunks of length <input> and stores them in a specific location
-    # TODO add function that is run instead of user already has .WAV files or other audio to be converted
+    # TODO: add function that is run instead of user already has .WAV files or other audio to be converted
 
     my_clip = mp.VideoFileClip(join(input_directory, vid2beconv))
     number_of_chunks = math.ceil(my_clip.duration / len_chunks)  # to get in minutes
