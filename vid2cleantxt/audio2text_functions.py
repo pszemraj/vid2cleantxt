@@ -425,7 +425,8 @@ def symspell_freetext(
             " ".join(line_suggests) + "\n"
         )  # add newline to end of each line appended
 
-    corrected_text = "".join(corrected_list)  # join list of lines into a single string
+    corrected_text = corr(" ".join(corrected_list)) # join list of lines into a single string and correct spaces
+
 
     if verbose:
         print(
@@ -490,11 +491,11 @@ def neuspell_freetext(textlines, ns_checker=None, verbose=False):
 
         corrected_list.append(corrected_text_f + "\n")
 
-    corrected_text = " ".join(corrected_list)  # join corrected text
+    corrected_text = corr(" ".join(corrected_list)) # join list of lines into a single string and correct spaces
 
     if verbose:
         print("Finished correcting w/ neuspell at time: ", datetime.now(), "\n")
-
+    assert isinstance(corrected_text, str), "corrected text is not a string"
     return corrected_text
 
 
@@ -556,62 +557,59 @@ def spellcorrect_pipeline(filepath, filename, ns_checker=None, verbose=False):
     with open(join(filepath, filename), "r", encoding="utf-8", errors="ignore") as file:
         textlines = file.readlines()  # return a list
 
+    # step 1: spellcheck using neuspell
     sc_textlines = neuspell_freetext(textlines, ns_checker=ns_checker, verbose=verbose)
 
     loc_SC = "neuspell_results"
     create_folder(join(filepath, loc_SC))
 
-    sc_outname = f"{trim_fname(filename)}_neuspell_results.txt"
+    sc_outname = f"{trim_fname(filename)}_NSC_results.txt"
 
     with open(
         join(filepath, loc_SC, sc_outname), "w", encoding="utf-8", errors="replace"
     ) as fo:
         fo.writelines(sc_textlines)  # save spell-corrected text
-
-    quick_sc_fixes = {
+    # step 2: sentence boundary detection & misc punctuation removal
+    misc_fixes = {
         " ' ": "'",
         " - ": "-",
         " . ": ".",
-    }
-    if isinstance(sc_textlines, list):
-        SBD_sc_textlines = []
-        for line in sc_textlines:
-            line = " ".join(line) if isinstance(line, list) else line
-            for key, value in quick_sc_fixes.items():
-                line = line.replace(key, value)
-            SBD_sc_textlines.append(line)
+    } # dictionary of miscellaneous fixes, mostly for punctuation
 
-            sentenced = SBD_freetext(line, verbose=verbose)
-            for key, value in quick_sc_fixes.items():
-                sentenced = sentenced.replace(key, value)
-            SBD_sc_textlines.append(sentenced)
-    else:
-        SBD_sc_textlines = SBD_freetext(sc_textlines, verbose=verbose)
-        for key, value in quick_sc_fixes.items():
-            SBD_sc_textlines = SBD_sc_textlines.replace(key, value)
+    sc_textlines = [sc_textlines] if not isinstance(sc_textlines, list) else sc_textlines
+    fin_textlines = []
+    for line in sc_textlines:
+        line = " ".join(line) if isinstance(line, list) else line # check for list of lists/strings
 
-    # SBD_text = " ".join(SBD_sc_textlines)
+        for key, value in misc_fixes.items():
+            line = line.replace(key, value)
+        sentenced = SBD_freetext(line, verbose=verbose)
+        assert isinstance(sentenced, str), f"sentenced, with type {type(sentenced)}  and valye {sentenced} is not a string.. fix it"
+        for key, value in misc_fixes.items():
+            sentenced = sentenced.replace(key, value) # fix punctuation
+        fin_textlines.append(sentenced)
 
-    loc_SBD = "NSC + SBD"
-    create_folder(join(filepath, loc_SBD))
-
-    SBD_outname = "FIN_" + trim_fname(filename, num_words=15, start_rev=False) + ".txt"
-
-    with open(
-        join(filepath, loc_SBD, SBD_outname), "w", encoding="utf-8", errors="replace"
-    ) as fo:
-        fo.writelines(
-            SBD_sc_textlines
-        )  # save spell-corrected AND sentence-boundary disambig text
+    sentenced = [
+        line.strip() for line in sentenced if line.strip()
+    ]  # remove empty lines
+    # save the corrected text, my boys
+    loc_FIN = "results_SC_pipeline"
+    create_folder(join(filepath, loc_FIN))
+    final_outname = f"{trim_fname(filename)}_NSC_SBD.txt"
+    SBD_out_path = join(filepath, loc_FIN, final_outname)
+    with open(SBD_out_path, "w", encoding="utf-8", errors="replace"
+    ) as fo2:
+        fo2.writelines(fin_textlines)
 
     pipelineout = {
         "origi_tscript_text": " ".join(textlines),
         "spellcorrected_text": " ".join(sc_textlines),
-        "final_text": " ".join(SBD_sc_textlines),
+        "final_text": " ".join(fin_textlines),
         "spell_corrected_dir": join(filepath, loc_SC),
         "sc_filename": sc_outname,
-        "SBD_dir": join(filepath, loc_SBD),
-        "SBD_filename": SBD_outname,
+        "SBD_dir": join(filepath, loc_FIN),
+        "SBD_filename": final_outname,
     }
 
     return pipelineout
+
