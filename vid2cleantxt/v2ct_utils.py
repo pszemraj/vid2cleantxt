@@ -33,7 +33,27 @@ def print_spacer(n=1):
 def find_ext_local(
     src_dir, req_ext=".txt", return_type="list", full_path=True, verbose=False
 ):
-    # returns the full path for every file with extension req_ext ONLY in the immediate directory specified
+    """
+    find_ext_local - return all files that match extension in a list, either either the full filepath or just the filename relative to the ONLY in the immediate directory below src_dir
+
+    Parameters
+    ----------
+    src_dir : [type]
+        [description]
+    req_ext : str, optional
+        [description], by default ".txt"
+    return_type : str, optional
+        [description], by default "list"
+    full_path : bool, optional
+        [description], by default True
+    verbose : bool, optional
+        [description], by default False
+
+    Returns
+    -------
+    [type]
+        [description]
+    """
     if full_path:
         appr_files = [
             join(src_dir, f)
@@ -300,40 +320,36 @@ def check_runhardware(verbose=False):
         print("No GPU being used :(\n")
 
 
-def digest_txt_directory(file_dir, identifer="", verbose=False, make_folder=True):
-    run_date = datetime.now()
-    if len(identifer) < 1:
-        identifer = str(shorten_title(trim_fname(dirname(file_dir))))
-    files_to_merge = natsorted(
-        [f for f in listdir(file_dir) if isfile(join(file_dir, f)) & f.endswith(".txt")]
-    )
-    outfilename = (
-        "[All-Merged-Text]" + identifer + run_date.strftime("_%d%m%Y_%H") + ".txt"
-    )
+def digest_txt_directory(file_dir, iden:str=None, verbose=False, make_folder=True):
+    """
+    digest_txt_directory - digest a directory of text files into a single file
 
-    og_wd = os.getcwd()
-    os.chdir(file_dir)
+    Parameters
+    ----------
+    file_dir : str, the directory to digest
+    iden : str, optional, default=None, the identifier to use for the digest
+    verbose : bool, optional
+    make_folder : bool, optional
 
+    Returns
+    -------
+    str, the path to the digest file
+    """
+    
+    run_date = get_timestamp()
+    iden = str(shorten_title(trim_fname(dirname(file_dir)))) if iden is None else iden
     if make_folder:
-        folder_name = "merged_txt_files"
-        output_loc = join(file_dir, folder_name)
-        create_folder(output_loc)
-        outfilename = join(folder_name, outfilename)
-        if verbose:
-            print("created new folder. new full path is: \n", output_loc)
+        os.makedirs(f"{file_dir}/{iden}", exist_ok=True)
+    merged_loc = f"{file_dir}/{iden}/mrg_{iden}_{run_date}.txt" if make_folder else f"{file_dir}/mrg_{iden}_{run_date}.txt"
+    files = [f for f in listdir(file_dir) if isfile(join(file_dir, f) and f.endswith(".txt"))]
 
-    count = 0
-    with open(outfilename, "w") as outfile:
+    outfile = open(merged_loc, "w", encoding="utf-8", errors="ignore")
+    for file in files:
+        with open(f"{file_dir}/{file}", "r", encoding="utf-8", errors="ignore") as f:
+            text = f.readlines()
+        outfile.write(f"\n\nStart of {file}\n")
+        outfile.writelines(text)
 
-        for names in files_to_merge:
-            with open(names) as infile:
-                count += 1
-                outfile.write("Start of: " + names + "\n")
-                outfile.writelines(infile.readlines())
-
-            outfile.write("\n")
-
-    print("Merged {} text files together in {}".format(count, dirname(file_dir)))
     if verbose:
-        print("the merged file is located at: \n", os.getcwd())
-    os.chdir(og_wd)
+        print(f"{len(files)} files processed")
+    return merged_loc # return the location of the merged file

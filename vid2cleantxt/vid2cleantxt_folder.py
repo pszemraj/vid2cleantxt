@@ -302,11 +302,11 @@ if __name__ == "__main__":
     # makes things easier to review when you only have to open one file instead of N
 
     digest_txt_directory(
-        out_p_tscript, identifer=f"original_tscripts_{get_timestamp()}"
+        out_p_tscript, iden=f"original_tscripts_{get_timestamp()}"
     )
     digest_txt_directory(
         out_p_metadata,
-        identifer=f"trans_metadata_{get_timestamp()}",
+        iden=f"trans_metadata_{get_timestamp()}",
         make_folder=False,
     )
 
