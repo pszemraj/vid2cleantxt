@@ -19,6 +19,13 @@ from natsort import natsorted
 
 
 # basics
+def get_timestamp():
+    return datetime.now().strftime("%b-%d-%Y_t-%H")
+
+
+def print_spacer(n=1):
+    """print_spacer - print a spacer line"""
+    print("\n   --------    " * n)
 
 
 def load_imm_dir_files(
