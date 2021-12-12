@@ -15,7 +15,6 @@ import GPUtil as GPU
 import humanize
 import psutil
 import torch
-from torch._C import device
 import wordninja
 from cleantext import clean
 from natsort import natsorted
@@ -116,27 +115,32 @@ class NullIO(StringIO):
 
 
 def move2completed(from_dir, filename, new_folder="completed", verbose=False):
-    # this is the better version
+    """
+    move2completed - move a file to a new folder
+
+    Parameters
+    ----------
+    from_dir : str, the directory to move the file from
+    filename : str, the filename to move
+    new_folder : str, optional,     the directory to move the file to, by default "completed"
+    verbose : bool, optional
+    """
     old_filepath = join(from_dir, filename)
 
     new_filedirectory = join(from_dir, new_folder)
 
     if not os.path.isdir(new_filedirectory):
         os.mkdir(new_filedirectory)
-        if verbose:
-            print("created new directory for files at: \n", new_filedirectory)
+        if verbose: print(f"created new directory {new_filedirectory}")
 
     new_filepath = join(new_filedirectory, filename)
 
     try:
         shutil.move(old_filepath, new_filepath)
-        print("successfully moved the file {} to */completed.".format(filename))
-    except:
-        print(
-            "ERROR! unable to move file to \n{}. Please investigate".format(
-                new_filepath
-            )
-        )
+        print(f"moved {old_filepath} to {new_filepath}")
+    except Exception as e:
+        print(f"ERROR: could not move {old_filepath} to {new_filepath}")
+        print(e)
 
 
 def cleantxt_wrap(ugly_text):
