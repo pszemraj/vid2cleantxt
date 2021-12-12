@@ -41,7 +41,7 @@ from audio2text_functions import (
     init_symspell,
     quick_keys,
     spellcorrect_pipeline,
-    validate_output_directories,
+    setup_out_dirs,
 )
 from v2ct_utils import (
     check_runhardware,
@@ -194,7 +194,7 @@ if __name__ == "__main__":
     filename = basename(filepath)
     directory = dirname(filepath)
     # iterate through list of video files, transcribing one at a time --------------------------------------------------
-    storage_locs = validate_output_directories(
+    storage_locs = setup_out_dirs(
         directory
     )  # create and get output folders
     out_p_tscript = storage_locs.get("t_out")

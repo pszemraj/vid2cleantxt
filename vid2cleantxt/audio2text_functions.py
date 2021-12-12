@@ -22,6 +22,7 @@ from symspellpy import SymSpell
 from tqdm.auto import tqdm
 
 from v2ct_utils import beautify_filename, create_folder, NullIO
+from vid2cleantxt.v2ct_utils import get_timestamp
 
 
 # ------------------------------------------------------------------------
@@ -51,11 +52,15 @@ def corr(s):
     return re.sub(r"\.(?! )", ". ", re.sub(r" +", " ", s))
 
 
-def validate_output_directories(
+def setup_out_dirs(
     directory,
     t_folder_name="v2clntxt_transcriptions",
     m_folder_name="v2clntxt_transc_metadata",
 ):
+    """
+    creates output directories for audio2text project
+    """
+    
     t_path_full = join(directory, t_folder_name)
     create_folder(t_path_full)
 
@@ -86,16 +91,19 @@ def convert_vidfile(
     vidfilename,
     start_time=0,
     end_time=6969,
-    input_directory="",
-    output_directory="",
+    in_path="",
+    out_path="",
     new_filename="",
 ):
+    """
+    converts a video file to a .wav file
+    """
     # takes a video file and creates an audiofile with various parameters
     # NOTE video filename is required
-    if len(input_directory) < 1:
+    if len(in_path) < 1:
         my_clip = mp.VideoFileClip(vidfilename)
     else:
-        my_clip = mp.VideoFileClip(join(input_directory, vidfilename))
+        my_clip = mp.VideoFileClip(join(in_path, vidfilename))
 
     if end_time == 6969:
         modified_clip = my_clip.subclip(t_start=int(start_time * 60))
@@ -114,14 +122,14 @@ def convert_vidfile(
     if len(new_filename) > 0:
         converted_filename = new_filename
 
-    if len(output_directory) < 1:
+    if len(out_path) < 1:
         modified_clip.audio.write_audiofile(converted_filename)
     else:
-        modified_clip.audio.write_audiofile(join(output_directory, converted_filename))
+        modified_clip.audio.write_audiofile(join(out_path, converted_filename))
 
     audio_conv_results = {
         "output_filename": converted_filename,
-        "output_folder": output_directory,
+        "output_folder": out_path,
         "clip_length": modified_clip.duration,
     }
 
@@ -131,6 +139,9 @@ def convert_vidfile(
 def convert_vid_for_transcription(
     vid2beconv, len_chunks, input_directory, output_directory, verbose=False
 ):
+    """
+    converts video file to audio file, and then splits audio file into chunks
+    """
     # Oriented specifically for the "wav2vec2" model speech to text transcription
     # takes a video file, turns it into .wav audio chunks of length <input> and stores them in a specific location
     # TODO add function that is run instead of user already has .WAV files or other audio to be converted
@@ -165,9 +176,8 @@ def convert_vid_for_transcription(
             join(output_directory, this_filename), logger=None
         )
 
-    print("Finished creating audio chunks at ", datetime.now().strftime("_%H.%M.%S"))
-    if verbose:
-        print("Files are located in ", output_directory)
+    print(f'Finished converting video to audio chunks - {get_timestamp()}')
+    if verbose: print(f"files saved to {output_directory}")
 
     return outfilename_storage
 
@@ -187,7 +197,9 @@ def quick_keys(
     txt_lang="en",
     ddup_thresh=0.3,
 ):
-    # uses YAKE to quickly determine keywords in a text file. Saves Keywords and YAKE score (0 means very important) in
+    """
+        Extracts keywords from a text file.  uses YAKE to quickly determine keywords in a text file. Saves Keywords and YAKE score (0 means very important) in
+    """
     with open(join(filepath, filename), "r", encoding="utf-8", errors="ignore") as file:
         text = file.read()
 
@@ -271,7 +283,7 @@ def symspell_file(
     # original spell-checking method pre SBD (before neuspell. Here for reference / if Neuspell is hard to use on the
     # user's machine/ https://github.com/mammothb/symspellpy
 
-    script_start_time = time.time()
+    s_st = time.time()
     if verbose:
         print("\nPySymSpell - Starting to correct the file: ", filename)
     # ------------------------------------
@@ -327,7 +339,7 @@ def symspell_file(
         file_out.writelines(corrected_doc)
 
     if verbose:
-        script_rt_m = (time.time() - script_start_time) / 60
+        script_rt_m = (time.time() - s_st) / 60
         print("RT for this file was {0:5f} minutes".format(script_rt_m))
         print("output folder for this transcription is: \n", filepath)
 
@@ -364,6 +376,12 @@ def init_symspell(max_dist=3, pref_len=7):
 def symspell_freetext(
     textlines, dist=3, keep_numb_words=True, verbose=False, speller=None
 ):
+    """
+    This function takes a list of lines of text and returns a corrected version of the text.
+    It uses the SymSpell algorithm to correct the text.
+    """
+    
+    
     # https://github.com/mammothb/symspellpy
     if speller is None:
         if verbose:
@@ -430,6 +448,12 @@ def init_neuspell(verbose=False):
 
 
 def neuspell_freetext(textlines, ns_checker=None, verbose=False):
+    
+    """
+    This function takes a list of lines of text and returns a corrected version of the text.
+    it uses Neuspell to correct the text.
+    """
+    
     if ns_checker is None:
         print(
             "Warning - neuspell object not passed in, creating one. - ", datetime.now()
@@ -466,8 +490,9 @@ def neuspell_freetext(textlines, ns_checker=None, verbose=False):
 
 
 def SBD_freetext(text, verbose=False, lang="en"):
-    # use pysbd to segment
-
+    """
+            SBD_freetext() - sentence boundary detection
+    """
     if isinstance(text, list):
         print(
             "Warning, input ~text~ has type {}. Will convert to str".format(type(text))

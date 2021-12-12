@@ -1,4 +1,6 @@
-# contains a bunch of general utilities like loading all files of a certain extension in a directory, etc.
+"""
+    v2ct_utils.py - a bunch of general utilities like loading all files of a certain extension in a directory, etc. FUnctions for the actual processing of the files are in audio2text_functions.py 
+"""
 
 import os
 import pprint as pp
@@ -148,7 +150,7 @@ def move2completed(from_dir, filename, new_folder="completed", verbose=False):
 
 
 def cleantxt_wrap(ugly_text):
-    # a wrapper for clean text with options different than default
+    # a wrapper for clean text with options different than default. This is used for the audio2text_functions.py
 
     # https://pypi.org/project/clean-text/
     cleaned_text = clean(
