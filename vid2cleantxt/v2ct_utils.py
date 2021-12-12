@@ -72,8 +72,7 @@ def find_ext_local(
         print(f"A list of files in the {src_dir} directory is: \n")
         pp.pprint(appr_files) if len(appr_files) < 10 else pp.pprint(appr_files[:10])
         if len(appr_files) > 10:
-            print(
-               f"NOTE: there are {len(appr_files)} total matching files\n")
+            print(f"NOTE: there are {len(appr_files)} total matching files\n")
 
     if return_type.lower() == "list":
         return appr_files
@@ -88,9 +87,7 @@ def find_ext_local(
         return appr_file_dict
 
 
-def find_ext_recursive(
-    src_dir, req_ext=".txt", full_path=True, verbose=False
-):
+def find_ext_recursive(src_dir, req_ext=".txt", full_path=True, verbose=False):
     """
     load_all_dir_files - return all files that match extension in a list, either either the full filepath or just the filename relative to the src_dir recursively
 
@@ -102,7 +99,9 @@ def find_ext_recursive(
         for prefile in f:
             if prefile.endswith(req_ext):
                 this_path = os.path.join(r, prefile)
-                appr_files.append(this_path) if full_path else appr_files.append(prefile)
+                appr_files.append(this_path) if full_path else appr_files.append(
+                    prefile
+                )
 
     appr_files = natsorted(appr_files)  # sort
 
@@ -110,11 +109,9 @@ def find_ext_recursive(
         print(f"A list of files in the {src_dir} directory is: \n")
         pp.pprint(appr_files) if len(appr_files) < 10 else pp.pprint(appr_files[:10])
         if len(appr_files) > 10:
-            print(
-               f"NOTE: there are {len(appr_files)} total matching files\n")
+            print(f"NOTE: there are {len(appr_files)} total matching files\n")
 
     return appr_files
-
 
 
 def shorten_title(title_text, max_no=20):
@@ -151,7 +148,8 @@ def move2completed(from_dir, filename, new_folder="completed", verbose=False):
 
     if not os.path.isdir(new_filedirectory):
         os.mkdir(new_filedirectory)
-        if verbose: print(f"created new directory {new_filedirectory}")
+        if verbose:
+            print(f"created new directory {new_filedirectory}")
 
     new_filepath = join(new_filedirectory, filename)
 
@@ -208,12 +206,11 @@ def trim_fname(filename, num_words=20, start_rev=False, word_separator="_"):
     str, the trimmed filename
     """
 
-
     filename = str(filename)
     index_file_Ext = filename.rfind(".")
     current_name = str(filename)[:index_file_Ext]  # get rid of extension
     clean_name = cleantxt_wrap(current_name)  # helper fn to clean up text
-    file_words = wordninja.split(clean_name) # split into words
+    file_words = wordninja.split(clean_name)  # split into words
     num_words = len(file_words) if len(file_words) <= num_words else num_words
 
     t_file_words = file_words[:num_words] if not start_rev else file_words[-num_words:]
@@ -226,9 +223,9 @@ def trim_fname(filename, num_words=20, start_rev=False, word_separator="_"):
 
 def check_runhardware_torch(verbose=False):
     """
-    check_runhardware_torch - check if the machine has the correct hardware for torch
+     check_runhardware_torch - check if the machine has the correct hardware for torch
 
-   Returns: True if the machine has the correct hardware for torch
+    Returns: True if the machine has the correct hardware for torch
     """
     # https://www.run.ai/guides/gpu-deep-learning/pytorch-gpu/
 
@@ -241,9 +238,7 @@ def check_runhardware_torch(verbose=False):
         print("Cuda availability (PyTorch): ", torch.cuda.is_available())
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         if verbose:
-            print(
-                "Active GPU device: ", torch.cuda.get_device_name(device=device)
-            )
+            print("Active GPU device: ", torch.cuda.get_device_name(device=device))
         return True
 
     else:
@@ -264,11 +259,10 @@ def torch_validate_cuda(verbose=False):
             print(
                 "WARNING - CUDA is not being used in processing - expect longer runtime"
             )
-            if verbose: print(f"CUDA is not available, but {num_gpus} GPU(s) detected")
+            if verbose:
+                print(f"CUDA is not available, but {num_gpus} GPU(s) detected")
     except Exception as e:
-        print(
-            "WARNING - CUDA is not being used in processing - expect longer runtime"
-        )
+        print("WARNING - CUDA is not being used in processing - expect longer runtime")
         print(e)
 
 
@@ -297,7 +291,8 @@ def check_runhardware(verbose=False):
         "\nGen RAM Free: {ram} | Proc size: {proc} | {n_cpu} CPUs ".format(
             ram=humanize.naturalsize(psutil.virtual_memory().available),
             proc=humanize.naturalsize(process.memory_info().rss),
-            n_cpu=psutil.cpu_count()),
+            n_cpu=psutil.cpu_count(),
+        ),
         cpu_load_string,
     )
     if verbose:
@@ -320,7 +315,7 @@ def check_runhardware(verbose=False):
         print("No GPU being used :(\n")
 
 
-def digest_txt_directory(file_dir, iden:str=None, verbose=False, make_folder=True):
+def digest_txt_directory(file_dir, iden: str = None, verbose=False, make_folder=True):
     """
     digest_txt_directory - digest a directory of text files into a single file
 
@@ -340,8 +335,14 @@ def digest_txt_directory(file_dir, iden:str=None, verbose=False, make_folder=Tru
     iden = str(shorten_title(trim_fname(dirname(file_dir)))) if iden is None else iden
     if make_folder:
         os.makedirs(f"{file_dir}/{iden}", exist_ok=True)
-    merged_loc = f"{file_dir}/{iden}/mrg_{iden}_{run_date}.txt" if make_folder else f"{file_dir}/mrg_{iden}_{run_date}.txt"
-    files = [f for f in listdir(file_dir) if isfile(join(file_dir, f) and f.endswith(".txt"))]
+    merged_loc = (
+        f"{file_dir}/{iden}/mrg_{iden}_{run_date}.txt"
+        if make_folder
+        else f"{file_dir}/mrg_{iden}_{run_date}.txt"
+    )
+    files = [
+        f for f in listdir(file_dir) if isfile(join(file_dir, f) and f.endswith(".txt"))
+    ]
 
     outfile = open(merged_loc, "w", encoding="utf-8", errors="ignore")
     for file in files:
@@ -352,4 +353,4 @@ def digest_txt_directory(file_dir, iden:str=None, verbose=False, make_folder=Tru
 
     if verbose:
         print(f"{len(files)} files processed")
-    return merged_loc # return the location of the merged file
+    return merged_loc  # return the location of the merged file

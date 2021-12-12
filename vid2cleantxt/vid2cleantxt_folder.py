@@ -189,7 +189,6 @@ def get_parser():
     parser.add_argument(
         "--move-input-vids",
         required=False,
-
         default=False,
         action="store_true",
         help="if specified, will move the files to the completed folder",
@@ -197,7 +196,6 @@ def get_parser():
     parser.add_argument(
         "--verbose",
         required=False,
-
         default=False,
         action="store_true",
         help="print out more information",
@@ -206,7 +204,6 @@ def get_parser():
     parser.add_argument(
         "--model-name",
         required=False,
-
         default=None,
         help="huggingface model name as a string, ex facebook/wav2vec2-large-960h-lv60-self",
     )
@@ -214,7 +211,6 @@ def get_parser():
     parser.add_argument(
         "--chunk-length",
         required=False,
-
         default=20,
         type=int,
         help="Duration of audio chunks (in seconds) that the transformer model will be fed",
@@ -252,9 +248,7 @@ if __name__ == "__main__":
     vid_extensions = [".mp4", ".mov", ".avi"]  # may add more later
     approved_files = []
     for ext in vid_extensions:
-        approved_files.extend(
-            find_ext_local(directory, req_ext=ext, full_path=False)
-        )
+        approved_files.extend(find_ext_local(directory, req_ext=ext, full_path=False))
 
     print(f"\nFound {len(approved_files)} video files in {directory}")
 
@@ -301,9 +295,7 @@ if __name__ == "__main__":
     # ----------------------------------- Merge Text Files  -------------------------------
     # makes things easier to review when you only have to open one file instead of N
 
-    digest_txt_directory(
-        out_p_tscript, iden=f"original_tscripts_{get_timestamp()}"
-    )
+    digest_txt_directory(out_p_tscript, iden=f"original_tscripts_{get_timestamp()}")
     digest_txt_directory(
         out_p_metadata,
         iden=f"trans_metadata_{get_timestamp()}",
@@ -357,4 +349,6 @@ if __name__ == "__main__":
     print(
         "The relevant files for this run are located in here: \n {out_p_tscript} \n and {out_p_metadata}"
     )
-    print("total runtime was {} minutes".format(round((time.perf_counter() - st) / 60), 2))
+    print(
+        "total runtime was {} minutes".format(round((time.perf_counter() - st) / 60), 2)
+    )

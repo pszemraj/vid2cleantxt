@@ -48,7 +48,7 @@ def num_numeric_chars(free_text):
     return num_numeric_words
 
 
-def corr(s:str):
+def corr(s: str):
     """
     corr - adds space after period if there isn't one. removes extra spaces
 
@@ -81,6 +81,7 @@ def setup_out_dirs(
     output_locs = {"t_out": t_path_full, "m_out": m_path_full}
     return output_locs
 
+
 def check_if_audio(filename):
     """
     check_if_audio - checks if a file is an audio file
@@ -93,7 +94,12 @@ def check_if_audio(filename):
     -------
     bool
     """
-    return filename.endswith(".wav") or filename.endswith(".mp3") or filename.endswith(".m4a")
+    return (
+        filename.endswith(".wav")
+        or filename.endswith(".mp3")
+        or filename.endswith(".m4a")
+    )
+
 
 def create_metadata_df():
     """
@@ -141,8 +147,11 @@ def create_audiofile(
     -------
     audio_conv_results : dict, the results of the conversion
     """
-    my_clip = mp.VideoFileClip(_vidname) if in_path is None else mp.VideoFileClip(join(in_path, _vidname))
-
+    my_clip = (
+        mp.VideoFileClip(_vidname)
+        if in_path is None
+        else mp.VideoFileClip(join(in_path, _vidname))
+    )
 
     if end_time == 6969:
         # if end_time is not specified, use the duration of the video
@@ -153,8 +162,11 @@ def create_audiofile(
             t_start=int(start_time * 60), t_end=int(end_time * 60)
         )
 
-
-    converted_filename = new_filename if new_filename != "" else f"vid_{trim_fname(_vidname)}_conv_{get_timestamp()}.wav"
+    converted_filename = (
+        new_filename
+        if new_filename != ""
+        else f"vid_{trim_fname(_vidname)}_conv_{get_timestamp()}.wav"
+    )
     if out_path == "":
         # if no output path is specified, use the current working directory
         modified_clip.audio.write_audiofile(converted_filename)
@@ -170,9 +182,7 @@ def create_audiofile(
     return audio_conv_results
 
 
-def prep_transc_src(
-    _vid2beconv, in_dir, out_dir, len_chunks=20, verbose=False
-):
+def prep_transc_src(_vid2beconv, in_dir, out_dir, len_chunks=20, verbose=False):
     """
     prep_transc_src - prepares the source video files for transcription by creating audio files and metadata
 
@@ -189,21 +199,22 @@ def prep_transc_src(
     [type]
         [description]
     """
-    
+
     load_path = join(in_dir, _vid2beconv) if in_dir is not None else _vid2beconv
     if check_if_audio(load_path):
         my_clip = mp.AudioFileClip(load_path)
     else:
         my_clip = mp.VideoFileClip(load_path)
-    
-    create_folder(out_dir) # create the output directory if it doesn't exist
+
+    create_folder(out_dir)  # create the output directory if it doesn't exist
     audio_chunks = []
 
     if verbose:
         print(f"{len(audio_chunks)} audio chunks created")
 
     n_chunks = math.ceil(my_clip.duration / len_chunks)  # to get in minutes, round up
-    if verbose: print(f"{n_chunks} audio chunks to be created of {len_chunks} seconds")
+    if verbose:
+        print(f"{n_chunks} audio chunks to be created of {len_chunks} seconds")
     preamble = trim_fname(_vid2beconv)
     chunk_fnames = []
 
@@ -214,16 +225,14 @@ def prep_transc_src(
     ):
         this_st = i * len_chunks
         if i == n_chunks - 1:
-            this_clip = my_clip.subclip(t_start=this_st) # if this is the last chunk, use the remainder of the video
-        else:
             this_clip = my_clip.subclip(
-                t_start=this_st, t_end=(this_st + len_chunks)
-            )
+                t_start=this_st
+            )  # if this is the last chunk, use the remainder of the video
+        else:
+            this_clip = my_clip.subclip(t_start=this_st, t_end=(this_st + len_chunks))
         this_filename = f"{preamble}_clipaudio_{i}.wav"
         chunk_fnames.append(this_filename)
-        this_clip.audio.write_audiofile(
-            join(out_dir, this_filename), logger=None
-        )
+        this_clip.audio.write_audiofile(join(out_dir, this_filename), logger=None)
 
     print(f"Finished creating audio chunks for wav2vec2 - {get_timestamp()}")
     if verbose:
@@ -240,13 +249,14 @@ def prep_transc_src(
 def quick_keys(
     filename,
     filepath,
-    max_ngrams:int=3,
-    num_kw:int=20,
-    disp_max:int=10,
+    max_ngrams: int = 3,
+    num_kw: int = 20,
+    disp_max: int = 10,
     save_db=False,
     verbose=False,
     txt_lang="en",
-    ddup_thresh=0.3,):
+    ddup_thresh=0.3,
+):
     """
     quick_keys - extracts keywords from a text file using ngrams and a TF-IDF model (Yake)
 
@@ -312,17 +322,21 @@ def quick_keys(
         "phrase_freq",
     ]
     if save_db:  # saves individual file if user asks
-        yake_fname = (f"{trim_fname(filename=filename, start_rev=False)}_YAKE_keywords.xlsx")
+        yake_fname = (
+            f"{trim_fname(filename=filename, start_rev=False)}_YAKE_keywords.xlsx"
+        )
         kw_report.to_excel(join(filepath, yake_fname), index=False)
 
-    num_phrases_disp = min(num_kw, disp_max) # number of phrases to display
+    num_phrases_disp = min(num_kw, disp_max)  # number of phrases to display
 
     if verbose:
         print(f"Top Key Phrases from YAKE, with max n-gram length {max_ngrams}")
         pp.pprint(kw_report.head(n=num_phrases_disp))
     else:
         kw_list = kw_report["key_phrase"].to_list()
-        print(f"Top {num_phrases_disp} Key Phrases from YAKE, with max n-gram length {max_ngrams}")
+        print(
+            f"Top {num_phrases_disp} Key Phrases from YAKE, with max n-gram length {max_ngrams}"
+        )
         pp.pprint(kw_list[:num_phrases_disp])
 
     return kw_report
@@ -331,6 +345,7 @@ def quick_keys(
 # ------------------------------------------------------------------------
 # Spelling
 # TODO: move to spelling module
+
 
 def init_symspell(max_dist=3, pref_len=7):
     """
@@ -374,13 +389,15 @@ def symspell_freetext(
     keep_numb_words : bool, optional, by default True, whether to keep numbers in the text
     verbose : bool, optional, by default False, whether to print out the results
     speller : SymSpell object, optional, by default None, if None, will initialize a new SymSpell object
-    
+
     Returns
     -------
     corrected_text : list, list of strings, or string, the corrected text
     """
 
-    speller = speller or init_symspell(dist=dist) # initialize a new SymSpell object if none is provided
+    speller = speller or init_symspell(
+        dist=dist
+    )  # initialize a new SymSpell object if none is provided
     corrected_list = []
     textlines = list(textlines) if isinstance(textlines, str) else textlines
     if verbose:
@@ -401,13 +418,20 @@ def symspell_freetext(
             ignore_non_words=keep_numb_words,
             ignore_term_with_digits=keep_numb_words,
         )
-        line_suggests = [s.term for s in suggestions] # list of suggested words for the line
+        line_suggests = [
+            s.term for s in suggestions
+        ]  # list of suggested words for the line
 
-        corrected_list.append(" ".join(line_suggests) + "\n") # add newline to end of each line appended
+        corrected_list.append(
+            " ".join(line_suggests) + "\n"
+        )  # add newline to end of each line appended
 
     corrected_text = "".join(corrected_list)  # join list of lines into a single string
 
-    if verbose: print(f"fineshed spelling correction on {len(textlines)} lines at {datetime.now()}")
+    if verbose:
+        print(
+            f"fineshed spelling correction on {len(textlines)} lines at {datetime.now()}"
+        )
 
     return corrected_text
 
@@ -447,7 +471,9 @@ def neuspell_freetext(textlines, ns_checker=None, verbose=False):
     -------
     corrected_text : list, list of strings, or string, the corrected text
     """
-    ns_checker = ns_checker or init_neuspell(verbose=verbose) # initialize a new Neuspell object if none is provided
+    ns_checker = ns_checker or init_neuspell(
+        verbose=verbose
+    )  # initialize a new Neuspell object if none is provided
     textlines = list(textlines) if isinstance(textlines, str) else textlines
     corrected_list = []
 
@@ -531,9 +557,7 @@ def spellcorrect_pipeline(filepath, filename, ns_checker=None, verbose=False):
     loc_SC = "neuspell_sc"
     create_folder(join(filepath, loc_SC))
 
-    sc_outname = (
-        "NSC_" + trim_fname(filename, num_words=15, start_rev=False) + ".txt"
-    )
+    sc_outname = "NSC_" + trim_fname(filename, num_words=15, start_rev=False) + ".txt"
 
     with open(
         join(filepath, loc_SC, sc_outname), "w", encoding="utf-8", errors="replace"
@@ -565,9 +589,7 @@ def spellcorrect_pipeline(filepath, filename, ns_checker=None, verbose=False):
     loc_SBD = "NSC + SBD"
     create_folder(join(filepath, loc_SBD))
 
-    SBD_outname = (
-        "FIN_" + trim_fname(filename, num_words=15, start_rev=False) + ".txt"
-    )
+    SBD_outname = "FIN_" + trim_fname(filename, num_words=15, start_rev=False) + ".txt"
 
     with open(
         join(filepath, loc_SBD, SBD_outname), "w", encoding="utf-8", errors="replace"

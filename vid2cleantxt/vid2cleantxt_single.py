@@ -268,4 +268,6 @@ if __name__ == "__main__":
     print(datetime.now())
     print("Transcription files + more in folder: \n", out_p_tscript)
     print("Metadata for each transcription located @ \n", out_p_metadata)
-    print("total runtime was {} minutes".format(round((time.perf_counter() - st) / 60), 2))
+    print(
+        "total runtime was {} minutes".format(round((time.perf_counter() - st) / 60), 2)
+    )
