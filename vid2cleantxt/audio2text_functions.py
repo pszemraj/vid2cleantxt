@@ -1,8 +1,6 @@
 """
-
-a list of common functions used repeatedly in audio 2 text project, so I don't have to copy and paste them all each time,
-and update each individually
-
+    audio2text_functions.py - functions for vid2cleantxt project, these functions are used to convert audio files to text.
+    general helper functions are in v2ct_utils.py
 """
 import math
 import pprint as pp
@@ -194,27 +192,34 @@ def convert_vid_for_transcription(
 def quick_keys(
     filename,
     filepath,
-    max_ngrams=3,
-    num_keywords=20,
+    max_ngrams:int=3,
+    num_keywords:int=20,
+    max_no_disp:int=10,
     save_db=False,
     verbose=False,
     txt_lang="en",
     ddup_thresh=0.3,
 ):
+    
     """
-    Extracts keywords from a text file.  uses YAKE to quickly determine keywords in a text file. Saves Keywords and YAKE score (0 means very important) in
-    """
-    with open(join(filepath, filename), "r", encoding="utf-8", errors="ignore") as file:
-        text = file.read()
+    quick_keys - Extracts keywords from a text file.  
+    uses YAKE to quickly determine keywordse. Saves Keywords and YAKE score (0 means very important) in a dataframe
 
-    custom_kw_extractor = yake.KeywordExtractor(
+    Returns
+    -------
+    df_keywords : dataframe
+    """
+    with open(join(filepath, filename), "r", encoding="utf-8", errors="ignore") as fi:
+        text = fi.read()
+
+    kw_extractor = yake.KeywordExtractor(
         lan=txt_lang,
         n=max_ngrams,
         dedupLim=ddup_thresh,
         top=num_keywords,
         features=None,
     )
-    yake_keywords = custom_kw_extractor.extract_keywords(text)
+    yake_keywords = kw_extractor.extract_keywords(text)
     phrase_db = pd.DataFrame(yake_keywords)
     if len(phrase_db) == 0:
         print("warning - no phrases were able to be extracted... ")
@@ -239,15 +244,14 @@ def quick_keys(
         entry_freq = text.count(str(search_term))
         yake_kw_freq.append(entry_freq)
 
-    word_len_series = pd.Series(yake_kw_len, name="No. Words in Phrase")
-    word_freq_series = pd.Series(yake_kw_freq, name="Phrase Freq. in Text")
+    word_len_series = pd.Series(yake_kw_len, name="word_count")
+    word_freq_series = pd.Series(yake_kw_freq, name="phrase_freq")
     phrase_db2 = pd.concat([phrase_db, word_len_series, word_freq_series], axis=1)
-    # add column names and save file as excel because CSVs suck
     phrase_db2.columns = [
         "key_phrase",
-        "YAKE Score (Lower = More Important)",
-        "num_words",
-        "freq_in_text",
+        "YAKE_score",
+        "word_count",
+        "phrase_freq",
     ]
     if save_db:  # saves individual file if user asks
         yake_fname = (
@@ -256,23 +260,16 @@ def quick_keys(
         )
         phrase_db2.to_excel(join(filepath, yake_fname), index=False)
 
-    # print out top 10 keywords, or if desired num keywords less than 10, all of them
-    max_no_disp = 10
-    if num_keywords > max_no_disp:
-        num_phrases_disp = max_no_disp
-    else:
-        num_phrases_disp = num_keywords
+    # print out top 10 keywords, or if desired num keywords less than max_no_disp, all of them
+    num_phrases_disp = min(num_keywords, max_no_disp)
 
     if verbose:
-        print("Top Key Phrases from YAKE, with max n-gram length: ", max_ngrams, "\n")
+        print(f"Top Key Phrases from YAKE, with max n-gram length {max_ngrams}")
         pp.pprint(phrase_db2.head(n=num_phrases_disp))
     else:
         list_o_words = phrase_db2["key_phrase"].to_list()
-        print("top 5 phrases are: \n")
-        if len(list_o_words) < 5:
-            pp.pprint(list_o_words)
-        else:
-            pp.pprint(list_o_words[:5])
+        print(f"Top {num_phrases_disp} Key Phrases from YAKE, with max n-gram length {max_ngrams}")
+        pp.pprint(list_o_words[:num_phrases_disp])
 
     return phrase_db2
 
