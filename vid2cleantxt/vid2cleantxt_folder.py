@@ -4,13 +4,14 @@
 vid2clntext by Peter Szemraj
 
 Pipeline for Zero-shot transcription of a lecture video file to text using facebook's wav2vec2 model
-This script is the 'folder' edition
 
 Tips for runtime:
 
 start with "facebook/wav2vec2-base-960h" for both tokenizer and model
 if model fails to work or errors out, try reducing the chunk length
 """
+
+# TODO: add code to add this file's path to the root path
 import math
 import shutil
 import sys
@@ -44,7 +45,6 @@ from v2ct_utils import (
     load_imm_dir_files,
     move2completed,
     NullIO,
-    shorten_title,
     torch_validate_cuda,
     get_timestamp,
 )
@@ -57,27 +57,46 @@ from v2ct_utils import (
 
 def transcribe_video_wav2vec(
     ts_model,
-    directory,
-    vid_clip_name,
+    src_dir,
+    clip_name,
     chunk_dur: int,
     verbose=False,
     temp_dir: str = "audio_chunks",
 ):
-    # this is the same process as used in the single video transcription, now as a function. Note that spell
-    # correction and keyword extraction are now done separately in the script  user needs to pass in: the model,
-    # the folder the video is in, and the name of the video
+    """
+    transcribe_video_wav2vec - transcribes a video clip using the wav2vec2 model
 
-    # Split Video into Audio Chunks-----------------------------------------------
+    Parameters
+    ----------
+    ts_model : [type]
+        [description]
+    directory : [type]
+        [description]
+    vid_clip_name : [type]
+        [description]
+    chunk_dur : int
+        [description]
+    verbose : bool, optional
+        [description], by default False
+    temp_dir : str, optional
+        [description], by default "audio_chunks"
+
+    Returns
+    -------
+    [type]
+        [description]
+    """
+
     if verbose:
-        print(f"Starting to transcribe {vid_clip_name} @ {get_timestamp()}")
+        print(f"Starting to transcribe {clip_name} @ {get_timestamp()}")
     # create audio chunk folder
-    ac_storedir = join(directory, temp_dir)
+    ac_storedir = join(src_dir, temp_dir)
     create_folder(ac_storedir)
     chunk_directory = convert_vid_for_transcription(
-        vid2beconv=vid_clip_name,
-        input_directory=directory,
+        vid2beconv=clip_name,
+        in_dir=src_dir,
         len_chunks=chunk_dur,
-        output_directory=ac_storedir,
+        out_dir=ac_storedir,
     )
     torch_validate_cuda()
     check_runhardware()
@@ -116,14 +135,14 @@ def transcribe_video_wav2vec(
         torch.cuda.empty_cache()
 
     if verbose:
-        print(f"Finished transcribing {vid_clip_name} @ {get_timestamp()}")
+        print(f"Finished transcribing {clip_name} @ {get_timestamp()}")
 
     md_df = create_metadata_df()  # makes a blank df with column names
     approx_input_len = (len(chunk_directory) * chunk_dur) / 60
     transc_dt = get_timestamp()
     full_text = corr(" ".join(full_transc))
     md_df.loc[len(md_df), :] = [
-        vid_clip_name,
+        clip_name,
         len(chunk_directory),
         chunk_dur,
         approx_input_len,
@@ -153,7 +172,7 @@ def get_parser():
     """
 
     parser = argparse.ArgumentParser(
-        description="submit a message and have a 774M parameter GPT model respond"
+        description="Transcribe a directory of videos using wav2vec2"
     )
     parser.add_argument(
         "--input-dir",
@@ -169,12 +188,16 @@ def get_parser():
     )
     parser.add_argument(
         "--move-input-vids",
+        required=False,
+
         default=False,
         action="store_true",
         help="if specified, will move the files to the completed folder",
     )
     parser.add_argument(
         "--verbose",
+        required=False,
+
         default=False,
         action="store_true",
         help="print out more information",
@@ -182,12 +205,16 @@ def get_parser():
 
     parser.add_argument(
         "--model-name",
+        required=False,
+
         default=None,
         help="huggingface model name as a string, ex facebook/wav2vec2-large-960h-lv60-self",
     )
 
     parser.add_argument(
         "--chunk-length",
+        required=False,
+
         default=20,
         type=int,
         help="Duration of audio chunks (in seconds) that the transformer model will be fed",
@@ -243,8 +270,8 @@ if __name__ == "__main__":
         # transcribe video and get results
         t_results = transcribe_video_wav2vec(
             ts_model=model,
-            directory=directory,
-            vid_clip_name=filename,
+            src_dir=directory,
+            clip_name=filename,
             chunk_dur=chunk_length,
         )
         t_finished = t_results.get("audio_transcription")
@@ -310,7 +337,7 @@ if __name__ == "__main__":
         qk_df = quick_keys(
             filepath=kw_dir,
             filename=kw_name,
-            num_keywords=25,
+            num_kw=25,
             max_ngrams=3,
             save_db=False,
             verbose=is_verbose,

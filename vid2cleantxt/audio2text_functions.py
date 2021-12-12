@@ -87,7 +87,7 @@ def create_metadata_df():
 
 
 def convert_vidfile(
-    vidfilename,
+    _vidname,
     start_time=0,
     end_time=6969,
     in_path="",
@@ -101,9 +101,9 @@ def convert_vidfile(
     # takes a video file and creates an audiofile with various parameters
     # NOTE video filename is required
     if len(in_path) < 1:
-        my_clip = mp.VideoFileClip(vidfilename)
+        my_clip = mp.VideoFileClip(_vidname)
     else:
-        my_clip = mp.VideoFileClip(join(in_path, vidfilename))
+        my_clip = mp.VideoFileClip(join(in_path, _vidname))
 
     if end_time == 6969:
         modified_clip = my_clip.subclip(t_start=int(start_time * 60))
@@ -113,7 +113,7 @@ def convert_vidfile(
         )
 
     converted_filename = (
-        vidfilename[: (len(vidfilename) - 4)]
+        _vidname[: (len(_vidname) - 4)]
         + "-converted_"
         + datetime.now().strftime("day_%d_time_%H-%M-%S_")
         + ".wav"
@@ -137,7 +137,7 @@ def convert_vidfile(
 
 
 def convert_vid_for_transcription(
-    vid2beconv, len_chunks, input_directory, output_directory, verbose=False
+    vid2beconv, len_chunks, in_dir, out_dir, verbose=False
 ):
     """
     convert_vid_for_transcription - converts video file to audio file, and then splits audio file into chunks
@@ -163,7 +163,7 @@ def convert_vid_for_transcription(
         [description]
     """
     # TODO: add function that is run instead of user already has .WAV files or other audio to be converted
-    my_clip = mp.VideoFileClip(join(input_directory, vid2beconv))
+    my_clip = mp.VideoFileClip(join(in_dir, vid2beconv))
     number_of_chunks = math.ceil(my_clip.duration / len_chunks)  # to get in minutes
     if verbose:
         print("converting into " + str(number_of_chunks) + " audio chunks")
@@ -186,12 +186,12 @@ def convert_vid_for_transcription(
         this_filename = preamble + "_run_" + str(i) + ".wav"
         outfilename_storage.append(this_filename)
         this_clip.audio.write_audiofile(
-            join(output_directory, this_filename), logger=None
+            join(out_dir, this_filename), logger=None
         )
 
     print(f"Finished converting video to audio chunks - {get_timestamp()}")
     if verbose:
-        print(f"files saved to {output_directory}")
+        print(f"files saved to {out_dir}")
 
     return outfilename_storage
 
@@ -205,8 +205,8 @@ def quick_keys(
     filename,
     filepath,
     max_ngrams:int=3,
-    num_keywords:int=20,
-    max_no_disp:int=10,
+    num_kw:int=20,
+    disp_max:int=10,
     save_db=False,
     verbose=False,
     txt_lang="en",
@@ -228,17 +228,17 @@ def quick_keys(
         lan=txt_lang,
         n=max_ngrams,
         dedupLim=ddup_thresh,
-        top=num_keywords,
+        top=num_kw,
         features=None,
     )
-    yake_keywords = kw_extractor.extract_keywords(text)
-    phrase_db = pd.DataFrame(yake_keywords)
+    kw_result = kw_extractor.extract_keywords(text)
+    phrase_db = pd.DataFrame(kw_result)
     if len(phrase_db) == 0:
         print("warning - no phrases were able to be extracted... ")
         return None
 
     if verbose:
-        print("YAKE keywords are: \n", yake_keywords)
+        print("YAKE keywords are: \n", kw_result)
         print("dataframe structure: \n")
         pp.pprint(phrase_db.head())
 
@@ -247,7 +247,7 @@ def quick_keys(
     # add a column for how many words the phrases contain
     yake_kw_len = []
     yake_kw_freq = []
-    for entry in yake_keywords:
+    for entry in kw_result:
         entry_wordcount = len(str(entry).split(" ")) - 1
         yake_kw_len.append(entry_wordcount)
 
@@ -258,8 +258,8 @@ def quick_keys(
 
     word_len_series = pd.Series(yake_kw_len, name="word_count")
     word_freq_series = pd.Series(yake_kw_freq, name="phrase_freq")
-    phrase_db2 = pd.concat([phrase_db, word_len_series, word_freq_series], axis=1)
-    phrase_db2.columns = [
+    kw_report = pd.concat([phrase_db, word_len_series, word_freq_series], axis=1)
+    kw_report.columns = [
         "key_phrase",
         "YAKE_score",
         "word_count",
@@ -270,20 +270,20 @@ def quick_keys(
             trim_fname(filename=filename, start_reverse=False)
             + "_top_phrases_YAKE.xlsx"
         )
-        phrase_db2.to_excel(join(filepath, yake_fname), index=False)
+        kw_report.to_excel(join(filepath, yake_fname), index=False)
 
     # print out top 10 keywords, or if desired num keywords less than max_no_disp, all of them
-    num_phrases_disp = min(num_keywords, max_no_disp)
+    num_phrases_disp = min(num_kw, disp_max)
 
     if verbose:
         print(f"Top Key Phrases from YAKE, with max n-gram length {max_ngrams}")
-        pp.pprint(phrase_db2.head(n=num_phrases_disp))
+        pp.pprint(kw_report.head(n=num_phrases_disp))
     else:
-        list_o_words = phrase_db2["key_phrase"].to_list()
+        kw_list = kw_report["key_phrase"].to_list()
         print(f"Top {num_phrases_disp} Key Phrases from YAKE, with max n-gram length {max_ngrams}")
-        pp.pprint(list_o_words[:num_phrases_disp])
+        pp.pprint(kw_list[:num_phrases_disp])
 
-    return phrase_db2
+    return kw_report
 
 
 # ------------------------------------------------------------------------

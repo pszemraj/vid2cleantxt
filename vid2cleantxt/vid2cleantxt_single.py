@@ -74,9 +74,9 @@ def transcribe_video_wav2vec(
     create_folder(path2audiochunks)
     chunk_directory = convert_vid_for_transcription(
         vid2beconv=vid_clip_name,
-        input_directory=directory,
+        in_dir=directory,
         len_chunks=chunk_length_seconds,
-        output_directory=path2audiochunks,
+        out_dir=path2audiochunks,
     )
     torch_validate_cuda()
     check_runhardware()
@@ -244,7 +244,7 @@ if __name__ == "__main__":
     qk_df = quick_keys(
         filepath=directory_for_keywords,
         filename=filename_for_keywords,
-        num_keywords=25,
+        num_kw=25,
         max_ngrams=3,
         save_db=False,
         verbose=False,
