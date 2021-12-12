@@ -176,15 +176,12 @@ def trim_fname(filename, num_words=20, start_rev=False, word_separator="_"):
     ----------
     filename : str
     num_words : int, optional, default=20
-    start_reverse : bool, optional
-        [description], by default False
-    word_separator : str, optional
-        [description], by default "_"
+    start_reverse : bool, optional, default=False
+    word_separator : str, optional, default="_", the character to use to join the words
 
     Returns
     -------
-    [type]
-        [description]
+    str, the trimmed filename
     """
 
 
