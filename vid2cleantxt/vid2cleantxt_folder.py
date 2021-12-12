@@ -42,7 +42,7 @@ from v2ct_utils import (
     check_runhardware,
     create_folder,
     digest_txt_directory,
-    load_imm_dir_files,
+    find_ext_local,
     move2completed,
     NullIO,
     torch_validate_cuda,
@@ -253,7 +253,7 @@ if __name__ == "__main__":
     approved_files = []
     for ext in vid_extensions:
         approved_files.extend(
-            load_imm_dir_files(directory, req_ext=ext, full_path=False)
+            find_ext_local(directory, req_ext=ext, full_path=False)
         )
 
     print(f"\nFound {len(approved_files)} video files in {directory}")
@@ -311,7 +311,7 @@ if __name__ == "__main__":
     )
 
     # add spelling correction to output transcriptions
-    txt_files = load_imm_dir_files(
+    txt_files = find_ext_local(
         out_p_tscript, req_ext=".txt", verbose=True, full_path=False
     )
     if is_verbose:

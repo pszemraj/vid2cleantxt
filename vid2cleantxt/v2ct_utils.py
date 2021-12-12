@@ -1,5 +1,5 @@
 """
-    v2ct_utils.py - a bunch of general utilities like loading all files of a certain extension in a directory, etc. FUnctions for the actual processing of the files are in audio2text_functions.py 
+    v2ct_utils.py - a bunch of general utilities like loading all files of a certain extension in a directory, etc. FUnctions for the actual processing of the files are in audio2text_functions.py
 """
 
 import os
@@ -30,7 +30,7 @@ def print_spacer(n=1):
     print("\n   --------    " * n)
 
 
-def load_imm_dir_files(
+def find_ext_local(
     src_dir, req_ext=".txt", return_type="list", full_path=True, verbose=False
 ):
     # returns the full path for every file with extension req_ext ONLY in the immediate directory specified
@@ -49,12 +49,11 @@ def load_imm_dir_files(
     appr_files = natsorted(appr_files)  # sort
 
     if verbose:
-        print("A list of files in the {} directory + sub-dirs is: \n".format(src_dir))
-        if len(appr_files) < 10:
-            pp.pprint(appr_files)
-        else:
-            pp.pprint(appr_files[:10])
-            print("\n and more. There are a total of {} files".format(len(appr_files)))
+        print(f"A list of files in the {src_dir} directory is: \n")
+        pp.pprint(appr_files) if len(appr_files) < 10 else pp.pprint(appr_files[:10])
+        if len(appr_files) > 10:
+            print(
+               f"NOTE: there are {len(appr_files)} total matching files\n")
 
     if return_type.lower() == "list":
         return appr_files
@@ -69,43 +68,33 @@ def load_imm_dir_files(
         return appr_file_dict
 
 
-def load_all_dir_files(
-    src_dir, req_ext=".txt", return_type="list", full_path=True, verbose=False
+def find_ext_recursive(
+    src_dir, req_ext=".txt", full_path=True, verbose=False
 ):
-    # returns the full path for every file with extension req_ext in the directory (and its sub-directories)
+    """
+    load_all_dir_files - return all files that match extension in a list, either either the full filepath or just the filename relative to the src_dir recursively
+
+    returns appr_files - a list of all files in the src_dir and sub-dirs that match the req_extension
+    """
     appr_files = []
     # r=root, d=directories, f = files
     for r, d, f in os.walk(src_dir):
         for prefile in f:
             if prefile.endswith(req_ext):
-                fullpath = join(r, prefile)
-                appr_files.append(fullpath)
+                this_path = os.path.join(r, prefile)
+                appr_files.append(this_path) if full_path else appr_files.append(prefile)
 
-    if full_path:
-        appr_files = natsorted(appr_files)
-    else:
-        # only get basenames. by default, f contains the whole path
-        appr_files = natsorted([basename(f) for f in appr_files if isfile(f)])
+    appr_files = natsorted(appr_files)  # sort
 
     if verbose:
-        print("A list of files in the {} directory + sub-dirs is: \n".format(src_dir))
-        if len(appr_files) < 10:
-            pp.pprint(appr_files)
-        else:
-            pp.pprint(appr_files[:10])
-            print("\n and more. There are a total of {} files".format(len(appr_files)))
+        print(f"A list of files in the {src_dir} directory is: \n")
+        pp.pprint(appr_files) if len(appr_files) < 10 else pp.pprint(appr_files[:10])
+        if len(appr_files) > 10:
+            print(
+               f"NOTE: there are {len(appr_files)} total matching files\n")
 
-    if return_type.lower() == "list":
-        return appr_files
-    else:
-        if verbose:
-            print("returning dictionary")
+    return appr_files
 
-        appr_file_dict = {}
-        for this_file in appr_files:
-            appr_file_dict[basename(this_file)] = this_file
-
-        return appr_file_dict
 
 
 def shorten_title(title_text, max_no=20):
@@ -237,6 +226,10 @@ def check_runhardware_torch(verbose=False):
 
 
 def torch_validate_cuda(verbose=False):
+    """
+    torch_validate_cuda - checks if CUDA is available and if it is, it checks if the GPU is available.
+
+    """
     GPUs = GPU.getGPUs()
     num_gpus = len(GPUs)
     try:
@@ -247,10 +240,11 @@ def torch_validate_cuda(verbose=False):
             )
             if verbose:
                 print("GPU util detects {} GPUs on your system".format(num_gpus))
-    except:
+    except Exception as e:
         print(
-            "WARNING - unable to start CUDA. If you wanted to use a GPU, exit and check hardware."
+            "WARNING - CUDA is not being used in processing - expect longer runtime"
         )
+        print(e)
 
 
 def check_runhardware(verbose=False):
