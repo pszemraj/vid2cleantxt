@@ -29,7 +29,7 @@ from transformers import Wav2Vec2ForCTC, Wav2Vec2Tokenizer
 
 from audio2text_functions import (
     trim_fname,
-    convert_vid_for_transcription,
+    prep_transc_src,
     corr,
     create_metadata_df,
     init_neuspell,
@@ -92,8 +92,8 @@ def transcribe_video_wav2vec(
     # create audio chunk folder
     ac_storedir = join(src_dir, temp_dir)
     create_folder(ac_storedir)
-    chunk_directory = convert_vid_for_transcription(
-        vid2beconv=clip_name,
+    chunk_directory = prep_transc_src(
+        _vid2beconv=clip_name,
         in_dir=src_dir,
         len_chunks=chunk_dur,
         out_dir=ac_storedir,

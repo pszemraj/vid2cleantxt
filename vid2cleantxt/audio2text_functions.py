@@ -2,6 +2,7 @@
     audio2text_functions.py - functions for vid2cleantxt project, these functions are used to convert audio files to text.
     general helper functions are in v2ct_utils.py
 """
+from json import load
 import math
 import pprint as pp
 import re
@@ -27,7 +28,9 @@ from vid2cleantxt.v2ct_utils import get_timestamp
 
 
 def avg_word(sentence):
-    # returns average word length as a float
+    """
+    avg_word - calculates the average word length of a sentence
+    """
     words = sentence.split()
     num_words = len(words)
     if num_words == 0:
@@ -45,9 +48,18 @@ def num_numeric_chars(free_text):
     return num_numeric_words
 
 
-def corr(s):
-    # adds space after period if there isn't one
-    # removes extra spaces
+def corr(s:str):
+    """
+    corr - adds space after period if there isn't one. removes extra spaces
+
+    Parameters
+    ----------
+    s : str, text to be corrected
+
+    Returns
+    -------
+    str
+    """
     return re.sub(r"\.(?! )", ". ", re.sub(r" +", " ", s))
 
 
@@ -69,8 +81,28 @@ def setup_out_dirs(
     output_locs = {"t_out": t_path_full, "m_out": m_path_full}
     return output_locs
 
+def check_if_audio(filename):
+    """
+    check_if_audio - checks if a file is an audio file
+
+    Parameters
+    ----------
+    filename : str, the name of the file to be checked
+
+    Returns
+    -------
+    bool
+    """
+    return filename.endswith(".wav") or filename.endswith(".mp3") or filename.endswith(".m4a")
 
 def create_metadata_df():
+    """
+    create_metadata_df - creates a dataframe to store metadata for each video file transcribed
+
+    Returns
+    -------
+    metadata_df : pd.DataFrame
+    """
     md_colnames = [
         "orig_file",
         "num_audio_chunks",
@@ -82,47 +114,49 @@ def create_metadata_df():
         "word_count",
     ]
 
-    md_df = pd.DataFrame(columns=md_colnames)
-    return md_df
+    return pd.DataFrame(columns=md_colnames)
 
 
-def convert_vidfile(
+def create_audiofile(
     _vidname,
     start_time=0,
     end_time=6969,
-    in_path="",
+    in_path=None,
     out_path="",
     new_filename="",
 ):
     """
-    converts a video file to a .wav file.
+    create_audiofile - takes a video file and creates an audiofile with various parameters. It is currently not used in the main pipelien (i.e., vid2cleantxt)
 
+    Parameters
+    ----------
+    _vidname : [type], required, the name of the video file to be converted
+    start_time : int, optional, the start time of the video file, by default 0
+    end_time : int, optional, the end time of the video file, by default 6969
+    in_path : str, optional, the path to the video file, by default None
+    out_path : str, optional, the path to the output audio file, by default ""
+    new_filename : str, optional, the name of the output audio file, by default ""
+
+    Returns
+    -------
+    audio_conv_results : dict, the results of the conversion
     """
-    # takes a video file and creates an audiofile with various parameters
-    # NOTE video filename is required
-    if len(in_path) < 1:
-        my_clip = mp.VideoFileClip(_vidname)
-    else:
-        my_clip = mp.VideoFileClip(join(in_path, _vidname))
+    my_clip = mp.VideoFileClip(_vidname) if in_path is None else mp.VideoFileClip(join(in_path, _vidname))
+
 
     if end_time == 6969:
+        # if end_time is not specified, use the duration of the video
         modified_clip = my_clip.subclip(t_start=int(start_time * 60))
     else:
+        # the user has specified a start and end time
         modified_clip = my_clip.subclip(
             t_start=int(start_time * 60), t_end=int(end_time * 60)
         )
 
-    converted_filename = (
-        _vidname[: (len(_vidname) - 4)]
-        + "-converted_"
-        + datetime.now().strftime("day_%d_time_%H-%M-%S_")
-        + ".wav"
-    )
-    # update_filename
-    if len(new_filename) > 0:
-        converted_filename = new_filename
 
-    if len(out_path) < 1:
+    converted_filename = new_filename if new_filename != "" else f"vid_{trim_fname(_vidname)}_conv_{get_timestamp()}.wav"
+    if out_path == "":
+        # if no output path is specified, use the current working directory
         modified_clip.audio.write_audiofile(converted_filename)
     else:
         modified_clip.audio.write_audiofile(join(out_path, converted_filename))
@@ -136,64 +170,66 @@ def convert_vidfile(
     return audio_conv_results
 
 
-def convert_vid_for_transcription(
-    vid2beconv, len_chunks, in_dir, out_dir, verbose=False
+def prep_transc_src(
+    _vid2beconv, in_dir, out_dir, len_chunks=20, verbose=False
 ):
     """
-    convert_vid_for_transcription - converts video file to audio file, and then splits audio file into chunks
-    Oriented specifically for the "wav2vec2" model speech to text transcription
-    takes a video file, turns it into .wav audio chunks of length <input> and stores them in a specific location
+    prep_transc_src - prepares the source video files for transcription by creating audio files and metadata
 
     Parameters
     ----------
-    vid2beconv : [type]
-        [description]
-    len_chunks : [type]
-        [description]
-    input_directory : [type]
-        [description]
-    output_directory : [type]
-        [description]
+    vid2beconv : str, the name of the video file to be converted (or audio file)
+    len_chunks : int, the length of the audio chunks to be created, by default 20 (seconds)
+    input_directory : str, the path to the video file, by default None, which means the current working directory
+    output_directory : str, the path to the output audio file, by default None, which means the current working directory
     verbose : bool, optional
-        [description], by default False
 
     Returns
     -------
     [type]
         [description]
     """
-    # TODO: add function that is run instead of user already has .WAV files or other audio to be converted
-    my_clip = mp.VideoFileClip(join(in_dir, vid2beconv))
-    number_of_chunks = math.ceil(my_clip.duration / len_chunks)  # to get in minutes
+    
+    load_path = join(in_dir, _vid2beconv) if in_dir is not None else _vid2beconv
+    if check_if_audio(load_path):
+        my_clip = mp.AudioFileClip(load_path)
+    else:
+        my_clip = mp.VideoFileClip(load_path)
+    
+    create_folder(out_dir) # create the output directory if it doesn't exist
+    audio_chunks = []
+
     if verbose:
-        print("converting into " + str(number_of_chunks) + " audio chunks")
-    preamble = trim_fname(vid2beconv)
-    outfilename_storage = []
-    if verbose: print(f"splitting audio into chunks of {len_chunks} seconds")
+        print(f"{len(audio_chunks)} audio chunks created")
+
+    n_chunks = math.ceil(my_clip.duration / len_chunks)  # to get in minutes, round up
+    if verbose: print(f"{n_chunks} audio chunks to be created of {len_chunks} seconds")
+    preamble = trim_fname(_vid2beconv)
+    chunk_fnames = []
 
     for i in tqdm(
-        range(number_of_chunks),
-        total=number_of_chunks,
-        desc="Converting Video to Audio",
+        range(n_chunks),
+        total=n_chunks,
+        desc="Creating .wav audio clips",
     ):
-        start_time = i * len_chunks
-        if i == number_of_chunks - 1:
-            this_clip = my_clip.subclip(t_start=start_time)
+        this_st = i * len_chunks
+        if i == n_chunks - 1:
+            this_clip = my_clip.subclip(t_start=this_st) # if this is the last chunk, use the remainder of the video
         else:
             this_clip = my_clip.subclip(
-                t_start=start_time, t_end=(start_time + len_chunks)
+                t_start=this_st, t_end=(this_st + len_chunks)
             )
-        this_filename = preamble + "_run_" + str(i) + ".wav"
-        outfilename_storage.append(this_filename)
+        this_filename = f"{preamble}_clipaudio_{i}.wav"
+        chunk_fnames.append(this_filename)
         this_clip.audio.write_audiofile(
             join(out_dir, this_filename), logger=None
         )
 
-    print(f"Finished converting video to audio chunks - {get_timestamp()}")
+    print(f"Finished creating audio chunks for wav2vec2 - {get_timestamp()}")
     if verbose:
         print(f"files saved to {out_dir}")
 
-    return outfilename_storage
+    return chunk_fnames
 
 
 # ------------------------------------------------------------------------
@@ -210,17 +246,27 @@ def quick_keys(
     save_db=False,
     verbose=False,
     txt_lang="en",
-    ddup_thresh=0.3,
-):
-
+    ddup_thresh=0.3,):
     """
-    quick_keys - Extracts keywords from a text file.
-    uses YAKE to quickly determine keywordse. Saves Keywords and YAKE score (0 means very important) in a dataframe
+    quick_keys - extracts keywords from a text file using ngrams and a TF-IDF model (Yake)
+
+    Parameters
+    ----------
+    filename : str, required, the name of the text file to be processed
+    filepath : str, required, the path to the text file to be processed
+    max_ngrams : int, optional, the maximum number of ngrams to use, by default 3
+    num_kw : int, optional, the number of keywords to extract, by default 20
+    disp_max : int, optional, the maximum number of keywords to display, by default 10
+    save_db : bool, optional, whether to save the keyword extraction results to excel, by default False
+    verbose : bool, optiona,
+    txt_lang : str, optional, the language of the text file, by default "en"
+    ddup_thresh : float, optional, the threshold for duplicate keywords, by default 0.3
 
     Returns
     -------
-    df_keywords : dataframe
+    kw_df : pd.DataFrame, the results of the keyword extraction
     """
+
     with open(join(filepath, filename), "r", encoding="utf-8", errors="ignore") as fi:
         text = fi.read()
 
@@ -238,7 +284,7 @@ def quick_keys(
         return None
 
     if verbose:
-        print("YAKE keywords are: \n", kw_result)
+        print(f"YAKE keywords are: {kw_result}\n")
         print("dataframe structure: \n")
         pp.pprint(phrase_db.head())
 
@@ -266,14 +312,10 @@ def quick_keys(
         "phrase_freq",
     ]
     if save_db:  # saves individual file if user asks
-        yake_fname = (
-            trim_fname(filename=filename, start_rev=False)
-            + "_top_phrases_YAKE.xlsx"
-        )
+        yake_fname = (f"{trim_fname(filename=filename, start_rev=False)}_YAKE_keywords.xlsx")
         kw_report.to_excel(join(filepath, yake_fname), index=False)
 
-    # print out top 10 keywords, or if desired num keywords less than max_no_disp, all of them
-    num_phrases_disp = min(num_kw, disp_max)
+    num_phrases_disp = min(num_kw, disp_max) # number of phrases to display
 
     if verbose:
         print(f"Top Key Phrases from YAKE, with max n-gram length {max_ngrams}")
@@ -288,7 +330,7 @@ def quick_keys(
 
 # ------------------------------------------------------------------------
 # Spelling
-
+# TODO: move to spelling module
 
 def init_symspell(max_dist=3, pref_len=7):
     """
@@ -296,15 +338,12 @@ def init_symspell(max_dist=3, pref_len=7):
 
     Parameters
     ----------
-    max_dist : int, optional
-        [maximum edit distance], by default 3
-    pref_len : int, optional
-        [description], by default 7
+    max_dist : int, optional, by default 3, max distance between words to be considered a match
+    pref_len : int, optional, by default 7, minimum length of word to be considered a valid word
 
     Returns
     -------
-    [type]
-        [description]
+    symspell : SymSpell object
     """
     sym_spell = SymSpell(max_dictionary_edit_distance=max_dist, prefix_length=pref_len)
 
@@ -325,35 +364,33 @@ def symspell_freetext(
     textlines, dist=3, keep_numb_words=True, verbose=False, speller=None
 ):
     """
-    This function takes a list of lines of text and returns a corrected version of the text.
-    It uses the SymSpell algorithm to correct the text.
+    symspell_freetext - spell check a text file using SymSpell
+    https://github.com/mammothb/symspellpy
+    Parameters
+    ----------
+
+    textlines : list, list of strings, or string, text to be spell checked
+    dist : int, optional, by default 3, max distance between words to be considered a match
+    keep_numb_words : bool, optional, by default True, whether to keep numbers in the text
+    verbose : bool, optional, by default False, whether to print out the results
+    speller : SymSpell object, optional, by default None, if None, will initialize a new SymSpell object
+    
+    Returns
+    -------
+    corrected_text : list, list of strings, or string, the corrected text
     """
 
-    # https://github.com/mammothb/symspellpy
-    if speller is None:
-        if verbose:
-            print(
-                "Warning - symspell object not passed in, creating one. - ",
-                datetime.now(),
-            )
-        sym_spell = init_symspell()
-    else:
-        sym_spell = speller
-
+    speller = speller or init_symspell(dist=dist) # initialize a new SymSpell object if none is provided
     corrected_list = []
-
-    if type(textlines) == str:
-        textlines = [textlines]  # put in a list if a string
-
+    textlines = list(textlines) if isinstance(textlines, str) else textlines
     if verbose:
-        print("\nStarting to correct text with {0:6d} lines ".format(len(textlines)))
-        print("the type of textlines var is ", type(textlines))
+        print(f"{len(textlines)} lines to be spell checked")
 
     # iterate through list of lines. Pass each line to be corrected. Append / sum results from each line till done
-    for line_obj in textlines:
+    for i, line_obj in enumerate(textlines):
         line = "".join(line_obj)
         if verbose:
-            print("line {} in the text is: ".format(textlines.index(line_obj)))
+            print(f"line {i} in the source is: ")
             pp.pprint(line)
         if line == "":
             continue  # blank line, skip to next run
@@ -364,18 +401,13 @@ def symspell_freetext(
             ignore_non_words=keep_numb_words,
             ignore_term_with_digits=keep_numb_words,
         )
-        all_sugg_for_line = []
-        for suggestion in suggestions:
-            all_sugg_for_line.append(
-                suggestion.term
-            )  # append / sum / log results from correcting the line
+        line_suggests = [s.term for s in suggestions] # list of suggested words for the line
 
-        corrected_list.append(" ".join(all_sugg_for_line) + "\n")
+        corrected_list.append(" ".join(line_suggests) + "\n") # add newline to end of each line appended
 
-    corrected_text = "".join(corrected_list)  # join corrected text
+    corrected_text = "".join(corrected_list)  # join list of lines into a single string
 
-    if verbose:
-        print("Finished correcting w/ symspell at time: ", datetime.now(), "\n")
+    if verbose: print(f"fineshed spelling correction on {len(textlines)} lines at {datetime.now()}")
 
     return corrected_text
 
@@ -384,14 +416,9 @@ def init_neuspell(verbose=False):
     """
     init_neuspell - initialize the neuspell object
 
-    Parameters
-    ----------
-    verbose : bool, optional
-
     Returns
     -------
-    [type] - returns the neuspell object
-        [description]
+    checker : neuspell.SpellChecker object
     """
     # TODO: check if options for different languages with Neuspell
     if verbose:
@@ -407,24 +434,23 @@ def init_neuspell(verbose=False):
 
 
 def neuspell_freetext(textlines, ns_checker=None, verbose=False):
-
     """
-    This function takes a list of lines of text and returns a corrected version of the text.
-    it uses Neuspell to correct the text.
+    neuspell_freetext - spell check a text object using Neuspell
+
+    Parameters
+    ----------
+    textlines : list, list of strings, or string, text to be spell checked
+    ns_checker : neuspell.SpellChecker object, optional, by default None, if None, will initialize a new Neuspell object
+    verbose : bool, optional
+
+    Returns
+    -------
+    corrected_text : list, list of strings, or string, the corrected text
     """
-
-    if ns_checker is None:
-        print(
-            "Warning - neuspell object not passed in, creating one. - ", datetime.now()
-        )
-        ns_checker = init_neuspell()
-
-    if type(textlines) == str:
-        textlines = [textlines]  # put in a list if a string
-
+    ns_checker = ns_checker or init_neuspell(verbose=verbose) # initialize a new Neuspell object if none is provided
+    textlines = list(textlines) if isinstance(textlines, str) else textlines
     corrected_list = []
 
-    # iterate through list of lines. Pass each line to be corrected. Append / sum results from each line till done
     for line_obj in textlines:
         line = "".join(line_obj)
 
@@ -487,19 +513,14 @@ def spellcorrect_pipeline(filepath, filename, ns_checker=None, verbose=False):
 
     Parameters
     ----------
-    filepath : [type]
-        [description]
-    filename : [type]
-        [description]
-    ns_checker : [type], optional
-        [description], by default None
+    filepath : [type], optional,    the filepath to the file to be corrected
+    filename : [type], optional,    the filename of the file to be corrected
+    ns_checker : [type], optional, the neuspell object to be used for spellchecking
     verbose : bool, optional
-        [description], by default False
 
     Returns
     -------
-    [type]
-        [description]
+    pipelineoutput : dict, the corrected text and other data
     """
 
     with open(join(filepath, filename), "r", encoding="utf-8", errors="ignore") as file:

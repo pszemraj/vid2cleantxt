@@ -335,7 +335,7 @@ def digest_txt_directory(file_dir, iden:str=None, verbose=False, make_folder=Tru
     -------
     str, the path to the digest file
     """
-    
+
     run_date = get_timestamp()
     iden = str(shorten_title(trim_fname(dirname(file_dir)))) if iden is None else iden
     if make_folder:
