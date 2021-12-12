@@ -39,7 +39,6 @@ def num_numeric_chars(free_text):
     """
     returns number of numeric "words" (i.e., digits that are surrounded by spaces)
     """
-    # returns number of numeric words in your text "I love 202 memes" --> 202 is one numeric word
     num_numeric_words = len(
         [free_text for free_text in free_text.split() if free_text.isdigit()]
     )
@@ -141,23 +140,36 @@ def convert_vid_for_transcription(
     vid2beconv, len_chunks, input_directory, output_directory, verbose=False
 ):
     """
-    converts video file to audio file, and then splits audio file into chunks
+    convert_vid_for_transcription - converts video file to audio file, and then splits audio file into chunks
+    Oriented specifically for the "wav2vec2" model speech to text transcription
+    takes a video file, turns it into .wav audio chunks of length <input> and stores them in a specific location
+
+    Parameters
+    ----------
+    vid2beconv : [type]
+        [description]
+    len_chunks : [type]
+        [description]
+    input_directory : [type]
+        [description]
+    output_directory : [type]
+        [description]
+    verbose : bool, optional
+        [description], by default False
+
+    Returns
+    -------
+    [type]
+        [description]
     """
-    # Oriented specifically for the "wav2vec2" model speech to text transcription
-    # takes a video file, turns it into .wav audio chunks of length <input> and stores them in a specific location
-    # TODO add function that is run instead of user already has .WAV files or other audio to be converted
+    # TODO: add function that is run instead of user already has .WAV files or other audio to be converted
     my_clip = mp.VideoFileClip(join(input_directory, vid2beconv))
     number_of_chunks = math.ceil(my_clip.duration / len_chunks)  # to get in minutes
     if verbose:
         print("converting into " + str(number_of_chunks) + " audio chunks")
     preamble = trim_fname(vid2beconv)
     outfilename_storage = []
-    if verbose:
-        print(
-            "separating audio into chunks starting at ",
-            datetime.now().strftime("_%H.%M.%S"),
-        )
-    update_incr = math.ceil(number_of_chunks / 10)
+    if verbose: print(f"splitting audio into chunks of {len_chunks} seconds")
 
     for i in tqdm(
         range(number_of_chunks),
@@ -507,7 +519,7 @@ def spellcorrect_pipeline(filepath, filename, ns_checker=None, verbose=False):
     ) as file_sc:
         file_sc.writelines(sc_textlines)  # save spell-corrected text
 
-    # TODO update logic in the respective functions instead of using quick_sc_fixes to fix recurring small issues
+    # TODO: update logic in the respective functions instead of using quick_sc_fixes to fix recurring small issues
     quick_sc_fixes = {
         " ' ": "'",
     }
