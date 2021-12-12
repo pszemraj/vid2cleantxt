@@ -1,9 +1,10 @@
-# this is the script you should run to transcribe files in 95+% of cases.
-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 vid2clntext by Peter Szemraj
 
 Pipeline for Zero-shot transcription of a lecture video file to text using facebook's wav2vec2 model
+this is the primary pipeline for the project
 
 Tips for runtime:
 
@@ -11,19 +12,21 @@ start with "facebook/wav2vec2-base-960h" for both tokenizer and model
 if model fails to work or errors out, try reducing the chunk length
 """
 
-# TODO: add code to add this file's path to the root path
-from genericpath import isfile
+import argparse
+import os
+import sys
+from os.path import dirname
+
+sys.path.append(dirname(dirname(os.path.abspath(__file__))))
+
 import math
 import shutil
-import sys
 import time
-from datetime import datetime
 from os.path import join
 
 import librosa
 import pandas as pd
 import argparse
-from pkg_resources import require
 import torch
 from tqdm.auto import tqdm
 from transformers import Wav2Vec2ForCTC, Wav2Vec2Tokenizer
