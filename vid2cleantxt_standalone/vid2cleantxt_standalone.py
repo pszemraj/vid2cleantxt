@@ -477,7 +477,7 @@ def symspell_file(
     # original spell-checking method pre SBD (before neuspell. Here for reference / if Neuspell is hard to use on the
     # user's machine/ https://github.com/mammothb/symspellpy
 
-    script_start_time = time.time()
+    script_start_time = time.perf_counter()
     if verbose:
         print("\nPySymSpell - Starting to correct the file: ", filename)
     # ------------------------------------
@@ -533,7 +533,7 @@ def symspell_file(
         file_out.writelines(corrected_doc)
 
     if verbose:
-        script_rt_m = (time.time() - script_start_time) / 60
+        script_rt_m = (time.perf_counter() - script_start_time) / 60
         print("RT for this file was {0:5f} minutes".format(script_rt_m))
         print("output folder for this transcription is: \n", filepath)
 
@@ -897,7 +897,7 @@ def transcribe_video_wav2vec(
     )
     torch_validate_cuda()
     check_runhardware()
-    time_log.append(time.time())
+    time_log.append(time.perf_counter())
     time_log_desc.append("converted video to audio")
     full_transcription = []
     GPU_update_incr = math.ceil(len(chunk_directory) / 2)
@@ -1069,7 +1069,7 @@ if __name__ == "__main__":
 
     time_log = []
     time_log_desc = []
-    time_log.append(time.time())
+    time_log.append(time.perf_counter())
     time_log_desc.append("start")
 
     run_default_examples = True
@@ -1100,7 +1100,7 @@ if __name__ == "__main__":
         )
 
     # load huggingface model
-    time_log.append(time.time())
+    time_log.append(time.perf_counter())
     time_log_desc.append("starting to load model")
 
     sys.stdout = NullIO()  # hide printing to console for initializations below:
@@ -1113,11 +1113,11 @@ if __name__ == "__main__":
     chunk_length = 30  # (in seconds) if model fails to work or errors out reduce this number. 30 is a good start.
     sys.stdout = sys.__stdout__  # return to default of print-to-console
     print("loaded the following model:", wav2vec2_model, " at ", datetime.now())
-    time_log.append(time.time())
+    time_log.append(time.perf_counter())
     time_log_desc.append("loaded model")
 
     # load videos, run through the model
-    t_script_start_time = time.time()
+    t_script_start_time = time.perf_counter()
     time_log.append(t_script_start_time)
     time_log_desc.append("starting transcription process")
 
@@ -1130,7 +1130,7 @@ if __name__ == "__main__":
     for filename in tqdm(
         approved_files, total=len(approved_files), desc="Total Transcription Progress"
     ):
-        t_script_start_time = time.time()
+        t_script_start_time = time.perf_counter()
         time_log.append(t_script_start_time)
         time_log_desc.append("start transc. - " + filename)
         # transcribe the video file
@@ -1166,7 +1166,7 @@ if __name__ == "__main__":
         metadata_filename = "metadata for " + vid_preamble + " transcription.csv"
         metadata.to_csv(join(out_p_metadata, metadata_filename), index=True)
 
-        t_script_end_time = time.time()
+        t_script_end_time = time.perf_counter()
         time_log.append(t_script_end_time)
         time_log_desc.append(
             "transc. file #{}".format(approved_files.index(filename))
@@ -1189,7 +1189,7 @@ if __name__ == "__main__":
         )
         time_records_db.to_excel(join(out_p_metadata, "mid_loop_runtime_database.xlsx"))
 
-    time_log.append(time.time())
+    time_log.append(time.perf_counter())
     time_log_desc.append("all transcriptions completed")
     print("\ntranscription process completed.\n")
 
@@ -1208,7 +1208,7 @@ if __name__ == "__main__":
     else:
         print("skipping merging generated .txt files")
 
-    time_log.append(time.time())
+    time_log.append(time.perf_counter())
     time_log_desc.append("merge files")
 
     # Validate text files to spell-check (in case there was a change)
@@ -1256,7 +1256,7 @@ if __name__ == "__main__":
         join(out_p_tscript, "YAKE - keywords for all transcripts in run.csv"),
         index=True,
     )
-    time_log.append(time.time())
+    time_log.append(time.perf_counter())
     time_log_desc.append("SC, keywords")
 
     # noinspection PyUnboundLocalVariable
@@ -1277,7 +1277,7 @@ if __name__ == "__main__":
     shutil.make_archive(join(zip_dir, transcript_header), "zip", out_p_tscript)
     shutil.make_archive(join(zip_dir, metadata_header), "zip", out_p_metadata)
 
-    time_log.append(time.time())
+    time_log.append(time.perf_counter())
     time_log_desc.append("crt zip archive")
 
     # exit block
@@ -1286,7 +1286,7 @@ if __name__ == "__main__":
     )
     print("Transcription file + more can be found here: \n", out_p_tscript)
     print("Metadata for each transcription is located: \n", out_p_metadata)
-    time_log.append(time.time())
+    time_log.append(time.perf_counter())
     time_log_desc.append("End")
     timelog_analytics(
         time_log, time_log_desc, save_path=out_p_metadata

@@ -284,7 +284,7 @@ def symspell_file(
     # original spell-checking method pre SBD (before neuspell. Here for reference / if Neuspell is hard to use on the
     # user's machine/ https://github.com/mammothb/symspellpy
 
-    s_st = time.time()
+    s_st = time.perf_counter()
     if verbose:
         print("\nPySymSpell - Starting to correct the file: ", filename)
     # ------------------------------------
@@ -340,7 +340,7 @@ def symspell_file(
         file_out.writelines(corrected_doc)
 
     if verbose:
-        script_rt_m = (time.time() - s_st) / 60
+        script_rt_m = (time.perf_counter() - s_st) / 60
         print("RT for this file was {0:5f} minutes".format(script_rt_m))
         print("output folder for this transcription is: \n", filepath)
 

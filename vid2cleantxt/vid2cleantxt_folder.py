@@ -330,4 +330,4 @@ if __name__ == "__main__":
     print(
         "The relevant files for this run are located in here: \n {out_p_tscript} \n and {out_p_metadata}"
     )
-    print("total runtime was {} minutes".format(round((time.time() - st) / 60), 2))
+    print("total runtime was {} minutes".format(round((time.perf_counter() - st) / 60), 2))
