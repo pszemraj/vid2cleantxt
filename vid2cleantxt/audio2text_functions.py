@@ -21,7 +21,7 @@ import yake
 from symspellpy import SymSpell
 from tqdm.auto import tqdm
 
-from v2ct_utils import beautify_filename, create_folder, NullIO
+from v2ct_utils import trim_fname, create_folder, NullIO
 from vid2cleantxt.v2ct_utils import get_timestamp
 
 
@@ -37,8 +37,10 @@ def avg_word(sentence):
     return sum(len(word) for word in words) / num_words
 
 
-# returns number of numeric "words" (i.e., digits that are surrounded by spaces)
 def num_numeric_chars(free_text):
+    """
+    returns number of numeric "words" (i.e., digits that are surrounded by spaces)
+    """
     # returns number of numeric words in your text "I love 202 memes" --> 202 is one numeric word
     num_numeric_words = len(
         [free_text for free_text in free_text.split() if free_text.isdigit()]
@@ -60,7 +62,7 @@ def setup_out_dirs(
     """
     creates output directories for audio2text project
     """
-    
+
     t_path_full = join(directory, t_folder_name)
     create_folder(t_path_full)
 
@@ -96,7 +98,8 @@ def convert_vidfile(
     new_filename="",
 ):
     """
-    converts a video file to a .wav file
+    converts a video file to a .wav file.
+
     """
     # takes a video file and creates an audiofile with various parameters
     # NOTE video filename is required
@@ -149,7 +152,7 @@ def convert_vid_for_transcription(
     number_of_chunks = math.ceil(my_clip.duration / len_chunks)  # to get in minutes
     if verbose:
         print("converting into " + str(number_of_chunks) + " audio chunks")
-    preamble = beautify_filename(vid2beconv)
+    preamble = trim_fname(vid2beconv)
     outfilename_storage = []
     if verbose:
         print(
@@ -247,7 +250,7 @@ def quick_keys(
     ]
     if save_db:  # saves individual file if user asks
         yake_fname = (
-            beautify_filename(filename=filename, start_reverse=False)
+            trim_fname(filename=filename, start_reverse=False)
             + "_top_phrases_YAKE.xlsx"
         )
         phrase_db2.to_excel(join(filepath, yake_fname), index=False)
@@ -328,7 +331,7 @@ def symspell_file(
     corrected_doc = "".join(corrected_list)
     corrected_fname = (
         "[corr_symsp]"
-        + beautify_filename(filename, num_words=15, start_reverse=False)
+        + trim_fname(filename, num_words=15, start_reverse=False)
         + ".txt"
     )
 
@@ -358,6 +361,21 @@ def symspell_file(
 
 
 def init_symspell(max_dist=3, pref_len=7):
+    """
+    init_symspell - initialize the SymSpell object
+
+    Parameters
+    ----------
+    max_dist : int, optional
+        [maximum edit distance], by default 3
+    pref_len : int, optional
+        [description], by default 7
+
+    Returns
+    -------
+    [type]
+        [description]
+    """
     sym_spell = SymSpell(max_dictionary_edit_distance=max_dist, prefix_length=pref_len)
 
     dictionary_path = pkg_resources.resource_filename(
@@ -380,8 +398,8 @@ def symspell_freetext(
     This function takes a list of lines of text and returns a corrected version of the text.
     It uses the SymSpell algorithm to correct the text.
     """
-    
-    
+
+
     # https://github.com/mammothb/symspellpy
     if speller is None:
         if verbose:
@@ -434,7 +452,19 @@ def symspell_freetext(
 
 
 def init_neuspell(verbose=False):
-    # TODO check if options for diferent languages with Neuspell
+    """
+    init_neuspell - initialize the neuspell object
+
+    Parameters
+    ----------
+    verbose : bool, optional
+
+    Returns
+    -------
+    [type] - returns the neuspell object
+        [description]
+    """
+    # TODO: check if options for different languages with Neuspell
     if verbose:
         checker = neuspell.SclstmbertChecker()
         checker.from_pretrained()
@@ -448,12 +478,12 @@ def init_neuspell(verbose=False):
 
 
 def neuspell_freetext(textlines, ns_checker=None, verbose=False):
-    
+
     """
     This function takes a list of lines of text and returns a corrected version of the text.
     it uses Neuspell to correct the text.
     """
-    
+
     if ns_checker is None:
         print(
             "Warning - neuspell object not passed in, creating one. - ", datetime.now()
@@ -523,7 +553,25 @@ def SBD_freetext(text, verbose=False, lang="en"):
 
 
 def spellcorrect_pipeline(filepath, filename, ns_checker=None, verbose=False):
-    # uses two functions (neuspell_freetext, SBD_freetext) in a pipeline
+    """
+    spellcorrect_pipeline - takes a filepath and filename and returns a corrected version of the text. It uses both the PySBD and Neuspell algorithms to correct the text.
+
+    Parameters
+    ----------
+    filepath : [type]
+        [description]
+    filename : [type]
+        [description]
+    ns_checker : [type], optional
+        [description], by default None
+    verbose : bool, optional
+        [description], by default False
+
+    Returns
+    -------
+    [type]
+        [description]
+    """
 
     with open(join(filepath, filename), "r", encoding="utf-8", errors="ignore") as file:
         textlines = file.readlines()  # return a list
@@ -534,7 +582,7 @@ def spellcorrect_pipeline(filepath, filename, ns_checker=None, verbose=False):
     create_folder(join(filepath, loc_SC))
 
     sc_outname = (
-        "NSC_" + beautify_filename(filename, num_words=15, start_reverse=False) + ".txt"
+        "NSC_" + trim_fname(filename, num_words=15, start_reverse=False) + ".txt"
     )
 
     with open(
@@ -568,7 +616,7 @@ def spellcorrect_pipeline(filepath, filename, ns_checker=None, verbose=False):
     create_folder(join(filepath, loc_SBD))
 
     SBD_outname = (
-        "FIN_" + beautify_filename(filename, num_words=15, start_reverse=False) + ".txt"
+        "FIN_" + trim_fname(filename, num_words=15, start_reverse=False) + ".txt"
     )
 
     with open(

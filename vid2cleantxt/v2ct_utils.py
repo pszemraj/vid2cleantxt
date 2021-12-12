@@ -178,7 +178,7 @@ def cleantxt_wrap(ugly_text):
     return cleaned_text
 
 
-def beautify_filename(filename, num_words=20, start_reverse=False, word_separator="_"):
+def trim_fname(filename, num_words=20, start_reverse=False, word_separator="_"):
     # takes a filename stored as text, removes extension, separates into X words ...
     # and returns a nice filename with the words separateed by
     # useful for when you are reading files, doing things to them, and making new files
@@ -301,7 +301,7 @@ def check_runhardware(verbose=False):
 def digest_txt_directory(file_dir, identifer="", verbose=False, make_folder=True):
     run_date = datetime.now()
     if len(identifer) < 1:
-        identifer = str(shorten_title(beautify_filename(dirname(file_dir))))
+        identifer = str(shorten_title(trim_fname(dirname(file_dir))))
     files_to_merge = natsorted(
         [f for f in listdir(file_dir) if isfile(join(file_dir, f)) & f.endswith(".txt")]
     )

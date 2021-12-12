@@ -27,7 +27,7 @@ from tqdm.auto import tqdm
 from transformers import Wav2Vec2ForCTC, Wav2Vec2Tokenizer
 
 from audio2text_functions import (
-    beautify_filename,
+    trim_fname,
     convert_vid_for_transcription,
     corr,
     create_metadata_df,
@@ -84,13 +84,11 @@ def transcribe_video_wav2vec(
     full_transc = []
     GPU_update_incr = math.ceil(len(chunk_directory) / 2)
 
-    # Load audio chunks by name, pass into model, append output text-----------------------------------------------
 
     for audio_chunk in tqdm(
         chunk_directory,
         total=len(chunk_directory),
-        desc="Transcribing {} ".format(shorten_title(vid_clip_name)),
-    ):
+        desc="Transcribing video",):
 
         current_loc = chunk_directory.index(audio_chunk)
 
@@ -202,6 +200,7 @@ def get_parser():
 
 if __name__ == "__main__":
     st = time.perf_counter()
+    # parse the command line arguments
     args = get_parser().parse_args()
     directory = str(args.input_dir)
     is_verbose = args.verbose
@@ -251,11 +250,11 @@ if __name__ == "__main__":
             vid_clip_name=filename,
             chunk_dur=chunk_length,
         )
-        full_transcription = t_results.get("audio_transcription")
+        t_finished = t_results.get("audio_transcription")
         metadata = t_results.get("metadata")
 
-        # label and store this transcription
-        v_lbl = beautify_filename(filename, num_words=15, start_reverse=False)
+        # label and store transcription
+        v_lbl = trim_fname(filename, num_words=15, start_reverse=False)
         # transcription
         t_file = f"vid2text_{v_lbl}_tranc_{get_timestamp()}.txt"
 
@@ -265,7 +264,7 @@ if __name__ == "__main__":
             encoding="utf-8",
             errors="ignore",
         ) as tf:
-            tf.writelines(full_transcription)  # save transcription
+            tf.writelines(t_finished)  # save transcription
 
         metadata_filename = f"metadata - {v_lbl} - transcription.csv"
         metadata.to_csv(join(out_p_metadata, metadata_filename), index=True)

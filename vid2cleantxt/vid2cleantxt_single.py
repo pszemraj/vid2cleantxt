@@ -33,7 +33,7 @@ from tqdm.auto import tqdm
 from transformers import Wav2Vec2ForCTC, Wav2Vec2Tokenizer
 
 from audio2text_functions import (
-    beautify_filename,
+    trim_fname,
     convert_vid_for_transcription,
     corr,
     create_metadata_df,
@@ -67,7 +67,7 @@ def transcribe_video_wav2vec(
 
     # Split Video into Audio Chunks-----------------------------------------------
     if verbose:
-        print("Starting to transcribe {} @ {}".format(vid_clip_name, datetime.now()))
+        print(f"Starting to transcribe {vid_clip_name} @ {datetime.now()}")
     # create audio chunk folder
     output_folder_name = "audio_chunks"
     path2audiochunks = join(directory, output_folder_name)
@@ -210,7 +210,7 @@ if __name__ == "__main__":
     metadata = t_results.get("metadata")
 
     # label and store this transcription
-    vid_preamble = beautify_filename(filename, num_words=15, start_reverse=False)
+    vid_preamble = trim_fname(filename, num_words=15, start_reverse=False)
     # transcription
     transcribed_filename = (
         vid_preamble + "_tscript_" + datetime.now().strftime("_%H.%M.%S") + ".txt"
@@ -255,7 +255,7 @@ if __name__ == "__main__":
         join(
             out_p_tscript,
             "YAKE - keywords for {}.csv".format(
-                beautify_filename(filename_for_keywords)
+                trim_fname(filename_for_keywords)
             ),
         ),
         index=True,
