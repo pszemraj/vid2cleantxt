@@ -61,6 +61,7 @@ def transcribe_video_wav2vec(
     vid_clip_name,
     chunk_dur: int,
     verbose=False,
+    temp_dir: str = "audio_chunks",
 ):
     # this is the same process as used in the single video transcription, now as a function. Note that spell
     # correction and keyword extraction are now done separately in the script  user needs to pass in: the model,
@@ -70,8 +71,7 @@ def transcribe_video_wav2vec(
     if verbose:
         print(f"Starting to transcribe {vid_clip_name} @ {get_timestamp()}")
     # create audio chunk folder
-    output_folder_name = "audio_chunks"
-    ac_storedir = join(directory, output_folder_name)
+    ac_storedir = join(directory, temp_dir)
     create_folder(ac_storedir)
     chunk_directory = convert_vid_for_transcription(
         vid2beconv=vid_clip_name,
@@ -84,11 +84,11 @@ def transcribe_video_wav2vec(
     full_transc = []
     GPU_update_incr = math.ceil(len(chunk_directory) / 2)
 
-
     for audio_chunk in tqdm(
         chunk_directory,
         total=len(chunk_directory),
-        desc="Transcribing video",):
+        desc="Transcribing video",
+    ):
 
         current_loc = chunk_directory.index(audio_chunk)
 
@@ -96,10 +96,11 @@ def transcribe_video_wav2vec(
             # provide update on GPU usage
             check_runhardware()
 
-        # load dat chunk
-        audio_input, rate = librosa.load(join(ac_storedir, audio_chunk), sr=16000)
+        audio_input, rate = librosa.load(
+            join(ac_storedir, audio_chunk), sr=16000
+        )  # 16000 is the sampling rate of the wav2vec model
         # MODEL
-        device = "cuda:0" if torch.cuda.is_available() else "cpu"
+        device = "cuda:0" if torch.cuda.is_available() else "cpu"  # GPU or CPU
         input_values = tokenizer(
             audio_input, return_tensors="pt", padding="longest", truncation=True
         ).input_values.to(device)
@@ -114,7 +115,8 @@ def transcribe_video_wav2vec(
         del predicted_ids
         torch.cuda.empty_cache()
 
-    if verbose: print(f"Finished transcribing {vid_clip_name} @ {get_timestamp()}")
+    if verbose:
+        print(f"Finished transcribing {vid_clip_name} @ {get_timestamp()}")
 
     md_df = create_metadata_df()  # makes a blank df with column names
     approx_input_len = (len(chunk_directory) * chunk_dur) / 60
@@ -194,16 +196,14 @@ def get_parser():
     return parser
 
 
-# -------------------------------------------------------
-# Main Script
-# -------------------------------------------------------
-
 if __name__ == "__main__":
+
     st = time.perf_counter()
     # parse the command line arguments
     args = get_parser().parse_args()
     directory = str(args.input_dir)
     is_verbose = args.verbose
+    move_comp = args.move_input_vids
     chunk_length = int(args.chunk_length)
     model_arg = args.model_name
 
@@ -222,7 +222,7 @@ if __name__ == "__main__":
     sym_spell = init_symspell()
     sys.stdout = orig_out  # return to default of print-to-console
 
-    vid_extensions = [".mp4", ".mov", ".avi"]
+    vid_extensions = [".mp4", ".mov", ".avi"]  # may add more later
     approved_files = []
     for ext in vid_extensions:
         approved_files.extend(
@@ -231,10 +231,7 @@ if __name__ == "__main__":
 
     print(f"\nFound {len(approved_files)} video files in {directory}")
 
-    # iterate through list of video files, transcribing one at a time --------------------------------------------------
-    storage_locs = setup_out_dirs(
-        directory
-    )  # create and get output folders
+    storage_locs = setup_out_dirs(directory)  # create and get output folders
     out_p_tscript = storage_locs.get("t_out")
     out_p_metadata = storage_locs.get("m_out")
 
@@ -255,7 +252,6 @@ if __name__ == "__main__":
 
         # label and store transcription
         v_lbl = trim_fname(filename, num_words=15, start_reverse=False)
-        # transcription
         t_file = f"vid2text_{v_lbl}_tranc_{get_timestamp()}.txt"
 
         with open(
@@ -264,12 +260,13 @@ if __name__ == "__main__":
             encoding="utf-8",
             errors="ignore",
         ) as tf:
-            tf.writelines(t_finished)  # save transcription
+            tf.writelines(t_finished)
 
         metadata_filename = f"metadata - {v_lbl} - transcription.csv"
         metadata.to_csv(join(out_p_metadata, metadata_filename), index=True)
 
-        move2completed(directory, filename=filename)
+        if move_comp:
+            move2completed(directory, filename=filename)
 
     if is_verbose:
         print(f"finished transcribing all files at {get_timestamp()}")
@@ -322,17 +319,13 @@ if __name__ == "__main__":
         kw_all_vids = pd.concat([kw_all_vids, qk_df], axis=1)
 
     # save overall transcription file
-    keyword_db_name = f"YAKE - all keys for batch {get_timestamp()}.csv"
+    kwdb_fname = f"YAKE - all keys for batch {get_timestamp()}.csv"
     kw_all_vids.to_csv(
-        join(out_p_tscript, keyword_db_name),
+        join(out_p_tscript, kwdb_fname),
         index=True,
     )
 
-    print(
-        "A file with keyword results is in {} \ntitled {}".format(
-            out_p_tscript, keyword_db_name
-        )
-    )
+    print(f"A file with keyword results is in {out_p_tscript} \ntitled {kwdb_fname}")
     print("Finished at: ", get_timestamp())
     print(
         "The relevant files for this run are located in here: \n {out_p_tscript} \n and {out_p_metadata}"

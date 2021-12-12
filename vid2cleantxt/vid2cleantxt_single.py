@@ -194,9 +194,7 @@ if __name__ == "__main__":
     filename = basename(filepath)
     directory = dirname(filepath)
     # iterate through list of video files, transcribing one at a time --------------------------------------------------
-    storage_locs = setup_out_dirs(
-        directory
-    )  # create and get output folders
+    storage_locs = setup_out_dirs(directory)  # create and get output folders
     out_p_tscript = storage_locs.get("t_out")
     out_p_metadata = storage_locs.get("m_out")
 
@@ -254,9 +252,7 @@ if __name__ == "__main__":
     qk_df.to_csv(
         join(
             out_p_tscript,
-            "YAKE - keywords for {}.csv".format(
-                trim_fname(filename_for_keywords)
-            ),
+            "YAKE - keywords for {}.csv".format(trim_fname(filename_for_keywords)),
         ),
         index=True,
     )

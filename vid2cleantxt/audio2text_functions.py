@@ -179,8 +179,9 @@ def convert_vid_for_transcription(
             join(output_directory, this_filename), logger=None
         )
 
-    print(f'Finished converting video to audio chunks - {get_timestamp()}')
-    if verbose: print(f"files saved to {output_directory}")
+    print(f"Finished converting video to audio chunks - {get_timestamp()}")
+    if verbose:
+        print(f"files saved to {output_directory}")
 
     return outfilename_storage
 
@@ -201,7 +202,7 @@ def quick_keys(
     ddup_thresh=0.3,
 ):
     """
-        Extracts keywords from a text file.  uses YAKE to quickly determine keywords in a text file. Saves Keywords and YAKE score (0 means very important) in
+    Extracts keywords from a text file.  uses YAKE to quickly determine keywords in a text file. Saves Keywords and YAKE score (0 means very important) in
     """
     with open(join(filepath, filename), "r", encoding="utf-8", errors="ignore") as file:
         text = file.read()
@@ -399,7 +400,6 @@ def symspell_freetext(
     It uses the SymSpell algorithm to correct the text.
     """
 
-
     # https://github.com/mammothb/symspellpy
     if speller is None:
         if verbose:
@@ -521,7 +521,7 @@ def neuspell_freetext(textlines, ns_checker=None, verbose=False):
 
 def SBD_freetext(text, verbose=False, lang="en"):
     """
-            SBD_freetext() - sentence boundary detection
+    SBD_freetext() - sentence boundary detection
     """
     if isinstance(text, list):
         print(
