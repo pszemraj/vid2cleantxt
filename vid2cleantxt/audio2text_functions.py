@@ -196,8 +196,7 @@ def prep_transc_src(_vid2beconv, in_dir, out_dir, len_chunks=20, verbose=False):
 
     Returns
     -------
-    [type]
-        [description]
+    chunk_fnames - list, the names of the audio files created
     """
 
     load_path = join(in_dir, _vid2beconv) if in_dir is not None else _vid2beconv
@@ -395,7 +394,7 @@ def symspell_freetext(
     corrected_text : list, list of strings, or string, the corrected text
     """
 
-    speller = speller or init_symspell(
+    sym_spell = speller or init_symspell(
         dist=dist
     )  # initialize a new SymSpell object if none is provided
     corrected_list = []
@@ -486,8 +485,7 @@ def neuspell_freetext(textlines, ns_checker=None, verbose=False):
         if line == "" or (len(line) <= 5):
             continue  # blank line
 
-        line = line.lower()
-        corrected_text = ns_checker.correct_strings([line])
+        corrected_text = ns_checker.correct_strings([line.lower()]) # spell check the lowercase line
         corrected_text_f = " ".join(corrected_text)
 
         corrected_list.append(corrected_text_f + "\n")
@@ -502,23 +500,29 @@ def neuspell_freetext(textlines, ns_checker=None, verbose=False):
 
 def SBD_freetext(text, verbose=False, lang="en"):
     """
-    SBD_freetext() - sentence boundary detection
+    SBD_freetext - spell check a text object using pySBD, a python implementation of the Sentence Boundary Detection algorithm
+
+    Parameters
+    ----------
+    text : list, list of strings, or string, text to be spell checked
+    verbose : bool, optional
+    lang : str, optional, by default "en", language of the text
+
+    Returns
+    -------
+    seg_and_capital = list, list of strings, or string, the corrected text
     """
+
     if isinstance(text, list):
-        print(
-            "Warning, input ~text~ has type {}. Will convert to str".format(type(text))
-        )
         text = " ".join(text)
+        if verbose: print("text is a list, converting to string")
 
     seg = pysbd.Segmenter(language=lang, clean=True)
     sentences = seg.segment(text)
 
     if verbose:
-        print(
-            "input text of {} words was split into ".format(len(text.split(" "))),
-            len(sentences),
-            "sentences",
-        )
+        print("Finished sentence boundary detection at time: ", datetime.now(), "\n")
+        print("Number of sentences: ", len(sentences))
 
     capitalized = []
     for sentence in sentences:
@@ -554,26 +558,28 @@ def spellcorrect_pipeline(filepath, filename, ns_checker=None, verbose=False):
 
     sc_textlines = neuspell_freetext(textlines, ns_checker=ns_checker, verbose=verbose)
 
-    loc_SC = "neuspell_sc"
+    loc_SC = "neuspell_results"
     create_folder(join(filepath, loc_SC))
 
-    sc_outname = "NSC_" + trim_fname(filename, num_words=15, start_rev=False) + ".txt"
+    sc_outname = f"{trim_fname(filename)}_neuspell_results.txt"
 
     with open(
         join(filepath, loc_SC, sc_outname), "w", encoding="utf-8", errors="replace"
-    ) as file_sc:
-        file_sc.writelines(sc_textlines)  # save spell-corrected text
+    ) as fo:
+        fo.writelines(sc_textlines)  # save spell-corrected text
 
-    # TODO: update logic in the respective functions instead of using quick_sc_fixes to fix recurring small issues
     quick_sc_fixes = {
         " ' ": "'",
+        " - ": "-",
+        " . ": ".",
     }
     if isinstance(sc_textlines, list):
         SBD_sc_textlines = []
         for line in sc_textlines:
-            if isinstance(line, list):
-                # handles weird corner cases
-                line = " ".join(line)
+            line = " ".join(line) if isinstance(line, list) else line
+            for key, value in quick_sc_fixes.items():
+                line = line.replace(key, value)
+            SBD_sc_textlines.append(line)
 
             sentenced = SBD_freetext(line, verbose=verbose)
             for key, value in quick_sc_fixes.items():
@@ -593,8 +599,8 @@ def spellcorrect_pipeline(filepath, filename, ns_checker=None, verbose=False):
 
     with open(
         join(filepath, loc_SBD, SBD_outname), "w", encoding="utf-8", errors="replace"
-    ) as file_sc:
-        file_sc.writelines(
+    ) as fo:
+        fo.writelines(
             SBD_sc_textlines
         )  # save spell-corrected AND sentence-boundary disambig text
 
