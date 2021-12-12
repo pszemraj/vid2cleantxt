@@ -49,6 +49,7 @@ from v2ct_utils import (
     torch_validate_cuda,
     get_timestamp,
 )
+from vid2cleantxt.audio2text_functions import get_av_fmts
 
 
 # -------------------------------------------------------
@@ -82,7 +83,7 @@ def save_transc_results(
 
     if verbose:
         print("Saved transcript and metadata to {} and {}".format(out_dir))
-    
+
 def transcribe_video_wav2vec(
     ts_model,
     src_dir,
@@ -106,7 +107,7 @@ def transcribe_video_wav2vec(
     Returns
     -------
     transc_results : dict, the transcribed text and metadata
-    
+
     """
 
     if verbose:
@@ -176,7 +177,7 @@ def transcribe_video_wav2vec(
         mdata=md_df,
         verbose=verbose,
     ) # save the results here
-    
+
     shutil.rmtree(ac_storedir, ignore_errors=True)  # remove audio chunks folder
     transc_res = {
         "audio_transcription": full_transc,
@@ -202,7 +203,7 @@ def postprocess_transc(tscript_dir, mdata_dir, merge_files=False, verbose=False)
     """
     if verbose:
         print("Starting to postprocess transcription @ {}".format(get_timestamp()))
-    
+
     if merge_files:
         digest_txt_directory(tscript_dir, iden=f"orig_transc_{get_timestamp()}")
         digest_txt_directory(
@@ -296,7 +297,7 @@ def get_parser():
     parser.add_argument(
         "--chunk-length",
         required=False,
-        default=20,
+        default=20, # may need to be adjusted based on hardware and model used
         type=int,
         help="Duration of audio chunks (in seconds) that the transformer model will be fed",
     )
@@ -324,21 +325,21 @@ if __name__ == "__main__":
     tokenizer = Wav2Vec2Tokenizer.from_pretrained(wav2vec2_model)
     model = Wav2Vec2ForCTC.from_pretrained(wav2vec2_model)
 
+    # load the spellchecker models. suppress outputs as there are way too many
     orig_out = sys.__stdout__
-    sys.stdout = NullIO()  # hide printing to console for initializations below:
+    sys.stdout = NullIO()  
     checker = init_neuspell()
     sym_spell = init_symspell()
     sys.stdout = orig_out  # return to default of print-to-console
 
-    vid_extensions = [".mp4", ".mov", ".avi"]  # may add more later
     approved_files = []
-    for ext in vid_extensions:
+    for ext in get_av_fmts(): # now include audio formats and video formats
         approved_files.extend(find_ext_local(directory, req_ext=ext, full_path=False))
 
     print(f"\nFound {len(approved_files)} video files in {directory}")
 
     storage_locs = setup_out_dirs(directory)  # create and get output folders
-   
+
 
     for filename in tqdm(
         approved_files,
@@ -352,19 +353,17 @@ if __name__ == "__main__":
             clip_name=filename,
             chunk_dur=chunk_length,
         )
-       
+
         if move_comp:
             move2completed(directory, filename=filename)
-            
-    if is_verbose:
-        print(f"finished transcribing all files at {get_timestamp()}")
-    
+
+
     # postprocess the transcriptions
     out_p_tscript = storage_locs.get("t_out")
     out_p_metadata = storage_locs.get("m_out")
     postprocess_transc(tscript_dir=out_p_tscript, mdata_dir=out_p_metadata, merge_files=False,
                        verbose=is_verbose)
-        
+
 
     print(f"Finished at: {get_timestamp()} taking a total of {(time.perf_counter() - st)/60} mins")
     print(

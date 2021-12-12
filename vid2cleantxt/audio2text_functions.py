@@ -27,41 +27,18 @@ from vid2cleantxt.v2ct_utils import get_timestamp
 # ------------------------------------------------------------------------
 
 
-def avg_word(sentence):
+def get_av_fmts():
     """
-    avg_word - calculates the average word length of a sentence
-    """
-    words = sentence.split()
-    num_words = len(words)
-    if num_words == 0:
-        num_words = 1
-    return sum(len(word) for word in words) / num_words
-
-
-def num_numeric_chars(free_text):
-    """
-    returns number of numeric "words" (i.e., digits that are surrounded by spaces)
-    """
-    num_numeric_words = len(
-        [free_text for free_text in free_text.split() if free_text.isdigit()]
-    )
-    return num_numeric_words
-
-
-def corr(s: str):
-    """
-    corr - adds space after period if there isn't one. removes extra spaces
-
-    Parameters
-    ----------
-    s : str, text to be corrected
+    get_audio_video_fmts - returns the audio and video formats supported by the system
 
     Returns
     -------
-    str
+    supported_fmts : list, all formats supported by vid2cleantxt
     """
-    return re.sub(r"\.(?! )", ". ", re.sub(r" +", " ", s))
-
+    audio_fmt = ['.wav', '.mp3', '.m4a', '.flac']
+    video_fmt = [".mp4", ".mov", ".avi", ".mkv", ".ogg", ".webm"]
+    supported_fmts = audio_fmt + video_fmt
+    return supported_fmts
 
 def setup_out_dirs(
     directory,
@@ -345,6 +322,41 @@ def quick_keys(
 # Spelling
 # TODO: move to spelling module
 
+
+def avg_word(sentence):
+    """
+    avg_word - calculates the average word length of a sentence
+    """
+    words = sentence.split()
+    num_words = len(words)
+    if num_words == 0:
+        num_words = 1
+    return sum(len(word) for word in words) / num_words
+
+
+def num_numeric_chars(free_text):
+    """
+    returns number of numeric "words" (i.e., digits that are surrounded by spaces)
+    """
+    num_numeric_words = len(
+        [free_text for free_text in free_text.split() if free_text.isdigit()]
+    )
+    return num_numeric_words
+
+
+def corr(s: str):
+    """
+    corr - adds space after period if there isn't one. removes extra spaces
+
+    Parameters
+    ----------
+    s : str, text to be corrected
+
+    Returns
+    -------
+    str
+    """
+    return re.sub(r"\.(?! )", ". ", re.sub(r" +", " ", s))
 
 def init_symspell(max_dist=3, pref_len=7):
     """
