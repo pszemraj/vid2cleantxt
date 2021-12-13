@@ -9,7 +9,7 @@ this is the primary pipeline for the project
 You can access the arguments for this script by running the following command:
     *\vid2cleantxt\vid2cleantxt_folder.py -h (windows)
     */vid2cleantxt/vid2cleantxt_folder.py -h (everything else)
-    
+
 Tips for runtime:
 
 start with "facebook/wav2vec2-base-960h" for both tokenizer and model
@@ -44,6 +44,8 @@ from audio2text_functions import (
     quick_keys,
     spellcorrect_pipeline,
     setup_out_dirs,
+    get_av_fmts,
+
 )
 from v2ct_utils import (
     check_runhardware,
@@ -55,7 +57,6 @@ from v2ct_utils import (
     torch_validate_cuda,
     get_timestamp,
 )
-from vid2cleantxt.audio2text_functions import get_av_fmts
 
 
 # -------------------------------------------------------
@@ -319,6 +320,7 @@ def get_parser():
 
     return parser
 
+#TODO: change to pathlib from os.path
 
 if __name__ == "__main__":
 
