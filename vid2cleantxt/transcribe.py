@@ -43,6 +43,7 @@ import transformers
 from transformers import Wav2Vec2ForCTC, AutoTokenizer
 transformers.utils.logging.set_verbosity(40)
 
+tl.set_verbosity_warning()
 from audio2text_functions import (
     trim_fname,
     prep_transc_src,
