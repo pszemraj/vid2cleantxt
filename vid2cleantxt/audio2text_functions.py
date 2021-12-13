@@ -413,7 +413,7 @@ def symspell_freetext(
     """
 
     sym_spell = speller or init_symspell(
-        dist=dist
+        max_dist=dist
     )  # initialize a new SymSpell object if none is provided
     corrected_list = []
     textlines = list(textlines) if isinstance(textlines, str) else textlines
