@@ -24,7 +24,12 @@ from os.path import dirname, join
 sys.path.append(dirname(dirname(os.path.abspath(__file__))))
 
 import warnings
-warnings.filterwarnings("ignore")
+warnings.filterwarnings("ignore", message="Some weights of")
+warnings.filterwarnings("ignore", message="initializing BertModel")
+
+import logging
+logging.basicConfig(level=logging.WARNING, filename='vid2cleantext_transcriber.log')
+
 import math
 import shutil
 import time
@@ -34,7 +39,9 @@ import pandas as pd
 import argparse
 import torch
 from tqdm import tqdm
+import transformers
 from transformers import Wav2Vec2ForCTC, AutoTokenizer
+transformers.utils.logging.set_verbosity(40)
 
 from audio2text_functions import (
     trim_fname,
@@ -336,6 +343,7 @@ if __name__ == "__main__":
     model_arg = args.model_name
 
     # load model
+    print(f"Loading models @ {get_timestamp()} - may take a while. If concerned, check the log file")
     wav2vec2_model = (
         "facebook/wav2vec2-large-960h-lv60-self" if model_arg is None else model_arg
     )
