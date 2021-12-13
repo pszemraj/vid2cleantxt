@@ -24,8 +24,9 @@ from natsort import natsorted
 
 
 # basics
-def get_timestamp():
-    return datetime.now().strftime("%b-%d-%Y_t-%H")
+def get_timestamp(exact=False):
+    ts = datetime.now().strftime("%b-%d-%Y_-%H-%M-%S") if exact else datetime.now().strftime("%b-%d-%Y_-%H")
+    return ts
 
 
 def print_spacer(n=1):
@@ -255,18 +256,16 @@ def torch_validate_cuda(verbose=False):
 
     """
     GPUs = GPU.getGPUs()
-    num_gpus = len(GPUs)
-    try:
+    
+    if GPUs is not None and len(GPUs) > 0:
         torch.cuda.init()
-        if not torch.cuda.is_available():
-            print(
-                "WARNING - CUDA is not being used in processing - expect longer runtime"
-            )
-            if verbose:
-                print(f"CUDA is not available, but {num_gpus} GPU(s) detected")
-    except Exception as e:
-        print("WARNING - CUDA is not being used in processing - expect longer runtime")
-        print(e)
+        print("Cuda availability (PyTorch): ", torch.cuda.is_available())
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        if verbose:
+            print("Active GPU device: ", torch.cuda.get_device_name(device=device))
+    else:
+        print("No GPU being used - expect longer RT")
+
 
 
 def check_runhardware(verbose=False):
@@ -302,7 +301,7 @@ def check_runhardware(verbose=False):
         # prints out load on each core vs time
         cpu_trend = [x / psutil.cpu_count() * 100 for x in psutil.getloadavg()]
         print(
-            "CPU load vs. time: 5 mins - {}% | 10 mins - {}% | 15 mins - {}% |".format(
+            "CPU load vs. time: 5 mins - {}% | 10 mins - {}% | 15 mins - {}% |\n".format(
                 cpu_trend[0], cpu_trend[1], cpu_trend[2]
             )
         )

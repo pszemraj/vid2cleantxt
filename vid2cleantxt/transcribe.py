@@ -40,7 +40,7 @@ import argparse
 import torch
 from tqdm import tqdm
 import transformers
-from transformers import Wav2Vec2ForCTC, AutoTokenizer, AutoModel
+from transformers import Wav2Vec2Processor, Wav2Vec2ForCTC
 transformers.utils.logging.set_verbosity(40)
 
 from audio2text_functions import (
@@ -109,6 +109,7 @@ def save_transc_results(
 
 def transcribe_video_wav2vec(
     ts_model,
+    ts_tokenizer,
     src_dir,
     clip_name: str,
     chunk_dur: int,
@@ -121,6 +122,7 @@ def transcribe_video_wav2vec(
     Parameters
     ----------
     ts_model : torch.nn.Module, the transformer model that was loaded (must be a wav2vec2 model)
+    ts_tokenizer : transformers.AutoTokenizer, the tokenizer that was loaded (must be a wav2vec2 tokenizer)
     directory : str, path to the directory containing the video file
     vid_clip_name : str, name of the video clip
     chunk_dur : int, duration of audio chunks (in seconds) that the transformer model will be fed
@@ -145,29 +147,46 @@ def transcribe_video_wav2vec(
         out_dir=ac_storedir,
     )
     torch_validate_cuda()
-    check_runhardware()
     full_transc = []
-    GPU_update_incr = math.ceil(len(chunk_directory) / 2)
+    GPU_update_incr = math.ceil(len(chunk_directory) / 2) if len(chunk_directory) > 1 else 1
     pbar = tqdm(total=len(chunk_directory), desc="Transcribing video")
     for i, audio_chunk in enumerate(chunk_directory):
 
         if (i % GPU_update_incr == 0) and (GPU_update_incr != 0):
             # provide update on GPU usage
             check_runhardware()
-
         audio_input, clip_sr = librosa.load(
             join(ac_storedir, audio_chunk), sr=16000
         )  # 16000 is the sampling rate of the wav2vec model
-        # MODEL
-        device = "cuda:0" if torch.cuda.is_available() else "cpu"  # GPU or CPU
-        input_values = tokenizer(
-            audio_input, return_tensors="pt", padding="longest", truncation=True
-        ).input_values.to(device)
-        ts_model = ts_model.to(device)
-        logits = ts_model(input_values).logits
-        predicted_ids = torch.argmax(logits, dim=-1)
-        this_transc = str(tokenizer.batch_decode(predicted_ids)[0])
-        full_transc.append(this_transc + "\n")
+        # convert audio to tensor
+        inputs = ts_tokenizer(audio_input, return_tensors="pt", padding="longest")
+        device = "cuda:0" if torch.cuda.is_available() else "cpu"  # GPUnscribe.py  or CPU# 
+        input_values = inputs.input_values.to(device)
+        attention_mask = inputs.attention_mask.to(device)
+
+        with torch.no_grad(): 
+            # run the model
+            logits = ts_model(input_values, attention_mask=attention_mask).logits
+
+        predicted_ids = torch.argmax(logits, dim=-1) # get the predicted ids by argmax
+        this_transc = ts_tokenizer.batch_decode(predicted_ids)
+        # audio_input, clip_sr = librosa.load(
+        #     join(ac_storedir, audio_chunk), sr=16000
+        # )  # 16000 is the sampling rate of the wav2vec model
+        # # MODEL
+        # device = "cuda:0" if torch.cuda.is_available() else "cpu"  # GPUnscribe.py  or CPU
+        # print(f"the type of audio_input is {type(audio_input)} and has length {len(audio_input)}")
+        # input_values = ts_tokenizer(
+        #     audio_input, return_tensors="pt", padding="longest", truncation=True
+        # ).input_values.to(device)
+        # ts_model = ts_model.to(device)
+        # logits = ts_model(input_values).logits
+        # # logits = ts_model(input_values).logits
+        # predicted_ids = torch.argmax(logits, dim=-1)
+        # this_transc = str(ts_tokenizer.batch_decode(predicted_ids)[0])
+        this_transc = "".join(this_transc) if isinstance(this_transc, list) else this_transc
+        # double-check if "" should be joined on  or " "
+        full_transc.append(f"{this_transc}\n")
         # empty memory so you don't overload the GPU
         del input_values
         del logits
@@ -343,15 +362,15 @@ if __name__ == "__main__":
     model_arg = args.model_name
 
     # load model
-    print(f"Loading models @ {get_timestamp()} - may take a while...")
-    print("if concerned about runtime, consider using the --verbose flag or checking logs")
+    print(f"Loading models @ {get_timestamp(True)} - may take a while...")
+    print("If RT seems excessive, try --verbose flag or checking logfile")
     wav2vec2_model = (
         "facebook/wav2vec2-large-960h-lv60-self" if model_arg is None else model_arg
     )
     if is_verbose:
         print("Loading model: {}".format(wav2vec2_model))
-    tokenizer = AutoTokenizer.from_pretrained(wav2vec2_model)
-    model = AutoModel.from_pretrained(wav2vec2_model)
+    tokenizer = Wav2Vec2Processor.from_pretrained(wav2vec2_model)
+    model = Wav2Vec2ForCTC.from_pretrained(wav2vec2_model)
 
     # load the spellchecker models. suppress outputs as there are way too many
     orig_out = sys.__stdout__
@@ -376,6 +395,7 @@ if __name__ == "__main__":
         # transcribe video and get results
         t_results = transcribe_video_wav2vec(
             ts_model=model,
+            ts_tokenizer=tokenizer,
             src_dir=directory,
             clip_name=filename,
             chunk_dur=chunk_length,

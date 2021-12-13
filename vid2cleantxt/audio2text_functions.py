@@ -8,7 +8,6 @@ from os.path import dirname, join
 
 sys.path.append(dirname(dirname(os.path.abspath(__file__))))
 
-from json import load
 import math
 import pprint as pp
 import re
