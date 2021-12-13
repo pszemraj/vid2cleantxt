@@ -175,7 +175,7 @@ def prep_transc_src(_vid2beconv, in_dir, out_dir, len_chunks=20, verbose=False, 
     input_directory : str, the path to the video file, by default None, which means the current working directory
     output_directory : str, the path to the output audio file, by default None, which means the current working directory
     verbose : bool, optional
-
+    use_mp : bool, optional, whether to use multiprocessing, by default True
     Returns
     -------
     chunk_fnames - list, the names of the audio files created
@@ -198,7 +198,7 @@ def prep_transc_src(_vid2beconv, in_dir, out_dir, len_chunks=20, verbose=False, 
         print(f"{n_chunks} audio chunks to be created of {len_chunks} seconds")
     preamble = trim_fname(_vid2beconv)
     chunk_fnames = []
-
+    # TODO: parallelize this loop with https://joblib.readthedocs.io/en/latest/parallel.html
     for i in tqdm(
         range(n_chunks),
         total=n_chunks,

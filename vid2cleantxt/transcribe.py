@@ -40,7 +40,7 @@ import argparse
 import torch
 from tqdm import tqdm
 import transformers
-from transformers import Wav2Vec2ForCTC, AutoTokenizer
+from transformers import Wav2Vec2ForCTC, AutoTokenizer, AutoModel
 transformers.utils.logging.set_verbosity(40)
 
 from audio2text_functions import (
@@ -155,7 +155,7 @@ def transcribe_video_wav2vec(
             # provide update on GPU usage
             check_runhardware()
 
-        audio_input, _ = librosa.load(
+        audio_input, clip_sr = librosa.load(
             join(ac_storedir, audio_chunk), sr=16000
         )  # 16000 is the sampling rate of the wav2vec model
         # MODEL
@@ -351,7 +351,7 @@ if __name__ == "__main__":
     if is_verbose:
         print("Loading model: {}".format(wav2vec2_model))
     tokenizer = AutoTokenizer.from_pretrained(wav2vec2_model)
-    model = Wav2Vec2ForCTC.from_pretrained(wav2vec2_model)
+    model = AutoModel.from_pretrained(wav2vec2_model)
 
     # load the spellchecker models. suppress outputs as there are way too many
     orig_out = sys.__stdout__
