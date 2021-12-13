@@ -1,8 +1,11 @@
 """
     v2ct_utils.py - a bunch of general utilities like loading all files of a certain extension in a directory, etc. FUnctions for the actual processing of the files are in audio2text_functions.py
 """
-
 import os
+import sys
+from os.path import dirname, join
+
+sys.path.append(dirname(dirname(os.path.abspath(__file__))))
 import pprint as pp
 import shutil
 from datetime import datetime

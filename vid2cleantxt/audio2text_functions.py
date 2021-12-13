@@ -2,6 +2,12 @@
     audio2text_functions.py - functions for vid2cleantxt project, these functions are used to convert audio files to text.
     general helper functions are in v2ct_utils.py
 """
+import os
+import sys
+from os.path import dirname, join
+
+sys.path.append(dirname(dirname(os.path.abspath(__file__))))
+
 from json import load
 import math
 import pprint as pp
@@ -9,7 +15,6 @@ import re
 import sys
 import time
 from datetime import datetime
-from os.path import join
 
 import moviepy.editor as mp
 import neuspell
@@ -20,8 +25,7 @@ import yake
 from symspellpy import SymSpell
 from tqdm.auto import tqdm
 
-from v2ct_utils import trim_fname, create_folder, NullIO
-from vid2cleantxt.v2ct_utils import get_timestamp
+from vid2cleantxt.v2ct_utils import trim_fname, create_folder, NullIO, get_timestamp
 
 
 # ------------------------------------------------------------------------
