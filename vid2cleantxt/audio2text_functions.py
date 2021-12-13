@@ -35,10 +35,11 @@ def get_av_fmts():
     -------
     supported_fmts : list, all formats supported by vid2cleantxt
     """
-    audio_fmt = ['.wav', '.mp3', '.m4a', '.flac']
+    audio_fmt = [".wav", ".mp3", ".m4a", ".flac"]
     video_fmt = [".mp4", ".mov", ".avi", ".mkv", ".ogg", ".webm"]
     supported_fmts = audio_fmt + video_fmt
     return supported_fmts
+
 
 def setup_out_dirs(
     directory,
@@ -358,6 +359,7 @@ def corr(s: str):
     """
     return re.sub(r"\.(?! )", ". ", re.sub(r" +", " ", s))
 
+
 def init_symspell(max_dist=3, pref_len=7):
     """
     init_symspell - initialize the SymSpell object
@@ -437,8 +439,9 @@ def symspell_freetext(
             " ".join(line_suggests) + "\n"
         )  # add newline to end of each line appended
 
-    corrected_text = corr(" ".join(corrected_list)) # join list of lines into a single string and correct spaces
-
+    corrected_text = corr(
+        " ".join(corrected_list)
+    )  # join list of lines into a single string and correct spaces
 
     if verbose:
         print(
@@ -498,12 +501,16 @@ def neuspell_freetext(textlines, ns_checker=None, verbose=False):
         if line == "" or (len(line) <= 5):
             continue  # blank line
 
-        corrected_text = ns_checker.correct_strings([line.lower()]) # spell check the lowercase line
+        corrected_text = ns_checker.correct_strings(
+            [line.lower()]
+        )  # spell check the lowercase line
         corrected_text_f = " ".join(corrected_text)
 
         corrected_list.append(corrected_text_f + "\n")
 
-    corrected_text = corr(" ".join(corrected_list)) # join list of lines into a single string and correct spaces
+    corrected_text = corr(
+        " ".join(corrected_list)
+    )  # join list of lines into a single string and correct spaces
 
     if verbose:
         print("Finished correcting w/ neuspell at time: ", datetime.now(), "\n")
@@ -528,7 +535,8 @@ def SBD_freetext(text, verbose=False, lang="en"):
 
     if isinstance(text, list):
         text = " ".join(text)
-        if verbose: print("text is a list, converting to string")
+        if verbose:
+            print("text is a list, converting to string")
 
     seg = pysbd.Segmenter(language=lang, clean=True)
     sentences = seg.segment(text)
@@ -586,19 +594,25 @@ def spellcorrect_pipeline(filepath, filename, ns_checker=None, verbose=False):
         " ' ": "'",
         " - ": "-",
         " . ": ".",
-    } # dictionary of miscellaneous fixes, mostly for punctuation
+    }  # dictionary of miscellaneous fixes, mostly for punctuation
 
-    sc_textlines = [sc_textlines] if not isinstance(sc_textlines, list) else sc_textlines
+    sc_textlines = (
+        [sc_textlines] if not isinstance(sc_textlines, list) else sc_textlines
+    )
     fin_textlines = []
     for line in sc_textlines:
-        line = " ".join(line) if isinstance(line, list) else line # check for list of lists/strings
+        line = (
+            " ".join(line) if isinstance(line, list) else line
+        )  # check for list of lists/strings
 
         for key, value in misc_fixes.items():
             line = line.replace(key, value)
         sentenced = SBD_freetext(line, verbose=verbose)
-        assert isinstance(sentenced, str), f"sentenced, with type {type(sentenced)}  and valye {sentenced} is not a string.. fix it"
+        assert isinstance(
+            sentenced, str
+        ), f"sentenced, with type {type(sentenced)}  and valye {sentenced} is not a string.. fix it"
         for key, value in misc_fixes.items():
-            sentenced = sentenced.replace(key, value) # fix punctuation
+            sentenced = sentenced.replace(key, value)  # fix punctuation
         fin_textlines.append(sentenced)
 
     sentenced = [
@@ -609,8 +623,7 @@ def spellcorrect_pipeline(filepath, filename, ns_checker=None, verbose=False):
     create_folder(join(filepath, loc_FIN))
     final_outname = f"{trim_fname(filename)}_NSC_SBD.txt"
     SBD_out_path = join(filepath, loc_FIN, final_outname)
-    with open(SBD_out_path, "w", encoding="utf-8", errors="replace"
-    ) as fo2:
+    with open(SBD_out_path, "w", encoding="utf-8", errors="replace") as fo2:
         fo2.writelines(fin_textlines)
 
     pipelineout = {
@@ -624,4 +637,3 @@ def spellcorrect_pipeline(filepath, filename, ns_checker=None, verbose=False):
     }
 
     return pipelineout
-

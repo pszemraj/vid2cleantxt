@@ -6,6 +6,10 @@ vid2clntext by Peter Szemraj
 Pipeline for Zero-shot transcription of a lecture video file to text using facebook's wav2vec2 model
 this is the primary pipeline for the project
 
+You can access the arguments for this script by running the following command:
+    *\vid2cleantxt\vid2cleantxt_folder.py -h (windows)
+    */vid2cleantxt/vid2cleantxt_folder.py -h (everything else)
+    
 Tips for runtime:
 
 start with "facebook/wav2vec2-base-960h" for both tokenizer and model
@@ -15,14 +19,13 @@ if model fails to work or errors out, try reducing the chunk length
 import argparse
 import os
 import sys
-from os.path import dirname
+from os.path import dirname, join
 
 sys.path.append(dirname(dirname(os.path.abspath(__file__))))
 
 import math
 import shutil
 import time
-from os.path import join
 
 import librosa
 import pandas as pd
@@ -59,8 +62,10 @@ from vid2cleantxt.audio2text_functions import get_av_fmts
 # Function Definitions
 # -------------------------------------------------------
 
+
 def save_transc_results(
-    out_dir, vid_name:str, ttext:str, mdata:pd.DataFrame, verbose:bool=False):
+    out_dir, vid_name: str, ttext: str, mdata: pd.DataFrame, verbose: bool = False
+):
     """
     save_transc_results - save the transcribed text to a file and a metadata file
 
@@ -75,10 +80,14 @@ def save_transc_results(
     storage_locs = setup_out_dirs(out_dir)  # create and get output folders
     out_p_tscript = storage_locs.get("t_out")
     out_p_metadata = storage_locs.get("m_out")
-    header = f"{trim_fname(vid_name)}_vid2txt_{get_timestamp()}" # create header for output file
+    header = f"{trim_fname(vid_name)}_vid2txt_{get_timestamp()}"  # create header for output file
     # save the text
-    with open(join(out_p_tscript, f"{header}_full.txt"), "w", encoding="utf-8",
-            errors="ignore",) as fo:
+    with open(
+        join(out_p_tscript, f"{header}_full.txt"),
+        "w",
+        encoding="utf-8",
+        errors="ignore",
+    ) as fo:
         fo.writelines(ttext)
 
     # save the metadata
@@ -87,10 +96,11 @@ def save_transc_results(
     if verbose:
         print("Saved transcript and metadata to {} and {}".format(out_dir))
 
+
 def transcribe_video_wav2vec(
     ts_model,
     src_dir,
-    clip_name:str,
+    clip_name: str,
     chunk_dur: int,
     verbose=False,
     temp_dir: str = "audio_chunks",
@@ -128,8 +138,7 @@ def transcribe_video_wav2vec(
     check_runhardware()
     full_transc = []
     GPU_update_incr = math.ceil(len(chunk_directory) / 2)
-    pbar = tqdm(total=len(chunk_directory),
-        desc="Transcribing video")
+    pbar = tqdm(total=len(chunk_directory), desc="Transcribing video")
     for i, audio_chunk in enumerate(chunk_directory):
 
         if (i % GPU_update_incr == 0) and (GPU_update_incr != 0):
@@ -166,7 +175,7 @@ def transcribe_video_wav2vec(
         clip_name,
         len(chunk_directory),
         chunk_dur,
-        (len(chunk_directory) * chunk_dur) / 60, # minutes, the duration of the video
+        (len(chunk_directory) * chunk_dur) / 60,  # minutes, the duration of the video
         get_timestamp(),
         full_text,
         len(full_text),
@@ -179,7 +188,7 @@ def transcribe_video_wav2vec(
         ttext=full_text,
         mdata=md_df,
         verbose=verbose,
-    ) # save the results here
+    )  # save the results here
 
     shutil.rmtree(ac_storedir, ignore_errors=True)  # remove audio chunks folder
     transc_res = {
@@ -188,7 +197,9 @@ def transcribe_video_wav2vec(
     }
 
     if verbose:
-        print("finished transcription of {vid_clip_name} base folder on {get_timestamp()}")
+        print(
+            "finished transcription of {vid_clip_name} base folder on {get_timestamp()}"
+        )
 
     return transc_res
 
@@ -253,6 +264,7 @@ def postprocess_transc(tscript_dir, mdata_dir, merge_files=False, verbose=False)
         index=True,
     )
 
+
 def get_parser():
     """
     get_parser - a helper function for the argparse module
@@ -300,7 +312,7 @@ def get_parser():
     parser.add_argument(
         "--chunk-length",
         required=False,
-        default=20, # may need to be adjusted based on hardware and model used
+        default=20,  # may need to be adjusted based on hardware and model used
         type=int,
         help="Duration of audio chunks (in seconds) that the transformer model will be fed",
     )
@@ -330,19 +342,18 @@ if __name__ == "__main__":
 
     # load the spellchecker models. suppress outputs as there are way too many
     orig_out = sys.__stdout__
-    sys.stdout = NullIO()  
+    sys.stdout = NullIO()
     checker = init_neuspell()
     sym_spell = init_symspell()
     sys.stdout = orig_out  # return to default of print-to-console
 
     approved_files = []
-    for ext in get_av_fmts(): # now include audio formats and video formats
+    for ext in get_av_fmts():  # now include audio formats and video formats
         approved_files.extend(find_ext_local(directory, req_ext=ext, full_path=False))
 
     print(f"\nFound {len(approved_files)} video files in {directory}")
 
     storage_locs = setup_out_dirs(directory)  # create and get output folders
-
 
     for filename in tqdm(
         approved_files,
@@ -360,15 +371,19 @@ if __name__ == "__main__":
         if move_comp:
             move2completed(directory, filename=filename)
 
-
     # postprocess the transcriptions
     out_p_tscript = storage_locs.get("t_out")
     out_p_metadata = storage_locs.get("m_out")
-    postprocess_transc(tscript_dir=out_p_tscript, mdata_dir=out_p_metadata, merge_files=False,
-                       verbose=is_verbose)
+    postprocess_transc(
+        tscript_dir=out_p_tscript,
+        mdata_dir=out_p_metadata,
+        merge_files=False,
+        verbose=is_verbose,
+    )
 
-
-    print(f"Finished at: {get_timestamp()} taking a total of {(time.perf_counter() - st)/60} mins")
+    print(
+        f"Finished at: {get_timestamp()} taking a total of {(time.perf_counter() - st)/60} mins"
+    )
     print(
         "The relevant files for this run are in: \n {out_p_tscript} \n and {out_p_metadata}"
     )
