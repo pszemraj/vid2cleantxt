@@ -23,6 +23,8 @@ from os.path import dirname, join
 
 sys.path.append(dirname(dirname(os.path.abspath(__file__))))
 
+import warnings
+warnings.filterwarnings("ignore")
 import math
 import shutil
 import time
@@ -31,7 +33,7 @@ import librosa
 import pandas as pd
 import argparse
 import torch
-from tqdm.auto import tqdm
+from tqdm import tqdm
 from transformers import Wav2Vec2ForCTC, AutoTokenizer
 
 from audio2text_functions import (
@@ -94,8 +96,8 @@ def save_transc_results(
     # save the metadata
     mdata.to_csv(join(out_p_metadata, f"{header}_metadata.csv"), index=False)
 
-    if verbose:
-        print("Saved transcript and metadata to {} and {}".format(out_dir))
+    # if verbose:
+    print("Saved transcript and metadata to {} and {}".format(out_dir))
 
 
 def transcribe_video_wav2vec(
