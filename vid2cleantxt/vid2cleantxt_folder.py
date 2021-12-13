@@ -32,7 +32,7 @@ import pandas as pd
 import argparse
 import torch
 from tqdm.auto import tqdm
-from transformers import Wav2Vec2ForCTC, Wav2Vec2Tokenizer
+from transformers import Wav2Vec2ForCTC, AutoTokenizer
 
 from audio2text_functions import (
     trim_fname,
@@ -339,7 +339,7 @@ if __name__ == "__main__":
     )
     if is_verbose:
         print("Loading model: {}".format(wav2vec2_model))
-    tokenizer = Wav2Vec2Tokenizer.from_pretrained(wav2vec2_model)
+    tokenizer = AutoTokenizer.from_pretrained(wav2vec2_model)
     model = Wav2Vec2ForCTC.from_pretrained(wav2vec2_model)
 
     # load the spellchecker models. suppress outputs as there are way too many

@@ -30,7 +30,7 @@ from os.path import basename, dirname, join
 import librosa
 import torch
 from tqdm.auto import tqdm
-from transformers import Wav2Vec2ForCTC, Wav2Vec2Tokenizer
+from transformers import Wav2Vec2ForCTC, AutoTokenizer
 
 from audio2text_functions import (
     trim_fname,
@@ -182,7 +182,7 @@ if __name__ == "__main__":
     wav2vec2_model = "facebook/wav2vec2-large-960h-lv60-self"  # load pretrained model
     # wav2vec2_model = "facebook/wav2vec2-base-960h" # tested up to 90 second chunks. Faster, but less accurate
     print("\nPreparing to load model: " + wav2vec2_model + " - ", datetime.now())
-    tokenizer = Wav2Vec2Tokenizer.from_pretrained(wav2vec2_model)
+    tokenizer = AutoTokenizer.from_pretrained(wav2vec2_model)
     model = Wav2Vec2ForCTC.from_pretrained(wav2vec2_model)
     chunk_length = 30  # (in seconds) if model fails to work or errors out, try reducing this number.
 
