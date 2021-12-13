@@ -24,9 +24,9 @@ from os.path import dirname, join
 sys.path.append(dirname(dirname(os.path.abspath(__file__))))
 
 
-
 import logging
-logging.basicConfig(level=logging.WARNING, filename='vid2cleantext_transcriber.log')
+
+logging.basicConfig(level=logging.WARNING, filename="vid2cleantext_transcriber.log")
 
 import math
 import shutil
@@ -40,6 +40,7 @@ from tqdm import tqdm
 import transformers
 from transformers import Wav2Vec2Processor, Wav2Vec2ForCTC
 import warnings
+
 #  filter out warnings that pretend transfer learning does not exist
 warnings.filterwarnings("ignore", message="Some weights of")
 warnings.filterwarnings("ignore", message="initializing BertModel")
@@ -56,7 +57,6 @@ from audio2text_functions import (
     spellcorrect_pipeline,
     setup_out_dirs,
     get_av_fmts,
-
 )
 from v2ct_utils import (
     check_runhardware,
@@ -71,7 +71,10 @@ from v2ct_utils import (
 
 
 def save_transc_results(
-    out_dir, vid_name: str, ttext: str, mdata: pd.DataFrame,
+    out_dir,
+    vid_name: str,
+    ttext: str,
+    mdata: pd.DataFrame,
 ):
     """
     save_transc_results - save the transcribed text to a file and a metadata file
@@ -99,7 +102,11 @@ def save_transc_results(
     mdata.to_csv(join(out_p_metadata, f"{header}_metadata.csv"), index=False)
 
     # if verbose:
-    print("Saved transcript and metadata to {} and {}".format(out_p_tscript, out_p_metadata))
+    print(
+        "Saved transcript and metadata to {} and {}".format(
+            out_p_tscript, out_p_metadata
+        )
+    )
 
 
 def transcribe_video_wav2vec(
@@ -143,7 +150,9 @@ def transcribe_video_wav2vec(
     )
     torch_validate_cuda()
     full_transc = []
-    GPU_update_incr = math.ceil(len(chunk_directory) / 2) if len(chunk_directory) > 1 else 1
+    GPU_update_incr = (
+        math.ceil(len(chunk_directory) / 2) if len(chunk_directory) > 1 else 1
+    )
     pbar = tqdm(total=len(chunk_directory), desc="Transcribing video")
     for i, audio_chunk in enumerate(chunk_directory):
 
@@ -155,7 +164,7 @@ def transcribe_video_wav2vec(
         )  # 16000 is the sampling rate of the wav2vec model
         # convert audio to tensor
         inputs = ts_tokenizer(audio_input, return_tensors="pt", padding="longest")
-        device = "cuda:0" if torch.cuda.is_available() else "cpu" # set device
+        device = "cuda:0" if torch.cuda.is_available() else "cpu"  # set device
         input_values = inputs.input_values.to(device)
         attention_mask = inputs.attention_mask.to(device)
 
@@ -163,7 +172,7 @@ def transcribe_video_wav2vec(
             # run the model
             logits = ts_model(input_values, attention_mask=attention_mask).logits
 
-        predicted_ids = torch.argmax(logits, dim=-1) # get the predicted ids by argmax
+        predicted_ids = torch.argmax(logits, dim=-1)  # get the predicted ids by argmax
         this_transc = ts_tokenizer.batch_decode(predicted_ids)
         # audio_input, clip_sr = librosa.load(
         #     join(ac_storedir, audio_chunk), sr=16000
@@ -179,7 +188,9 @@ def transcribe_video_wav2vec(
         # # logits = ts_model(input_values).logits
         # predicted_ids = torch.argmax(logits, dim=-1)
         # this_transc = str(ts_tokenizer.batch_decode(predicted_ids)[0])
-        this_transc = "".join(this_transc) if isinstance(this_transc, list) else this_transc
+        this_transc = (
+            "".join(this_transc) if isinstance(this_transc, list) else this_transc
+        )
         # double-check if "" should be joined on  or " "
         full_transc.append(f"{this_transc}\n")
         # empty memory so you don't overload the GPU
@@ -205,7 +216,9 @@ def transcribe_video_wav2vec(
         len(full_text),
         len(full_text.split(" ")),
     ]
-    md_df.transpose(copy=False,)
+    md_df.transpose(
+        copy=False,
+    )
     save_transc_results(
         out_dir=src_dir,
         vid_name=clip_name,
@@ -342,7 +355,8 @@ def get_parser():
 
     return parser
 
-#TODO: change to pathlib from os.path
+
+# TODO: change to pathlib from os.path
 
 if __name__ == "__main__":
 

@@ -25,7 +25,16 @@ from natsort import natsorted
 
 # basics
 def get_timestamp(exact=False):
-    ts = datetime.now().strftime("%b-%d-%Y_-%H-%M-%S") if exact else datetime.now().strftime("%b-%d-%Y_-%H")
+    """
+    get_timestamp - return a timestamp in the format YYYY-MM-DD_HH-MM-SS (exact=False)
+        or YYYY-MM-DD_HH-MM-SS-MS (exact=True)
+    exact : bool, optional, by default False,  if True, return a timestamp with seconds
+    """
+    ts = (
+        datetime.now().strftime("%b-%d-%Y_-%H-%M-%S")
+        if exact
+        else datetime.now().strftime("%b-%d-%Y_-%H")
+    )
     return ts
 
 
@@ -264,8 +273,7 @@ def torch_validate_cuda(verbose=False):
         if verbose:
             print("Active GPU device: ", torch.cuda.get_device_name(device=device))
     else:
-        print("No GPU being used - expect longer RT")
-
+        print("No GPU being used by this machine :(\n")
 
 
 def check_runhardware(verbose=False):
@@ -277,7 +285,7 @@ def check_runhardware(verbose=False):
     if GPUs is not None and len(GPUs) > 0:
         gpu = GPUs[0]
     else:
-        print("No GPU being used - expect longer RT\n")
+        print("No GPU being used :/\n")
         GPUs = gpu = None
     process = psutil.Process(os.getpid())
 
@@ -309,11 +317,13 @@ def check_runhardware(verbose=False):
         if len(GPUs) > 0:
             print(
                 "GPU RAM Free: {0:.0f}MB | Used: {1:.0f}MB | Util {2:3.0f}% | Total {3:.0f}MB\n".format(
-                    gpu.memoryFree, gpu.memoryUsed, gpu.memoryUtil * 100, gpu.memoryTotal
+                    gpu.memoryFree,
+                    gpu.memoryUsed,
+                    gpu.memoryUtil * 100,
+                    gpu.memoryTotal,
                 )
             )
-    else:
-        print("No GPU being used :(\n")
+    # no need to check for CUDA AGAIN they are sad and will not let you use them
 
 
 def digest_txt_directory(file_dir, iden: str = None, verbose=False, make_folder=True):
