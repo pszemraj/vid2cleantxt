@@ -234,31 +234,6 @@ def trim_fname(filename, num_words=20, start_rev=False, word_separator="_"):
 # Hardware
 
 
-def check_runhardware_torch(verbose=False):
-    """
-     check_runhardware_torch - check if the machine has the correct hardware for torch
-
-    Returns: True if the machine has the correct hardware for torch
-    """
-    # https://www.run.ai/guides/gpu-deep-learning/pytorch-gpu/
-
-    GPUs = GPU.getGPUs()
-
-    if len(GPUs) > 0:
-
-        torch.cuda.init()
-
-        print("Cuda availability (PyTorch): ", torch.cuda.is_available())
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        if verbose:
-            print("Active GPU device: ", torch.cuda.get_device_name(device=device))
-        return True
-
-    else:
-        print("No GPU being used :(")
-        return False
-
-
 def torch_validate_cuda(verbose=False):
     """
     torch_validate_cuda - checks if CUDA is available and if it is, it checks if the GPU is available.

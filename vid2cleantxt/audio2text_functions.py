@@ -328,12 +328,12 @@ def quick_keys(
     num_phrases_disp = min(num_kw, disp_max)  # number of phrases to display
 
     if verbose:
-        print(f"Top Key Phrases from YAKE, with max n-gram length {max_ngrams}")
+        print(f"\nTop Key Phrases from YAKE, with max n-gram length {max_ngrams}")
         pp.pprint(kw_report.head(n=num_phrases_disp))
     else:
         kw_list = kw_report["key_phrase"].to_list()
         print(
-            f"Top {num_phrases_disp} Key Phrases from YAKE, with max n-gram length {max_ngrams}"
+            f"\nTop {num_phrases_disp} Key Phrases from YAKE, with max n-gram length {max_ngrams}"
         )
         pp.pprint(kw_list[:num_phrases_disp])
 

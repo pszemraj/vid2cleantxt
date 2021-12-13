@@ -174,20 +174,6 @@ def transcribe_video_wav2vec(
 
         predicted_ids = torch.argmax(logits, dim=-1)  # get the predicted ids by argmax
         this_transc = ts_tokenizer.batch_decode(predicted_ids)
-        # audio_input, clip_sr = librosa.load(
-        #     join(ac_storedir, audio_chunk), sr=16000
-        # )  # 16000 is the sampling rate of the wav2vec model
-        # # MODEL
-        # device = "cuda:0" if torch.cuda.is_available() else "cpu"  # GPUnscribe.py  or CPU
-        # print(f"the type of audio_input is {type(audio_input)} and has length {len(audio_input)}")
-        # input_values = ts_tokenizer(
-        #     audio_input, return_tensors="pt", padding="longest", truncation=True
-        # ).input_values.to(device)
-        # ts_model = ts_model.to(device)
-        # logits = ts_model(input_values).logits
-        # # logits = ts_model(input_values).logits
-        # predicted_ids = torch.argmax(logits, dim=-1)
-        # this_transc = str(ts_tokenizer.batch_decode(predicted_ids)[0])
         this_transc = (
             "".join(this_transc) if isinstance(this_transc, list) else this_transc
         )
@@ -423,8 +409,8 @@ if __name__ == "__main__":
     )
 
     print(
-        f"Finished at: {get_timestamp()} taking a total of {(time.perf_counter() - st)/60} mins"
+        f"\n\nFinished at: {get_timestamp()} taking a total of {(time.perf_counter() - st)/60} mins"
     )
     print(
-        "The relevant files for this run are in: \n {out_p_tscript} \n and {out_p_metadata}"
+        f"The relevant files for this run are in: \n {out_p_tscript} \n and {out_p_metadata}"
     )
