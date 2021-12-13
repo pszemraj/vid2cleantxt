@@ -49,6 +49,7 @@ transformers.utils.logging.set_verbosity(40)
 from audio2text_functions import (
     trim_fname,
     prep_transc_src,
+    prep_w_multi,
     corr,
     create_metadata_df,
     init_neuspell,
@@ -115,6 +116,7 @@ def transcribe_video_wav2vec(
     src_dir,
     clip_name: str,
     chunk_dur: int,
+    use_mp=False,
     verbose=False,
     temp_dir: str = "audio_chunks",
 ):
@@ -142,13 +144,15 @@ def transcribe_video_wav2vec(
     # create audio chunk folder
     ac_storedir = join(src_dir, temp_dir)
     create_folder(ac_storedir)
-    chunk_directory = prep_transc_src(
-        _vid2beconv=clip_name,
-        in_dir=src_dir,
-        len_chunks=chunk_dur,
-        out_dir=ac_storedir,
+    prepare_audio = prep_w_multi if use_mp else prep_transc_src # set the function to use for preparing audio chunks
+    # functions have the same signature, so we can use the same function for both mp and non-mp
+
+    # get the audio chunks
+    chunk_directory = prepare_audio(
+        src_dir, clip_name, chunk_dur, ac_storedir, verbose=verbose
     )
     torch_validate_cuda()
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"  # set device
     full_transc = []
     GPU_update_incr = (
         math.ceil(len(chunk_directory) / 2) if len(chunk_directory) > 1 else 1
@@ -164,7 +168,6 @@ def transcribe_video_wav2vec(
         )  # 16000 is the sampling rate of the wav2vec model
         # convert audio to tensor
         inputs = ts_tokenizer(audio_input, return_tensors="pt", padding="longest")
-        device = "cuda:0" if torch.cuda.is_available() else "cpu"  # set device
         input_values = inputs.input_values.to(device)
         attention_mask = inputs.attention_mask.to(device)
 
@@ -328,7 +331,8 @@ def get_parser():
         "--model-name",
         required=False,
         default=None,
-        help="huggingface model name as a string, ex facebook/wav2vec2-large-960h-lv60-self",
+        help="huggingface model name as a string, ex 'facebook/wav2vec2-base-960h'",
+        # "facebook/wav2vec2-large-960h-lv60-self" is the best model but VERY taxing on the GPU/CPU
     )
 
     parser.add_argument(
@@ -359,7 +363,7 @@ if __name__ == "__main__":
     print(f"Loading models @ {get_timestamp(True)} - may take a while...")
     print("If RT seems excessive, try --verbose flag or checking logfile")
     wav2vec2_model = (
-        "facebook/wav2vec2-large-960h-lv60-self" if model_arg is None else model_arg
+        "facebook/wav2vec2-base-960h" if model_arg is None else model_arg
     )
     if is_verbose:
         print("Loading model: {}".format(wav2vec2_model))

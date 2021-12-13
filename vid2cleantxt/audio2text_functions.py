@@ -3,8 +3,11 @@
     general helper functions are in v2ct_utils.py
 """
 import os
+from posixpath import basename
 import sys
 from os.path import dirname, join
+
+import numpy as np
 
 sys.path.append(dirname(dirname(os.path.abspath(__file__))))
 
@@ -23,9 +26,9 @@ import pysbd
 import yake
 from symspellpy import SymSpell
 from tqdm.auto import tqdm
-
+from natsort import natsorted
 from vid2cleantxt.v2ct_utils import trim_fname, create_folder, NullIO, get_timestamp
-
+import joblib
 
 # ------------------------------------------------------------------------
 
@@ -164,7 +167,7 @@ def create_audiofile(
 
 
 def prep_transc_src(
-    _vid2beconv, in_dir, out_dir, len_chunks=20, verbose=False, use_mp=True
+    _vid2beconv, in_dir, out_dir, len_chunks=20, verbose=False,
 ):
     """
     prep_transc_src - prepares the source video files for transcription by creating audio files and metadata
@@ -179,7 +182,6 @@ def prep_transc_src(
     use_mp : bool, optional, whether to use multiprocessing, by default True
     Returns
     -------
-    chunk_fnames - list, the names of the audio files created
     """
 
     load_path = join(in_dir, _vid2beconv) if in_dir is not None else _vid2beconv
@@ -236,8 +238,76 @@ def prep_transc_src(
     if verbose:
         print(f"files saved to {out_dir}")
 
-    return chunk_fnames
+    return natsorted(chunk_fnames)
 
+
+def prep_w_multi( _vid2beconv, in_dir, out_dir, len_chunks=20, verbose=False,  backend = 'threading'):
+    """
+    prep_w_multi - prepares the audio chunks for transcription using joblib parallel to
+        efficiently process the audio chunks in parallel
+
+    Parameters
+    ----------
+    vid2beconv : str, the name of the video file to be converted (or audio file)
+    len_chunks : int, the length of the audio chunks to be created, by default 20 (seconds)
+    input_directory : str, the path to the video file, by default None, which means the current working directory
+    output_directory : str, the path to the output audio file, by default None, which means the current working directory
+    verbose : bool, optional
+
+    Returns
+    -------
+    chunk_fnames, list of saved chunk names
+    """
+    usr_cpus = os.cpu_count() -2 if os.cpu_count() > 2 else 1 # leave one for the main process
+    load_path = join(in_dir, _vid2beconv) if in_dir is not None else _vid2beconv
+    my_clip = mp.AudioFileClip(load_path) if check_if_audio(load_path) else mp.VideoFileClip(load_path)
+    create_folder(out_dir)  # create the output directory if it doesn't exist
+    audio_chunks = []
+
+    if verbose:
+        print(f"{len(audio_chunks)} audio chunks created")
+
+    n_chunks = math.ceil(my_clip.duration / len_chunks)  # to get in minutes, round up
+    # create iterable that stores the start and end times of each chunk, which are each chunk length long
+    chunk_times = [ (i * len_chunks, (i + 1) * len_chunks) for i in range(n_chunks) ] # creates list of tuples
+    def write_chunk(i, chunk_times, out_dir):
+        this_st, this_end = chunk_times[i]
+
+        if i == n_chunks - 1:
+                this_clip = my_clip.subclip(
+                t_start=this_st
+            )  # if this is the last chunk, use the remainder of the video
+        else:
+            this_clip = my_clip.subclip(t_start=this_st, t_end=this_end)
+        this_filename = f"{_vid2beconv}_clipaudio_{i}.wav"
+        _clip_path = join(out_dir, this_filename) if out_dir is not None else this_filename
+        this_clip.audio.write_audiofile(
+            _clip_path,
+            codec="pcm_s32le",
+            ffmpeg_params=[
+                "-ar",
+                "16000",
+                "-ac",
+                "1",
+                "-preset",
+                "fastest",
+                "-f",
+                "wav",
+                "y",
+            ],
+            logger=None,
+        )
+        return basename(_clip_path)
+
+    stored_chunk_fnames = joblib.Parallel(n_jobs=usr_cpus, backend=backend)(
+        joblib.delayed(write_chunk)(i, chunk_times, out_dir) for i, chunk_times in enumerate(n_chunks)
+    )
+    _tot = len(stored_chunk_fnames)
+    print(f"Finished creating {_tot} audio chunks for wav2vec2 - {get_timestamp()}")
+    if verbose:
+        print(f"files saved to {out_dir}")
+
+    return natsorted(stored_chunk_fnames)
 
 # ------------------------------------------------------------------------
 
