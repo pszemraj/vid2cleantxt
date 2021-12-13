@@ -307,13 +307,14 @@ def check_runhardware(verbose=False):
             )
         )
 
-    if len(GPUs) > 0 and GPUs is not None:
+    if GPUs is not None:
         # display GPU name, memory, etc
-        print(
-            "GPU RAM Free: {0:.0f}MB | Used: {1:.0f}MB | Util {2:3.0f}% | Total {3:.0f}MB\n".format(
-                gpu.memoryFree, gpu.memoryUsed, gpu.memoryUtil * 100, gpu.memoryTotal
+        if len(GPUs) > 0:
+            print(
+                "GPU RAM Free: {0:.0f}MB | Used: {1:.0f}MB | Util {2:3.0f}% | Total {3:.0f}MB\n".format(
+                    gpu.memoryFree, gpu.memoryUsed, gpu.memoryUtil * 100, gpu.memoryTotal
+                )
             )
-        )
     else:
         print("No GPU being used :(\n")
 

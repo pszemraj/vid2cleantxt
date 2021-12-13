@@ -343,7 +343,8 @@ if __name__ == "__main__":
     model_arg = args.model_name
 
     # load model
-    print(f"Loading models @ {get_timestamp()} - may take a while. If concerned, check the log file")
+    print(f"Loading models @ {get_timestamp()} - may take a while...")
+    print("if concerned about runtime, consider using the --verbose flag or checking logs")
     wav2vec2_model = (
         "facebook/wav2vec2-large-960h-lv60-self" if model_arg is None else model_arg
     )
