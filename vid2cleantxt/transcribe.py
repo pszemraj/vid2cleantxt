@@ -23,9 +23,7 @@ from os.path import dirname, join
 
 sys.path.append(dirname(dirname(os.path.abspath(__file__))))
 
-import warnings
-warnings.filterwarnings("ignore", message="Some weights of")
-warnings.filterwarnings("ignore", message="initializing BertModel")
+
 
 import logging
 logging.basicConfig(level=logging.WARNING, filename='vid2cleantext_transcriber.log')
@@ -41,6 +39,10 @@ import torch
 from tqdm import tqdm
 import transformers
 from transformers import Wav2Vec2Processor, Wav2Vec2ForCTC
+import warnings
+#  filter out warnings that pretend transfer learning does not exist
+warnings.filterwarnings("ignore", message="Some weights of")
+warnings.filterwarnings("ignore", message="initializing BertModel")
 transformers.utils.logging.set_verbosity(40)
 
 from audio2text_functions import (
@@ -68,13 +70,8 @@ from v2ct_utils import (
 )
 
 
-# -------------------------------------------------------
-# Function Definitions
-# -------------------------------------------------------
-
-
 def save_transc_results(
-    out_dir, vid_name: str, ttext: str, mdata: pd.DataFrame, verbose: bool = False
+    out_dir, vid_name: str, ttext: str, mdata: pd.DataFrame,
 ):
     """
     save_transc_results - save the transcribed text to a file and a metadata file
@@ -85,7 +82,6 @@ def save_transc_results(
     vid_name : str, name of the video file
     ttext : str, the transcribed text
     mdata : pd.DataFrame, the metadata for the video file
-    verbose : bool, optional
     """
     storage_locs = setup_out_dirs(out_dir)  # create and get output folders
     out_p_tscript = storage_locs.get("t_out")
@@ -100,11 +96,10 @@ def save_transc_results(
     ) as fo:
         fo.writelines(ttext)
 
-    # save the metadata
     mdata.to_csv(join(out_p_metadata, f"{header}_metadata.csv"), index=False)
 
     # if verbose:
-    print("Saved transcript and metadata to {} and {}".format(out_dir))
+    print("Saved transcript and metadata to {} and {}".format(out_p_tscript, out_p_metadata))
 
 
 def transcribe_video_wav2vec(
@@ -160,11 +155,11 @@ def transcribe_video_wav2vec(
         )  # 16000 is the sampling rate of the wav2vec model
         # convert audio to tensor
         inputs = ts_tokenizer(audio_input, return_tensors="pt", padding="longest")
-        device = "cuda:0" if torch.cuda.is_available() else "cpu"  # GPUnscribe.py  or CPU# 
+        device = "cuda:0" if torch.cuda.is_available() else "cpu" # set device
         input_values = inputs.input_values.to(device)
         attention_mask = inputs.attention_mask.to(device)
 
-        with torch.no_grad(): 
+        with torch.no_grad():
             # run the model
             logits = ts_model(input_values, attention_mask=attention_mask).logits
 
@@ -210,13 +205,12 @@ def transcribe_video_wav2vec(
         len(full_text),
         len(full_text.split(" ")),
     ]
-    md_df.transpose(copy=False, inplace=True)
+    md_df.transpose(copy=False,)
     save_transc_results(
         out_dir=src_dir,
         vid_name=clip_name,
         ttext=full_text,
         mdata=md_df,
-        verbose=verbose,
     )  # save the results here
 
     shutil.rmtree(ac_storedir, ignore_errors=True)  # remove audio chunks folder

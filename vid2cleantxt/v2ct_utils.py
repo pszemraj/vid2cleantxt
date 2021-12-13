@@ -256,7 +256,7 @@ def torch_validate_cuda(verbose=False):
 
     """
     GPUs = GPU.getGPUs()
-    
+
     if GPUs is not None and len(GPUs) > 0:
         torch.cuda.init()
         print("Cuda availability (PyTorch): ", torch.cuda.is_available())
@@ -274,21 +274,19 @@ def check_runhardware(verbose=False):
 
     """
     GPUs = GPU.getGPUs()
-
-    try:
+    if GPUs is not None and len(GPUs) > 0:
         gpu = GPUs[0]
-    except Exception as e:
-        print("No GPU detected")
-        print(e)
+    else:
+        print("No GPU being used - expect longer RT\n")
         GPUs = gpu = None
     process = psutil.Process(os.getpid())
 
     CPU_load = psutil.cpu_percent()
     if CPU_load > 0:
-        cpu_load_string = f"loaded at {CPU_load} % |"
+        cpu_load_string = f"loaded at {CPU_load} % |\n"
     else:
         # the first time process.cpu_percent() is called it returns 0 which can be confusing
-        cpu_load_string = "|"
+        cpu_load_string = "|\n"
     print(
         "\nGen RAM Free: {ram} | Proc size: {proc} | {n_cpu} CPUs ".format(
             ram=humanize.naturalsize(psutil.virtual_memory().available),
