@@ -213,7 +213,8 @@ def prep_transc_src(_vid2beconv, in_dir, out_dir, len_chunks=20, verbose=False):
             this_clip = my_clip.subclip(t_start=this_st, t_end=(this_st + len_chunks))
         this_filename = f"{preamble}_clipaudio_{i}.wav"
         chunk_fnames.append(this_filename)
-        this_clip.audio.write_audiofile(join(out_dir, this_filename), logger=None)
+        _clip_path = join(out_dir, this_filename)
+        this_clip.audio.write_audiofile(_clip_path, codec='pcm_s32le', ffmpeg_params=['-ar', '16000', '-ac', '1', '-preset', 'fastest', '-f', 'wav', '-y'],                                        logger=None)
 
     print(f"Finished creating audio chunks for wav2vec2 - {get_timestamp()}")
     if verbose:
