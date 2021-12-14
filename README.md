@@ -1,4 +1,8 @@
-# vid2cleantxt
+```
+
+```
+
+vid2cleantxt
 
 ![vid2cleantext simple](https://user-images.githubusercontent.com/74869040/131500291-ed0a9d7f-8be7-4f4b-9acf-c360cfd46f1f.png)
 
@@ -6,7 +10,7 @@
 
 TL;DR check out [this Colab script](https://colab.research.google.com/drive/1WfJ1yQn-jtyZsoQXdzXx91FPbLo5t7Mg?usp=sharing) to see a transcription and keyword extraction of a speech by John F. Kennedy by simply running all cells.
 
-* * *
+---
 
 **Table of Contents**
 
@@ -28,7 +32,7 @@ TL;DR check out [this Colab script](https://colab.research.google.com/drive/1WfJ
         -   [Text Summarization](#text-summarization)
     -   [TextHero example use case](#texthero-example-use-case)
     -   [ScatterText example use case](#scattertext-example-use-case)
--   [Design Choices & Troubleshooting](#design-choices--troubleshooting)
+-   [Design Choices &amp; Troubleshooting](#design-choices--troubleshooting)
     -   [What python package dependencies does this repo have?](#what-python-package-dependencies-does-this-repo-have)
     -   [I tried to transcribe an audio file, and it gave me an error:](#i-tried-to-transcribe-an-audio-file-and-it-gave-me-an-error)
     -   [My computer crashes once it starts running the wav2vec2 model:](#my-computer-crashes-once-it-starts-running-the-wav2vec2-model)
@@ -36,18 +40,18 @@ TL;DR check out [this Colab script](https://colab.research.google.com/drive/1WfJ
     -   [Why use wav2vec2 instead of SpeechRecognition or other transcription methods?](#why-use-wav2vec2-instead-of-speechrecognition-or-other-transcription-methods)
 -   [Example](#example)
     -   [Description](#description)
-    -   [Output (sentence boundary disambiguation) of JFK's Moon Speech @ Rice University:](#output-sentence-boundary-disambiguation-of-jfks-moon-speech--rice-university)
-    -   [Output script run log for the "single_file" version:](#output-script-run-log-for-the-single_file-version)
--   [Future Work, Collaboration, & Citations](#future-work-collaboration--citations)
+    -   [Output (sentence boundary disambiguation) of JFK&#39;s Moon Speech @ Rice University:](#output-sentence-boundary-disambiguation-of-jfks-moon-speech--rice-university)
+    -   [Output script run log for the &#34;single_file&#34; version:](#output-script-run-log-for-the-single_file-version)
+-   [Future Work, Collaboration, &amp; Citations](#future-work-collaboration--citations)
     -   [Project Updates](#project-updates)
     -   [Future Work](#future-work)
-    -   [What about a version where I don't need python at all?](#what-about-a-version-where-i-dont-need-python-at-all)
-    -   [I've found x repo / script / concept that I think you should incorporate or collaborate with the author.](#ive-found-x-repo--script--concept-that-i-think-you-should-incorporate-or-collaborate-with-the-author)
+    -   [What about a version where I don&#39;t need python at all?](#what-about-a-version-where-i-dont-need-python-at-all)
+    -   [I&#39;ve found x repo / script / concept that I think you should incorporate or collaborate with the author.](#ive-found-x-repo--script--concept-that-i-think-you-should-incorporate-or-collaborate-with-the-author)
     -   [Citations](#citations)
 
 <!-- /TOC -->
 
-* * *
+---
 
 # Motivation
 
@@ -57,7 +61,7 @@ When compared to other media (such as text and pictures), video (specifically th
 
 ## Example Output
 
-Example output text of a video transcription of [JFK's peace speech](https://youtu.be/0fkKnfk4k40):
+Example output text of a video transcription of [JFK&#39;s peace speech](https://youtu.be/0fkKnfk4k40):
 
 > Surely the opening vistas of space promise high costs and hardships as well as high reward so it is not surprising that some would have us stay where we are a little longer to rest to wait but this city of question this state of taxes this country of the united states was not built by those who waited and rested but if I were to say my fellow citizens. That we shall send to the moon two hundred and forty thousand miles away from the control station in Houston a giant rocket more than three hundred feet tall the length of this football field made of new metal alloys some of which have not yet been invented capable of standing heat and stresses several times more than have ever been experienced fitted together with a precision better than the. First watch carrying all the equipment needed for propulsion guidance control communications food and survival on an untried mission to an unknown celestial body and then return it safely to earth re entering the atmosphere at speeds of over twenty five thousand miles per hour causing heat about half that on the temperature of the sun almost as hot as it is here to day and do all this. And do all this and do it right and do it first before this dictate is out then we must be so I'm the one who's doing all the work so to get me to stay cool for a minute however I think we're going to do it and I think that we must pay what needs to be paid I don't think we ought to waste any. Money but I think we ought to do the job and this will be done in the decade of the sixty it may be done while some of you are still here at school at this college and university it will be done during the terms of office of some of the people who sit here on this platform but it will be done many years ago the great British explorer garage memory who was to die on mount everist was asked why did he want to climb it the said because it is there well space is there. And we're going to climb it and the moon and the planets are there and new hopes for knowledge and peace are there and therefore as we set sail we ask god's blessing on the most hazardous and dangerous and greatest adventure on which man has ever embarked thank you
 
@@ -69,24 +73,24 @@ See the examples folder for more detail / full transcript.
 
 Here's a high-level overview of what happens in the `vid2cleantxt_folder.py` script to create the output shown above:
 
-1.  Imports relevant packages, and imports relevant functions from audio2text_functions.py
-2.  Receive **directory** string input from user in "script run window\*. Then iterates through that directory, and finds
-    all video files
-3.  FOR each video file found:
-    -   convert video to .wav format audio chunks of duration X\*\* seconds with MoviePy
-    -   transcribe all X audio chunks through
-        a [pretrained wav2vec2 model](https://github.com/pytorch/fairseq/tree/master/examples/wav2vec)
-        (in this repo - using huggingface transformers) and store the resulting text in a list
-    -   write all results of the list into a text file, store various runtime metrics into a separate text list
-    -   Delete .wav audio chunk directory after completed using them
-4.  Next, create two new text files: one with all transcriptions appended, one with all metadata appended.
-5.  Then FOR each transcription text file:
-    -   Pass the 'base' transcription text through a spell checker (symspellpy) and autocorrect spelling. save as new text
-        file.
-    -   Use pySBD to infer sentence boundaries on the spell-corrected text and add periods in to delineate sentences. Save  as new file.
-    -   Run basic keyword extraction (via YAKE) on spell-corrected file. All keywords per file are stored in one dataframe
-        for comparison, and exported to .xlsx format.
-6.  cleanup tasks, report runtime, and exit.
+1. Imports relevant packages, and imports relevant functions from audio2text_functions.py
+2. Receive **directory** string input from user in "script run window\*. Then iterates through that directory, and finds
+   all video files
+3. FOR each video file found:
+    - convert video to .wav format audio chunks of duration X\*\* seconds with MoviePy
+    - transcribe all X audio chunks through
+      a [pretrained wav2vec2 model](https://github.com/pytorch/fairseq/tree/master/examples/wav2vec)
+      (in this repo - using huggingface transformers) and store the resulting text in a list
+    - write all results of the list into a text file, store various runtime metrics into a separate text list
+    - Delete .wav audio chunk directory after completed using them
+4. Next, create two new text files: one with all transcriptions appended, one with all metadata appended.
+5. Then FOR each transcription text file:
+    - Pass the 'base' transcription text through a spell checker (symspellpy) and autocorrect spelling. save as new text
+      file.
+    - Use pySBD to infer sentence boundaries on the spell-corrected text and add periods in to delineate sentences. Save as new file.
+    - Run basic keyword extraction (via YAKE) on spell-corrected file. All keywords per file are stored in one dataframe
+      for comparison, and exported to .xlsx format.
+6. cleanup tasks, report runtime, and exit.
 
 _\* the 'single file' version needs to have the name defined in the python code itself_
 
@@ -110,39 +114,45 @@ Essentially, clone the repo, and run `vid2cleantxt/vid2cleantxt_folder.py`. The 
 
 1.  fastest (in bash command line):
 
-
-    1. `git clone https://github.com/pszemraj/vid2cleantxt.git` 
+    1. `git clone https://github.com/pszemraj/vid2cleantxt.git`
     2. `cd vid2cleantxt/`
     3. `pip install -r requirements.txt`
-    4. `python vid2cleantxt/vid2cleantxt_folder.py`
-    
+    4. `python vid2cleantxt/transcribe.py --input-dir "C:\Users\peter\source"`
+        > in this example, all video and audio files in "C:\Users\peter\source" would be transcribed.
 
-2.  Clone with github desktop - run `vid2cleantxt/vid2cleantxt_folder.py` from your IDE
-    -   `vid2cleantxt_standalone.py` contains all the python functions, classes, etc. to run a transcription. If you are experiencing issues, try to see if running this script (from whatever location) works.
+2.  Clone with github desktop
+
+        1. install requirements.txt either from your IDE prompt or via the command above
+        2. open terminal in the local folder via your IDE or manual
+        3. `python vid2cleantxt/transcribe.py --input-dir "C:\Users\peter\source"` in said terminal
+
+    > in this example, all video and audio files in "C:\Users\peter\source" would be transcribed.
+
 3.  If neither of those are convenient, see the next section on how to use Colab
 
-## Is there a jupyter notebook file?
+## Notebooks on Colab
 
-No, but there are versions of these scripts on Google Colab. From Colab you can download as .ipynb, but you may need to
-make some small changes (some directories, packages, etc. are specific to Colab's structure). Links to Colab Scripts:
+Notebook versions are available on Google Colab, because they offer free GPUs which makes vid2cleantxt _much_ faster. If you want a notebook, in Colab you can download as .ipynb, but you may need to make some small changes (some directories, packages, etc. are specific to Colab's structure). The same goes for the colab noteboooks in this repo.
 
-1.  Single-File Version (Implements GPU)
-    -   Link [here](https://colab.research.google.com/drive/1WfJ1yQn-jtyZsoQXdzXx91FPbLo5t7Mg?usp=sharing)
-    -   This script downloads the video from a public link to one of the JFK videos stored on my Google Drive. As such, no
-        authentication / etc. is required and **this link is recommended for seeing how this pipeline works**.
-    -   The only steps required are checking / adjusting the runtime to a GPU, and _Run All_
-2.  Multi-File Version (Implements GPU)
-    -   Link [here](https://colab.research.google.com/drive/1qOUkiPMaUZgBTMfCFF-fCRTPCMg1997J?usp=sharing), *note file was updated and posted to the repo July 13, 2021.*
-    -   This script connects to the user's google drive to convert a whole folder of videos using Google's Colab Python
-        package.
-    -   It **does require the video files to be hosted on the user's drive**, as well as authorization of Colab (it will
-        prompt you and walk you through this)
+Links to Colab Scripts:
+
+1. Single-File Version (Implements GPU)
+    - Link [here](https://colab.research.google.com/drive/1WfJ1yQn-jtyZsoQXdzXx91FPbLo5t7Mg?usp=sharing)
+    - This script downloads the video from a public link to one of the JFK videos stored on my Google Drive. As such, no
+      authentication / etc. is required and **this link is recommended for seeing how this pipeline works**.
+    - The only steps required are checking / adjusting the runtime to a GPU, and _Run All_
+2. Multi-File Version (Implements GPU)
+    - Link [here](https://colab.research.google.com/drive/1qOUkiPMaUZgBTMfCFF-fCRTPCMg1997J?usp=sharing), _note file was updated and posted to the repo July 13, 2021._
+    - This script connects to the user's google drive to convert a whole folder of videos using Google's Colab Python
+      package.
+    - It **does require the video files to be hosted on the user's drive**, as well as authorization of Colab (it will
+      prompt you and walk you through this)
 
 New to Colab? Some links I found useful:
 
--   [Google's FAQ](https://research.google.com/colaboratory/faq.html)
+-   [Google&#39;s FAQ](https://research.google.com/colaboratory/faq.html)
 -   [Medium Article on Colab + Large Datasets](https://satyajitghana.medium.com/working-with-huge-datasets-800k-files-in-google-colab-and-google-drive-bcb175c79477)
--   [Google's Demo Notebook on I/O](https://colab.research.google.com/notebooks/io.ipynb)
+-   [Google&#39;s Demo Notebook on I/O](https://colab.research.google.com/notebooks/io.ipynb)
 -   [A better Colab Experience](https://towardsdatascience.com/10-tips-for-a-better-google-colab-experience-33f8fe721b82)
 
 ## How long does this take to run?
@@ -154,22 +164,23 @@ On my machine (CPU only due to Windows + AMD GPU) it takes approximately 80-120%
 
 **Specs:**
 
-    	Processor Intel(R) Core(TM) i7-8665U CPU @ 1.90GHz
-    	Speed 4.8 GHz
-    	Number of Cores 8
-    	Memory RAM 32 GB
-    	Video Card #1 Intel(R) UHD Graphics 620
-    	Dedicated Memory 128 MB
-    	Total Memory 16 GB
-    	Video Card #2 AMD Radeon Pro WX3200 Graphics
-    	Dedicated Memory 4.0 GB
-    	Total Memory 20 GB
-    	Operating System  Windows 10 64-bit
+```
+	Processor Intel(R) Core(TM) i7-8665U CPU @ 1.90GHz
+	Speed 4.8 GHz
+	Number of Cores 8
+	Memory RAM 32 GB
+	Video Card #1 Intel(R) UHD Graphics 620
+	Dedicated Memory 128 MB
+	Total Memory 16 GB
+	Video Card #2 AMD Radeon Pro WX3200 Graphics
+	Dedicated Memory 4.0 GB
+	Total Memory 20 GB
+	Operating System  Windows 10 64-bit
+```
 
-> _Note:_ if you change `wav2vec2_model = "facebook/wav2vec2-large-960h-lv60-self"` to `wav2vec2_model = "
-> facebook/wav2vec2-base-960h"`the runtime will be considerably faster. I do not have stats on differences in WER, but  [facebook](https://github.com/pytorch/fairseq/tree/master/examples/wav2vec) may have some posted.
+> _Note:_ if you change `wav2vec2_model = "facebook/wav2vec2-large-960h-lv60-self"` to `wav2vec2_model = " facebook/wav2vec2-base-960h"`the runtime will be considerably faster. I do not have stats on differences in WER, but [facebook](https://github.com/pytorch/fairseq/tree/master/examples/wav2vec) may have some posted.
 
-* * *
+---
 
 # Application
 
@@ -184,23 +195,23 @@ machine learning algorithms (i.e., classifying text, so on). Some packages to ch
 
 ### Visualization and Analysis
 
-1.  [TextHero](https://github.com/jbesomi/texthero) - cleans text, allows for visualization / clustering (k-means) /     dimensionality reduction (PCA, TSNE)
-    -   Use case here: I want to see how _this speaker_'s speeches differ from each other. Which are "the most related"?
-2.  [Scattertext](https://github.com/JasonKessler/scattertext) - allows for comparisons of one corpus of text to another     via various methods and visualizes them.
-    -   Use case here: I want to see how the speeches by _this speaker_ compare to speeches by _speaker B_ in terms of topics, word frequency… so on
+1. [TextHero](https://github.com/jbesomi/texthero) - cleans text, allows for visualization / clustering (k-means) / dimensionality reduction (PCA, TSNE)
+    - Use case here: I want to see how _this speaker_'s speeches differ from each other. Which are "the most related"?
+2. [Scattertext](https://github.com/JasonKessler/scattertext) - allows for comparisons of one corpus of text to another via various methods and visualizes them.
+    - Use case here: I want to see how the speeches by _this speaker_ compare to speeches by _speaker B_ in terms of topics, word frequency… so on
 
 Some examples from my own usage are illustrated below from both packages.
 
 ### Text Extraction / Manipulation
 
-1.  [Textract](https://textract.readthedocs.io/)
-2.  [Textacy](https://github.com/chartbeat-labs/textacy)
-3.  [YAKE](https://github.com/LIAAD/yake)
-    -   A brief YAKE analysis is completed in this pipeline after transcribing the audio.
+1. [Textract](https://textract.readthedocs.io/)
+2. [Textacy](https://github.com/chartbeat-labs/textacy)
+3. [YAKE](https://github.com/LIAAD/yake)
+    - A brief YAKE analysis is completed in this pipeline after transcribing the audio.
 
 ### Text Summarization
 
-Several options are available on the [HuggingFace website](https://huggingface.co/models?pipeline_tag=summarization). I have personally found [Google's pegasus](https://huggingface.co/google/pegasus-xsum) to be most effective for "lecture-esque" video conversion.
+Several options are available on the [HuggingFace website](https://huggingface.co/models?pipeline_tag=summarization). I have personally found [Google&#39;s pegasus](https://huggingface.co/google/pegasus-xsum) to be most effective for "lecture-esque" video conversion.
 
 I personally use several similar methods in combination with the transcription script, however it isn't in a place to be officially posted yet. It will be posted to a public repo on this account when ready. For now, you can check out [this Colab notebook](https://colab.research.google.com/drive/1BSIsYHH0w5pdVxqo_nK5vHgMeBiJKKGm?usp=sharing) using the same example text that is output when the JFK speeches are transcribed.
 
@@ -218,7 +229,7 @@ Comparing frequency of terms in one body of text vs. another
 
 ![ST P 1 term frequency I ML 2021 Docs I ML Prior Exams_072122_](https://user-images.githubusercontent.com/74869040/110546149-69e49980-812e-11eb-9c94-81fcb395b907.png)
 
-* * *
+---
 
 # Design Choices & Troubleshooting
 
@@ -252,8 +263,7 @@ wordninja>=2.0.0
 yake>=0.4.8
 ```
 
-- _Note: the github link in the reqs above downloads the spaCy model `en_core_web_sm` as part of the setup/installation process so you don't have to manually type `python -m spacy download en_core_web_sm` into the terminal to be able to run the code. More on this is described on spaCy's website [here](https://spacy.io/usage/models#production)_
-
+-   _Note: the github link in the reqs above downloads the spaCy model `en_core_web_sm` as part of the setup/installation process so you don't have to manually type `python -m spacy download en_core_web_sm` into the terminal to be able to run the code. More on this is described on spaCy's website [here](https://spacy.io/usage/models#production)_
 
 ## I tried to transcribe an audio file, and it gave me an error:
 
@@ -284,12 +294,14 @@ Transcription of Public Domain Speeches from President John F. Kennedy
 The "example_JFK_speech" folder contains the results and interim files of running both the single file and folder version. Recap:
 
 -   for the single file version, you need to update the `input_file` variable with the filepath to the desired video file.
+
     -   if the path to the video file does not exist, the console should prompt the user to enter a new path
+
 -   for the folder version, just run the .py script, and the console will prompt the user for input right away. Paste the directory path (to the video file folder), and it will handle it from there.
 -   output files from already-run scripts on the examples are located in:
 
-    1.  `vid2cleantxt\example_JFK_speech\TEST_folder_edition`
-    2.  `vid2cleantxt\example_JFK_speech\TEST_singlefile`
+    1. `vid2cleantxt\example_JFK_speech\TEST_folder_edition`
+    2. `vid2cleantxt\example_JFK_speech\TEST_singlefile`
 
         for the folder and single-file versions respectively.
 
@@ -305,82 +317,84 @@ The input video was `example_JFK_speech/TEST_folder_edition/completed/GPU_Presid
 
 For a transcription of the **President John F. Kennedy's Peace Speech.mp4** video file. See `example_JFK_speech/TEST_singlefile/v2clntxt_transcriptions/NSC + SBD` to read the full text for this.
 
-    C:\Users\peter\AppData\Local\Programs\Python\Python39\python.exe C:/Users/peter/GIT_repos/vid2cleantxt/vid2cleantxt/vid2cleantxt_single.py
-    data folder is set to `C:\Users\peter\AppData\Local\Programs\Python\Python39\lib\site-packages
-    \neuspell\../data` script
+```
+C:\Users\peter\AppData\Local\Programs\Python\Python39\python.exe C:/Users/peter/GIT_repos/vid2cleantxt/vid2cleantxt/vid2cleantxt_single.py
+data folder is set to `C:\Users\peter\AppData\Local\Programs\Python\Python39\lib\site-packages
+\neuspell\../data` script
 
-     Enter full path to the video to be transcribed ---->C:\Users\peter\GIT_repos\vid2cleantxt\exa
-    mple_JFK_speech\TEST_singlefile\President John F. Kennedy's Peace Speech.mp4
+ Enter full path to the video to be transcribed ---->C:\Users\peter\GIT_repos\vid2cleantxt\exa
+mple_JFK_speech\TEST_singlefile\President John F. Kennedy's Peace Speech.mp4
 
-    Preparing to load model: facebook/wav2vec2-large-960h-lv60-self -  2021-07-13 01:09:57.762653
-    Some weights of Wav2Vec2ForCTC were not initialized from the model checkpoint at facebook/wav2
-    vec2-large-960h-lv60-self and are newly initialized: ['wav2vec2.masked_spec_embed']
-    You should probably TRAIN this model on a down-stream task to be able to use it for prediction
-    s and inference.
-    Some weights of the model checkpoint at bert-base-cased were not used when initializing BertMo
-    del: ['cls.predictions.transform.dense.bias', 'cls.predictions.decoder.weight', 'cls.predictio
-    ns.transform.dense.weight', 'cls.seq_relationship.weight', 'cls.predictions.bias', 'cls.predic
-    tions.transform.LayerNorm.bias', 'cls.predictions.transform.LayerNorm.weight', 'cls.seq_relati
-    onship.bias']
-    - This IS expected if you are initializing BertModel from the checkpoint of a model trained on
-     another task or with another architecture (e.g. initializing a BertForSequenceClassification
-    model from a BertForPreTraining model).
-    - This IS NOT expected if you are initializing BertModel from the checkpoint of a model that y
-    ou expect to be exactly identical (initializing a BertForSequenceClassification model from a B
-    ertForSequenceClassification model).
-    Converting Video to Audio: 100%|█████████████████████████████| 55/55 [03:29<00:00,  3.80s/it]
-    Finished creating audio chunks at  _01.14.09
-    WARNING - unable to start CUDA. If you wanted to use a GPU, exit and check hardware.
+Preparing to load model: facebook/wav2vec2-large-960h-lv60-self -  2021-07-13 01:09:57.762653
+Some weights of Wav2Vec2ForCTC were not initialized from the model checkpoint at facebook/wav2
+vec2-large-960h-lv60-self and are newly initialized: ['wav2vec2.masked_spec_embed']
+You should probably TRAIN this model on a down-stream task to be able to use it for prediction
+s and inference.
+Some weights of the model checkpoint at bert-base-cased were not used when initializing BertMo
+del: ['cls.predictions.transform.dense.bias', 'cls.predictions.decoder.weight', 'cls.predictio
+ns.transform.dense.weight', 'cls.seq_relationship.weight', 'cls.predictions.bias', 'cls.predic
+tions.transform.LayerNorm.bias', 'cls.predictions.transform.LayerNorm.weight', 'cls.seq_relati
+onship.bias']
+- This IS expected if you are initializing BertModel from the checkpoint of a model trained on
+ another task or with another architecture (e.g. initializing a BertForSequenceClassification
+model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertModel from the checkpoint of a model that y
+ou expect to be exactly identical (initializing a BertForSequenceClassification model from a B
+ertForSequenceClassification model).
+Converting Video to Audio: 100%|█████████████████████████████| 55/55 [03:29<00:00,  3.80s/it]
+Finished creating audio chunks at  _01.14.09
+WARNING - unable to start CUDA. If you wanted to use a GPU, exit and check hardware.
 
-    Gen RAM Free: 8.8 GB  | Proc size: 3.1 GB  | 8 CPUs  loaded at 34.8 % |
-    No GPU being used :(
-    -----------------
+Gen RAM Free: 8.8 GB  | Proc size: 3.1 GB  | 8 CPUs  loaded at 34.8 % |
+No GPU being used :(
+-----------------
 
-    Transcribing President John F. Ke... :   0%|                          | 0/55 [00:00<?, ?it/s]
-    Gen RAM Free: 8.8 GB  | Proc size: 3.1 GB  | 8 CPUs  |
-    No GPU being used :(
-    -----------------
+Transcribing President John F. Ke... :   0%|                          | 0/55 [00:00<?, ?it/s]
+Gen RAM Free: 8.8 GB  | Proc size: 3.1 GB  | 8 CPUs  |
+No GPU being used :(
+-----------------
 
-    2021-07-13 01:14:13.854223: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Co
-    uld not load dynamic library 'cudart64_110.dll'; dlerror: cudart64_110.dll not found
-    2021-07-13 01:14:13.867744: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above
-    cudart dlerror if you do not have a GPU set up on your machine.
-    Transcribing President John F. Ke... :  51%|████████▋        | 28/55 [17:51<16:56, 37.65s/it]
-    Gen RAM Free: 13.6 GB  | Proc size: 1.5 GB  | 8 CPUs  loaded at 67.2 % |
-    No GPU being used :(
-    -----------------
+2021-07-13 01:14:13.854223: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Co
+uld not load dynamic library 'cudart64_110.dll'; dlerror: cudart64_110.dll not found
+2021-07-13 01:14:13.867744: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above
+cudart dlerror if you do not have a GPU set up on your machine.
+Transcribing President John F. Ke... :  51%|████████▋        | 28/55 [17:51<16:56, 37.65s/it]
+Gen RAM Free: 13.6 GB  | Proc size: 1.5 GB  | 8 CPUs  loaded at 67.2 % |
+No GPU being used :(
+-----------------
 
-    Transcribing President John F. Ke... : 100%|█████████████████| 55/55 [34:19<00:00, 37.45s/it]
-    successfully moved the file President John F. Kennedy's Peace Speech.mp4 to */completed.
+Transcribing President John F. Ke... : 100%|█████████████████| 55/55 [34:19<00:00, 37.45s/it]
+successfully moved the file President John F. Kennedy's Peace Speech.mp4 to */completed.
 
-    ----------------------------
-    transcription process completed -  2021-07-13 01:48:29.504284
+----------------------------
+transcription process completed -  2021-07-13 01:48:29.504284
 
-    top 5 phrases are:
+top 5 phrases are:
 
-    ['nations world peace',
-     'war total war',
-     'interests nuclear powers',
-     'world security system',
-     'peace corps abroad']
-    Transcription files used to extract KW can be found in:
-      C:\Users\peter\GIT_repos\vid2cleantxt\example_JFK_speech\TEST_singlefile\v2clntxt_transcript
-    ions\neuspell_sc
+['nations world peace',
+ 'war total war',
+ 'interests nuclear powers',
+ 'world security system',
+ 'peace corps abroad']
+Transcription files used to extract KW can be found in:
+  C:\Users\peter\GIT_repos\vid2cleantxt\example_JFK_speech\TEST_singlefile\v2clntxt_transcript
+ions\neuspell_sc
 
 
-    ----------------------------------- Script Complete -------------------------------
-    2021-07-13 01:49:20.620811
-    Transcription files + more in folder:
-     C:\Users\peter\GIT_repos\vid2cleantxt\example_JFK_speech\TEST_singlefile\v2clntxt_transcripti
-    ons
-    Metadata for each transcription located @
-     C:\Users\peter\GIT_repos\vid2cleantxt\example_JFK_speech\TEST_singlefile\v2clntxt_transc_meta
-    data
-    total runtime was 40 minutes
+----------------------------------- Script Complete -------------------------------
+2021-07-13 01:49:20.620811
+Transcription files + more in folder:
+ C:\Users\peter\GIT_repos\vid2cleantxt\example_JFK_speech\TEST_singlefile\v2clntxt_transcripti
+ons
+Metadata for each transcription located @
+ C:\Users\peter\GIT_repos\vid2cleantxt\example_JFK_speech\TEST_singlefile\v2clntxt_transc_meta
+data
+total runtime was 40 minutes
 
-    Process finished with exit code 0
+Process finished with exit code 0
+```
 
-* * *
+---
 
 # Future Work, Collaboration, & Citations
 
@@ -388,7 +402,7 @@ For a transcription of the **President John F. Kennedy's Peace Speech.mp4** vide
 
 A _rough_ timeline of what has been going on in the repo:
 
--   Sept-Oct 2021: Fixing bugs, formatting code. 
+-   Sept-Oct 2021: Fixing bugs, formatting code.
 -   July 12, 2021 - sync work from Colab notebooks: add CUDA support for pytorch in the `.py` versions, added Neuspell as a spell checker. General organization and formatting improvements.
 -   July 8, 2021 - python scripts cleaned and updated.
 -   April - June: Work done mostly on Colab improving saving, grammar correction, etc.
@@ -396,17 +410,19 @@ A _rough_ timeline of what has been going on in the repo:
 
 ## Future Work
 
-1.  ~~syncing improvements currently in the existing **Google Colab** notebooks (links) above such as [NeuSpell](https://github.com/neuspell/neuspell)~~
+1. ~~syncing improvements currently in the existing **Google Colab** notebooks (links) above such as [NeuSpell](https://github.com/neuspell/neuspell)~~
 
-    -   ~~this will include support for CUDA automatically when running the code (currently just on Colab)~~
+    - ~~this will include support for CUDA automatically when running the code (currently just on Colab)~~
 
-2.  convert groups of functions to a class object
-3.  publish class as a python package to streamline process / reduce overhead, making it easier to use + adopt.
-4.  Include additional features that are currently not public:
-    -   Summarization of video transcriptions
-    -   Paragraph Disambiguation in both transcription & summarization
-    -   report generation (see results in .PDF for notes, etc.)
-5.  py2exe (once code optimized)
+2. convert groups of functions to a class object
+3. publish class as a python package to streamline process / reduce overhead, making it easier to use + adopt.
+4. Include additional features that are currently not public:
+
+    - Summarization of video transcriptions
+    - Paragraph Disambiguation in both transcription & summarization
+    - report generation (see results in .PDF for notes, etc.)
+
+5. py2exe (once code optimized)
 
 ## What about a version where I don't need python at all?
 
@@ -432,10 +448,10 @@ Send me a message / start a discussion! Always looking to improve.
 
 -   repo [link](https://github.com/mammothb/symspellpy/tree/e7a91a88f45dc4051b28b83e990fe072cabf0595)
 -   copyright:
-    > Copyright (c) 2020 Wolf Garbe Version: 6.7 Author: Wolf Garbe <mailto:wolf.garbe@seekstorm.com>
-    > Maintainer: Wolf Garbe <mailto:wolf.garbe@seekstorm.com>
-    > URL: <https://github.com/wolfgarbe/symspell>
-    > Description: <https://medium.com/@wolfgarbe/1000x-faster-spelling-correction-algorithm-2012-8701fcd87a5f>
+    > Copyright (c) 2020 Wolf Garbe Version: 6.7 Author: Wolf Garbe [mailto:wolf.garbe@seekstorm.com](mailto:wolf.garbe@seekstorm.com)
+    > Maintainer: Wolf Garbe [mailto:wolf.garbe@seekstorm.com](mailto:wolf.garbe@seekstorm.com)
+    > URL: [https://github.com/wolfgarbe/symspell](https://github.com/wolfgarbe/symspell)
+    > Description: [https://medium.com/@wolfgarbe/1000x-faster-spelling-correction-algorithm-2012-8701fcd87a5f](https://medium.com/@wolfgarbe/1000x-faster-spelling-correction-algorithm-2012-8701fcd87a5f)
     >
     > MIT License
     >
@@ -449,7 +465,7 @@ Send me a message / start a discussion! Always looking to improve.
     > The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
     > Software.
     >
-    > <https://opensource.org/licenses/MIT>
+    > [https://opensource.org/licenses/MIT](https://opensource.org/licenses/MIT)
 
 **YAKE (yet another keyword extractor)**
 
