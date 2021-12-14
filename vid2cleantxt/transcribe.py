@@ -70,6 +70,31 @@ from v2ct_utils import (
     get_timestamp,
 )
 
+def wav2vec2_islarge(model_obj):
+    """
+    wav2vec2_check_size - compares the size of the passed model object, and whether
+    it is in fact a wav2vec2 model. this is because these models need special handling
+    w.r.t predictions. https://huggingface.co/facebook/wav2vec2-base-960h
+
+    Parameters
+    ----------
+    model_obj : transformers.Wav2Vec2ForCTC, the model object to check
+
+    Returns
+    -------
+    is_large, whether the model is the large wav2vec2 model or not
+    """
+    approx_sizes = {
+        "base": 94396320,
+        "large":  315471520, # recorded by  loading the model in known environment
+    }
+    if not  isinstance(model_obj, Wav2Vec2ForCTC):
+        sys.exit("Model is not a wav2vec2 model - this function is for wav2vec2 models only")
+    np_proposed = model_obj.num_parameters()
+
+    dist_from_base = abs(np_proposed - approx_sizes.get("base"))
+    dist_from_large = abs(np_proposed - approx_sizes.get("large"))
+    return True if dist_from_large < dist_from_base else False
 
 def save_transc_results(
     out_dir,
@@ -144,6 +169,7 @@ def transcribe_video_wav2vec(
     # create audio chunk folder
     ac_storedir = join(src_dir, temp_dir)
     create_folder(ac_storedir)
+    use_attn = wav2vec2_islarge(ts_model) # if they pass in a large model, use attention masking
     prepare_audio = prep_w_multi if use_mp else prep_transc_src # set the function to use for preparing audio chunks
     # functions have the same signature, so we can use the same function for both mp and non-mp
 
@@ -157,9 +183,11 @@ def transcribe_video_wav2vec(
     GPU_update_incr = (
         math.ceil(len(chunk_directory) / 2) if len(chunk_directory) > 1 else 1
     )
+    ts_tokenizer.model
     pbar = tqdm(total=len(chunk_directory), desc="Transcribing video")
     for i, audio_chunk in enumerate(chunk_directory):
 
+        # note that large-960h-lv60 has an attention mask of length of the input sequence, the base model does not
         if (i % GPU_update_incr == 0) and (GPU_update_incr != 0):
             # provide update on GPU usage
             check_runhardware()
@@ -169,11 +197,13 @@ def transcribe_video_wav2vec(
         # convert audio to tensor
         inputs = ts_tokenizer(audio_input, return_tensors="pt", padding="longest")
         input_values = inputs.input_values.to(device)
-        attention_mask = inputs.attention_mask.to(device)
-
+        attention_mask = inputs.attention_mask.to(device) if use_attn else None
+        # run the model
         with torch.no_grad():
-            # run the model
-            logits = ts_model(input_values, attention_mask=attention_mask).logits
+            if use_attn:
+                logits = ts_model(input_values, attention_mask=attention_mask).logits
+            else:
+                logits = ts_model(input_values.to(device)).logits
 
         predicted_ids = torch.argmax(logits, dim=-1)  # get the predicted ids by argmax
         this_transc = ts_tokenizer.batch_decode(predicted_ids)
@@ -223,7 +253,7 @@ def transcribe_video_wav2vec(
 
     if verbose:
         print(
-            "finished transcription of {vid_clip_name} base folder on {get_timestamp()}"
+            f"finished transcription of {clip_name} base folder on {get_timestamp()}"
         )
 
     return transc_res
@@ -341,6 +371,14 @@ def get_parser():
         default=20,  # may need to be adjusted based on hardware and model used
         type=int,
         help="Duration of audio chunks (in seconds) that the transformer model will be fed",
+    )
+
+    parser.add_argument(
+        "--use-mp",
+        required=False,
+        default=False,  # note that the standard iteration of the model is more robust
+         action="store_true",
+        help="When converting audio to wav, use multiprocessing to speed up the process",
     )
 
     return parser

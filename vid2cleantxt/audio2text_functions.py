@@ -274,6 +274,7 @@ def prep_w_multi( _vid2beconv, in_dir, out_dir, len_chunks=20, verbose=False,  b
     n_chunks = math.ceil(my_clip.duration / len_chunks)  # to get in minutes, round up
     # create iterable that stores the start and end times of each chunk, which are each chunk length long
     chunk_times = [ (i * len_chunks, (i + 1) * len_chunks) for i in range(n_chunks) ] # creates list of tuples
+    pbar = tqdm( desc="Creating .wav audio clips", total=n_chunks)
     def write_chunk(i, chunk_t, out_dir=out_dir):
         my_clip = mp.AudioFileClip(load_path) if check_if_audio(load_path) else mp.VideoFileClip(load_path)
 
@@ -309,11 +310,13 @@ def prep_w_multi( _vid2beconv, in_dir, out_dir, len_chunks=20, verbose=False,  b
             ],
             logger=None,
         )
+        pbar.update(1)
         return basename(_clip_path)
-    print(f"gen audio chunks for {_vid2beconv} with MP - {get_timestamp()}")
+    print(f"starting multiprocessinggen of audio {_vid2beconv} {get_timestamp()}")
     stored_chunk_fnames = joblib.Parallel(n_jobs=usr_cpus, backend=backend)(
         joblib.delayed(write_chunk)(i, chunk_t) for i, chunk_t in enumerate(chunk_times)
     )
+    pbar.close()
     _tot = len(stored_chunk_fnames)
     print(f"Finished creating {_tot} audio chunks for wav2vec2 - {get_timestamp()}")
     if verbose:
