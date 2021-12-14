@@ -401,6 +401,7 @@ if __name__ == "__main__":
     move_comp = args.move_input_vids
     chunk_length = int(args.chunk_length)
     model_arg = args.model_name
+    convert_mp = args.use_mp
 
     # load model
     print(f"Loading models @ {get_timestamp(True)} - may take a while...")
@@ -438,7 +439,7 @@ if __name__ == "__main__":
             src_dir=directory,
             clip_name=filename,
             chunk_dur=chunk_length,
-            use_mp=True,
+            use_mp=convert_mp,
         )
 
         if move_comp:
