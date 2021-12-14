@@ -153,4 +153,5 @@ Thumbs.db
 # local temp dirs
 scratch
 notebooks
+*audio_chunks*
 *test2*
