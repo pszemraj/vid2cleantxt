@@ -70,6 +70,7 @@ from v2ct_utils import (
     get_timestamp,
 )
 
+
 def wav2vec2_islarge(model_obj):
     """
     wav2vec2_check_size - compares the size of the passed model object, and whether
@@ -86,15 +87,18 @@ def wav2vec2_islarge(model_obj):
     """
     approx_sizes = {
         "base": 94396320,
-        "large":  315471520, # recorded by  loading the model in known environment
+        "large": 315471520,  # recorded by  loading the model in known environment
     }
-    if not  isinstance(model_obj, Wav2Vec2ForCTC):
-        sys.exit("Model is not a wav2vec2 model - this function is for wav2vec2 models only")
+    if not isinstance(model_obj, Wav2Vec2ForCTC):
+        sys.exit(
+            "Model is not a wav2vec2 model - this function is for wav2vec2 models only"
+        )
     np_proposed = model_obj.num_parameters()
 
     dist_from_base = abs(np_proposed - approx_sizes.get("base"))
     dist_from_large = abs(np_proposed - approx_sizes.get("large"))
     return True if dist_from_large < dist_from_base else False
+
 
 def save_transc_results(
     out_dir,
@@ -169,8 +173,12 @@ def transcribe_video_wav2vec(
     # create audio chunk folder
     ac_storedir = join(src_dir, temp_dir)
     create_folder(ac_storedir)
-    use_attn = wav2vec2_islarge(ts_model) # if they pass in a large model, use attention masking
-    prepare_audio = prep_w_multi if use_mp else prep_transc_src # set the function to use for preparing audio chunks
+    use_attn = wav2vec2_islarge(
+        ts_model
+    )  # if they pass in a large model, use attention masking
+    prepare_audio = (
+        prep_w_multi if use_mp else prep_transc_src
+    )  # set the function to use for preparing audio chunks
     # functions have the same signature, so we can use the same function for both mp and non-mp
 
     # get the audio chunks
@@ -252,9 +260,7 @@ def transcribe_video_wav2vec(
     }
 
     if verbose:
-        print(
-            f"finished transcription of {clip_name} base folder on {get_timestamp()}"
-        )
+        print(f"finished transcription of {clip_name} base folder on {get_timestamp()}")
 
     return transc_res
 
@@ -377,7 +383,7 @@ def get_parser():
         "--use-mp",
         required=False,
         default=False,  # note that the standard iteration of the model is more robust
-         action="store_true",
+        action="store_true",
         help="When converting audio to wav, use multiprocessing to speed up the process",
     )
 
@@ -400,9 +406,7 @@ if __name__ == "__main__":
     # load model
     print(f"Loading models @ {get_timestamp(True)} - may take a while...")
     print("If RT seems excessive, try --verbose flag or checking logfile")
-    wav2vec2_model = (
-        "facebook/wav2vec2-base-960h" if model_arg is None else model_arg
-    )
+    wav2vec2_model = "facebook/wav2vec2-base-960h" if model_arg is None else model_arg
     if is_verbose:
         print("Loading model: {}".format(wav2vec2_model))
     tokenizer = Wav2Vec2Processor.from_pretrained(wav2vec2_model)

@@ -167,7 +167,11 @@ def create_audiofile(
 
 
 def prep_transc_src(
-    _vid2beconv, in_dir, out_dir, len_chunks=20, verbose=False,
+    _vid2beconv,
+    in_dir,
+    out_dir,
+    len_chunks=20,
+    verbose=False,
 ):
     """
     prep_transc_src - prepares the source video files for transcription by creating audio files and metadata
@@ -212,14 +216,16 @@ def prep_transc_src(
                 t_start=this_st
             )  # if this is the last chunk, use the remainder of the video
         elif i == 0:
-            this_clip = my_clip.subclip(
-                 t_end=len_chunks
-            )
+            this_clip = my_clip.subclip(t_end=len_chunks)
         else:
             this_clip = my_clip.subclip(t_start=this_st, t_end=(this_st + len_chunks))
         this_filename = f"{preamble}_clipaudio_{i}.wav"
         chunk_fnames.append(this_filename)
-        _clip_path = join(out_dir, this_filename) if out_dir is not None else join(os.getcwd(), this_filename)
+        _clip_path = (
+            join(out_dir, this_filename)
+            if out_dir is not None
+            else join(os.getcwd(), this_filename)
+        )
 
         this_clip.audio.write_audiofile(
             filename=_clip_path,
@@ -245,7 +251,9 @@ def prep_transc_src(
     return natsorted(chunk_fnames)
 
 
-def prep_w_multi( _vid2beconv, in_dir, out_dir, len_chunks=20, verbose=False,  backend = 'threading'):
+def prep_w_multi(
+    _vid2beconv, in_dir, out_dir, len_chunks=20, verbose=False, backend="threading"
+):
     """
     prep_w_multi - prepares the audio chunks for transcription using joblib parallel to
         efficiently process the audio chunks in parallel
@@ -262,9 +270,15 @@ def prep_w_multi( _vid2beconv, in_dir, out_dir, len_chunks=20, verbose=False,  b
     -------
     chunk_fnames, list of saved chunk names
     """
-    usr_cpus = os.cpu_count() -2 if os.cpu_count() > 2 else 1 # leave one for the main process
+    usr_cpus = (
+        os.cpu_count() - 2 if os.cpu_count() > 2 else 1
+    )  # leave one for the main process
     load_path = join(in_dir, _vid2beconv) if in_dir is not None else _vid2beconv
-    my_clip = mp.AudioFileClip(load_path) if check_if_audio(load_path) else mp.VideoFileClip(load_path)
+    my_clip = (
+        mp.AudioFileClip(load_path)
+        if check_if_audio(load_path)
+        else mp.VideoFileClip(load_path)
+    )
     create_folder(out_dir)  # create the output directory if it doesn't exist
     audio_chunks = []
 
@@ -273,32 +287,38 @@ def prep_w_multi( _vid2beconv, in_dir, out_dir, len_chunks=20, verbose=False,  b
 
     n_chunks = math.ceil(my_clip.duration / len_chunks)  # to get in minutes, round up
     # create iterable that stores the start and end times of each chunk, which are each chunk length long
-    chunk_times = [ (i * len_chunks, (i + 1) * len_chunks) for i in range(n_chunks) ] # creates list of tuples
-    pbar = tqdm( desc="Creating .wav audio clips", total=n_chunks)
+    chunk_times = [
+        (i * len_chunks, (i + 1) * len_chunks) for i in range(n_chunks)
+    ]  # creates list of tuples
+    pbar = tqdm(desc="Creating .wav audio clips", total=n_chunks)
+
     def write_chunk(i, chunk_t, out_dir=out_dir):
-        my_clip = mp.AudioFileClip(load_path) if check_if_audio(load_path) else mp.VideoFileClip(load_path)
+        my_clip = (
+            mp.AudioFileClip(load_path)
+            if check_if_audio(load_path)
+            else mp.VideoFileClip(load_path)
+        )
 
         this_st = chunk_t[0]
         this_end = chunk_t[1]
 
         if i == n_chunks - 1:
-                this_clip = my_clip.subclip(
+            this_clip = my_clip.subclip(
                 t_start=this_st
             )  # if this is the last chunk, use the remainder of the video
         elif i == 0:
-            this_clip = my_clip.subclip(
-                 t_end=this_end
-            )
+            this_clip = my_clip.subclip(t_end=this_end)
         else:
             this_clip = my_clip.subclip(t_start=this_st, t_end=this_end)
         this_filename = f"{_vid2beconv}_clipaudio_{i}.wav"
-        _clip_path = join(out_dir, this_filename) if out_dir is not None else this_filename
-        print("\n got this far prep_w_multi\n")
+        _clip_path = (
+            join(out_dir, this_filename) if out_dir is not None else this_filename
+        )
         this_clip.audio.write_audiofile(
             _clip_path,
             codec="pcm_s32le",
             ffmpeg_params=[
-                      "-ar",
+                "-ar",
                 "16000",
                 "-ac",
                 "1",
@@ -312,6 +332,7 @@ def prep_w_multi( _vid2beconv, in_dir, out_dir, len_chunks=20, verbose=False,  b
         )
         pbar.update(1)
         return basename(_clip_path)
+
     print(f"starting multiprocessinggen of audio {_vid2beconv} {get_timestamp()}")
     stored_chunk_fnames = joblib.Parallel(n_jobs=usr_cpus, backend=backend)(
         joblib.delayed(write_chunk)(i, chunk_t) for i, chunk_t in enumerate(chunk_times)
@@ -323,6 +344,7 @@ def prep_w_multi( _vid2beconv, in_dir, out_dir, len_chunks=20, verbose=False,  b
         print(f"files saved to {out_dir}")
 
     return natsorted(stored_chunk_fnames)
+
 
 # ------------------------------------------------------------------------
 
