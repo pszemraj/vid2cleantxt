@@ -22,7 +22,7 @@ TL;DR check out [this Colab script](https://colab.research.google.com/drive/1WfJ
     -   [Example Output](#example-output)
     -   [Pipeline Intro](#pipeline-intro)
 -   [Installation](#installation)
-    -   [How to get this to work on your machine](#how-to-get-this-to-work-on-your-machine)
+    -   [Quickstart](#how-to-get-this-to-work-on-your-machine)
     -   [Is there a jupyter notebook file?](#is-there-a-jupyter-notebook-file)
     -   [How long does this take to run?](#how-long-does-this-take-to-run)
 -   [Application](#application)
@@ -103,7 +103,7 @@ By default,
 
 # Installation
 
-## How to get this to work on your machine
+## Quickstart aka How to get this to work on your machine
 
 Essentially, clone the repo, and run `vid2cleantxt/transcribe.py --input-dir "path to inputs`. the main arg to pass is `--input-dir` for, well, the inputs.
 
