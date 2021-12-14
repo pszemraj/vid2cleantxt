@@ -7,13 +7,14 @@ Pipeline for Zero-shot transcription of a lecture video file to text using faceb
 this is the primary pipeline for the project
 
 You can access the arguments for this script by running the following command:
-    *\vid2cleantxt\vid2cleantxt_folder.py -h (windows)
-    */vid2cleantxt/vid2cleantxt_folder.py -h (everything else)
+    *\vid2cleantxt\transcribe.py -h (windows)
+    */vid2cleantxt/transcribe.py -h (everything else + Windows bash)
 
 Tips for runtime:
 
-start with "facebook/wav2vec2-base-960h" for both tokenizer and model
-if model fails to work or errors out, try reducing the chunk length
+- use the default "facebook/wav2vec2-base-960h" to start out with
+- if model fails to work or errors out, try reducing the chunk length with --chunk-length <int>
+
 """
 
 import argparse
@@ -26,7 +27,7 @@ sys.path.append(dirname(dirname(os.path.abspath(__file__))))
 
 import logging
 
-logging.basicConfig(level=logging.WARNING, filename="vid2cleantext_transcriber.log")
+logging.basicConfig(level=logging.WARNING, filename="LOGFILE_vid2cleantxt_transcriber.log")
 
 import math
 import shutil
@@ -366,16 +367,16 @@ def get_parser():
         "--model-name",
         required=False,
         default=None,
-        help="huggingface model name as a string, ex 'facebook/wav2vec2-base-960h'",
+        help="huggingface wav2vec2 model name, ex 'facebook/wav2vec2-base-960h'",
         # "facebook/wav2vec2-large-960h-lv60-self" is the best model but VERY taxing on the GPU/CPU
     )
 
     parser.add_argument(
         "--chunk-length",
         required=False,
-        default=20,  # may need to be adjusted based on hardware and model used
+        default=15,  # may need to be adjusted based on hardware and model used
         type=int,
-        help="Duration of audio chunks (in seconds) that the transformer model will be fed",
+        help="Duration of .wav chunks (in seconds) that the transformer model will be fed",
     )
 
     parser.add_argument(
@@ -383,7 +384,7 @@ def get_parser():
         required=False,
         default=False,  # note that the standard iteration of the model is more robust
         action="store_true",
-        help="When converting audio to wav, use multiprocessing to speed up the process",
+        help="When converting inputs to .wav chunks, use multiprocessing = faster",
     )
 
     return parser
@@ -396,16 +397,18 @@ if __name__ == "__main__":
     st = time.perf_counter()
     # parse the command line arguments
     args = get_parser().parse_args()
-    directory = str(args.input_dir)
+    input_src = str(args.input_dir)
+    directory = os.path.abspath(input_src)
+    # TODO: add output directory
     is_verbose = args.verbose
     move_comp = args.move_input_vids
     chunk_length = int(args.chunk_length)
     model_arg = args.model_name
     convert_mp = args.use_mp
 
-    # load model
     print(f"Loading models @ {get_timestamp(True)} - may take a while...")
     print("If RT seems excessive, try --verbose flag or checking logfile")
+    # load the model
     wav2vec2_model = "facebook/wav2vec2-base-960h" if model_arg is None else model_arg
     if is_verbose:
         print("Loading model: {}".format(wav2vec2_model))
@@ -419,6 +422,7 @@ if __name__ == "__main__":
     sym_spell = init_symspell()
     sys.stdout = orig_out  # return to default of print-to-console
 
+    # load vid2cleantxt inputs
     approved_files = []
     for ext in get_av_fmts():  # now include audio formats and video formats
         approved_files.extend(find_ext_local(directory, req_ext=ext, full_path=False))
@@ -443,7 +447,7 @@ if __name__ == "__main__":
         )
 
         if move_comp:
-            move2completed(directory, filename=filename)
+            move2completed(directory, filename=filename) # move src to completed folder
 
     # postprocess the transcriptions
     out_p_tscript = storage_locs.get("t_out")
@@ -459,5 +463,5 @@ if __name__ == "__main__":
         f"\n\nFinished at: {get_timestamp()} taking a total of {(time.perf_counter() - st)/60} mins"
     )
     print(
-        f"The relevant files for this run are in: \n {out_p_tscript} \n and {out_p_metadata}"
+        f"relevant files for run are in: \n{out_p_tscript} \n and: \n{out_p_metadata}"
     )
