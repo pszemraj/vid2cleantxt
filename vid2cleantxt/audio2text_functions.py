@@ -201,7 +201,6 @@ def prep_transc_src(
         print(f"{n_chunks} audio chunks to be created of {len_chunks} seconds")
     preamble = trim_fname(_vid2beconv)
     chunk_fnames = []
-    # TODO: parallelize this loop with https://joblib.readthedocs.io/en/latest/parallel.html
     for i in tqdm(
         range(n_chunks),
         total=n_chunks,
@@ -212,13 +211,18 @@ def prep_transc_src(
             this_clip = my_clip.subclip(
                 t_start=this_st
             )  # if this is the last chunk, use the remainder of the video
+        elif i == 0:
+            this_clip = my_clip.subclip(
+                 t_end=len_chunks
+            )
         else:
             this_clip = my_clip.subclip(t_start=this_st, t_end=(this_st + len_chunks))
         this_filename = f"{preamble}_clipaudio_{i}.wav"
         chunk_fnames.append(this_filename)
-        _clip_path = join(out_dir, this_filename)
+        _clip_path = join(out_dir, this_filename) if out_dir is not None else join(os.getcwd(), this_filename)
+
         this_clip.audio.write_audiofile(
-            _clip_path,
+            filename=_clip_path,
             codec="pcm_s32le",
             ffmpeg_params=[
                 "-ar",
@@ -270,22 +274,30 @@ def prep_w_multi( _vid2beconv, in_dir, out_dir, len_chunks=20, verbose=False,  b
     n_chunks = math.ceil(my_clip.duration / len_chunks)  # to get in minutes, round up
     # create iterable that stores the start and end times of each chunk, which are each chunk length long
     chunk_times = [ (i * len_chunks, (i + 1) * len_chunks) for i in range(n_chunks) ] # creates list of tuples
-    def write_chunk(i, chunk_times, out_dir):
-        this_st, this_end = chunk_times[i]
+    def write_chunk(i, chunk_t, out_dir=out_dir):
+        my_clip = mp.AudioFileClip(load_path) if check_if_audio(load_path) else mp.VideoFileClip(load_path)
+
+        this_st = chunk_t[0]
+        this_end = chunk_t[1]
 
         if i == n_chunks - 1:
                 this_clip = my_clip.subclip(
                 t_start=this_st
             )  # if this is the last chunk, use the remainder of the video
+        elif i == 0:
+            this_clip = my_clip.subclip(
+                 t_end=this_end
+            )
         else:
             this_clip = my_clip.subclip(t_start=this_st, t_end=this_end)
         this_filename = f"{_vid2beconv}_clipaudio_{i}.wav"
         _clip_path = join(out_dir, this_filename) if out_dir is not None else this_filename
+        print("\n got this far prep_w_multi\n")
         this_clip.audio.write_audiofile(
             _clip_path,
             codec="pcm_s32le",
             ffmpeg_params=[
-                "-ar",
+                      "-ar",
                 "16000",
                 "-ac",
                 "1",
@@ -298,9 +310,9 @@ def prep_w_multi( _vid2beconv, in_dir, out_dir, len_chunks=20, verbose=False,  b
             logger=None,
         )
         return basename(_clip_path)
-
+    print(f"gen audio chunks for {_vid2beconv} with MP - {get_timestamp()}")
     stored_chunk_fnames = joblib.Parallel(n_jobs=usr_cpus, backend=backend)(
-        joblib.delayed(write_chunk)(i, chunk_times, out_dir) for i, chunk_times in enumerate(n_chunks)
+        joblib.delayed(write_chunk)(i, chunk_t) for i, chunk_t in enumerate(chunk_times)
     )
     _tot = len(stored_chunk_fnames)
     print(f"Finished creating {_tot} audio chunks for wav2vec2 - {get_timestamp()}")

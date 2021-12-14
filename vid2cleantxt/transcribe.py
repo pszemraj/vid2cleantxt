@@ -149,7 +149,7 @@ def transcribe_video_wav2vec(
 
     # get the audio chunks
     chunk_directory = prepare_audio(
-        src_dir, clip_name, chunk_dur, ac_storedir, verbose=verbose
+        clip_name, src_dir, ac_storedir, chunk_dur, verbose=verbose
     )
     torch_validate_cuda()
     device = "cuda:0" if torch.cuda.is_available() else "cpu"  # set device
@@ -397,6 +397,7 @@ if __name__ == "__main__":
             src_dir=directory,
             clip_name=filename,
             chunk_dur=chunk_length,
+            use_mp=True,
         )
 
         if move_comp:
