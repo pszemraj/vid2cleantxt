@@ -14,11 +14,11 @@ Tips for runtime:
 
 - use the default "facebook/wav2vec2-base-960h" to start out with
 - if model fails to work or errors out, try reducing the chunk length with --chunk-length <int>
-
 """
 
 import argparse
 import os
+import gc
 import sys
 from os.path import dirname, join
 
@@ -187,6 +187,7 @@ def transcribe_video_wav2vec(
         clip_name, src_dir, ac_storedir, chunk_dur, verbose=verbose
     )
     torch_validate_cuda()
+    gc.collect()
     device = "cuda:0" if torch.cuda.is_available() else "cpu"  # set device
     full_transc = []
     GPU_update_incr = (
@@ -199,6 +200,7 @@ def transcribe_video_wav2vec(
         if (i % GPU_update_incr == 0) and (GPU_update_incr != 0):
             # provide update on GPU usage
             check_runhardware()
+            gc.collect()
         audio_input, clip_sr = librosa.load(
             join(ac_storedir, audio_chunk), sr=16000
         )  # 16000 is the sampling rate of the wav2vec model
