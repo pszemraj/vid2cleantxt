@@ -129,7 +129,7 @@ Essentially, clone the repo, and run `vid2cleantxt/transcribe.py --input-dir "pa
 
 ## Notebooks on Colab
 
-Notebook versions are available on Google Colab, because they offer free GPUs which makes vid2cleantxt _much_ faster. If you want a notebook to run locally for whatever reason, in Colab you can download as .ipynb, but you may need to make some small changes (some directories, packages, etc. are specific to Colab's structure) - the same goes for the colab noteboooks in this repo.
+Notebook versions are available on Google Colab, because they offer free GPUs which makes vid2cleantxt _much_ faster. If you want a notebook to run locally for whatever reason, in Colab you can download as .ipynb, but you may need to make some small changes (some directories, packages, etc. are specific to Colab's structure) - the same goes for the colab notebooks in this repo.
 
 Links to Colab Scripts:
 
@@ -142,8 +142,7 @@ Links to Colab Scripts:
     - Link [here](https://colab.research.google.com/drive/1qOUkiPMaUZgBTMfCFF-fCRTPCMg1997J?usp=sharing), _note file was updated and posted to the repo July 13, 2021._
     - This script connects to the user's google drive to convert a whole folder of videos using Google's Colab Python
       package.
-    - It **does require the video files to be hosted on the user's drive**, as well as authorization of Colab (it will
-      prompt you and walk you through this)
+    - It **does require the video files to be hosted on the user's drive**, as well as authorization of Colab (it will prompt you and walk you through this)
 
 New to Colab? Some links I found useful:
 
@@ -283,6 +282,7 @@ _`*` these statements reflect the assessment completed around project inception 
 
 Transcription of Public Domain Speeches from President John F. Kennedy
 
+*Please note the below example needs to be updated to latest terms*
 ## Description
 
 The "example_JFK_speech" folder contains the results and interim files of running both the single file and folder version. Recap:
