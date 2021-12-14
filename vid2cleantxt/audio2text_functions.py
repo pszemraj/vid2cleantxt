@@ -170,7 +170,7 @@ def prep_transc_src(
     _vid2beconv,
     in_dir,
     out_dir,
-    len_chunks=20,
+    len_chunks=15,
     verbose=False,
 ):
     """
@@ -232,8 +232,8 @@ def prep_transc_src(
             codec="pcm_s32le",
             ffmpeg_params=[
                 "-ar",
-                "16000",
-                "-ac",
+                "16000", # sampling rate
+                "-ac", # number of channels
                 "1",
                 # "-preset",
                 # "fastest",
@@ -244,15 +244,15 @@ def prep_transc_src(
             logger=None,
         )
 
-    print(f"Finished creating audio chunks for wav2vec2 - {get_timestamp()}")
+    print(f"\ncreated audio chunks for wav2vec2 - {get_timestamp()}")
     if verbose:
-        print(f"files saved to {out_dir}")
+        print(f" files saved to {out_dir}")
 
     return natsorted(chunk_fnames)
 
 
 def prep_w_multi(
-    _vid2beconv, in_dir, out_dir, len_chunks=20, verbose=False, backend="threading"
+    _vid2beconv, in_dir, out_dir, len_chunks=15, verbose=False, backend="threading"
 ):
     """
     prep_w_multi - prepares the audio chunks for transcription using joblib parallel to
@@ -316,32 +316,38 @@ def prep_w_multi(
         )
         this_clip.audio.write_audiofile(
             _clip_path,
-            codec="pcm_s32le",
+            codec="copy",
+            nbytes=2,
+            bitrate='16k',
             ffmpeg_params=[
-                "-ar",
-                "16000",
+                # "-c:a",
+                # "copy",
+                # "-ar",
+                # "16000",
                 "-ac",
                 "1",
-                # "-preset",
-                # "fastest",
+                "-preset",
+                "fastest",
                 "-f",
                 "wav",
                 "y",
             ],
             logger=None,
         )
+        this_clip.close()
+        my_clip.close()
         pbar.update(1)
         return basename(_clip_path)
 
-    print(f"starting multiprocessinggen of audio {_vid2beconv} {get_timestamp()}")
+    print(f"\nstarting multiprocessing of audio:\n File: {_vid2beconv} Time: {get_timestamp(True)}")
     stored_chunk_fnames = joblib.Parallel(n_jobs=usr_cpus, backend=backend)(
         joblib.delayed(write_chunk)(i, chunk_t) for i, chunk_t in enumerate(chunk_times)
     )
     pbar.close()
     _tot = len(stored_chunk_fnames)
-    print(f"Finished creating {_tot} audio chunks for wav2vec2 - {get_timestamp()}")
+    print(f"\nCreated {_tot} audio chunks for wav2vec2")
     if verbose:
-        print(f"files saved to {out_dir}")
+        print(f" files saved to {out_dir}")
 
     return natsorted(stored_chunk_fnames)
 
