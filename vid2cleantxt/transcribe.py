@@ -187,7 +187,7 @@ def transcribe_video_wav2vec(
         clip_name, src_dir, ac_storedir, chunk_dur, verbose=verbose
     )
     torch_validate_cuda()
-    gc.collect()
+    gc.collect() # free up memory
     device = "cuda:0" if torch.cuda.is_available() else "cpu"  # set device
     full_transc = []
     GPU_update_incr = (

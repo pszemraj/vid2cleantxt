@@ -27,7 +27,7 @@ import yake
 from symspellpy import SymSpell
 from tqdm.auto import tqdm
 from natsort import natsorted
-from vid2cleantxt.v2ct_utils import trim_fname, create_folder, NullIO, get_timestamp
+from vid2cleantxt.v2ct_utils import shorten_title, trim_fname, create_folder, NullIO, get_timestamp
 import joblib
 
 # ------------------------------------------------------------------------
@@ -229,7 +229,7 @@ def prep_transc_src(
 
         this_clip.audio.write_audiofile(
             filename=_clip_path,
-            codec="pcm_s32le",
+            codec="copy",
             ffmpeg_params=[
                 "-ar",
                 "16000", # sampling rate
@@ -243,7 +243,8 @@ def prep_transc_src(
             ],
             logger=None,
         )
-
+        this_clip.close()
+    my_clip.close()
     print(f"\ncreated audio chunks for wav2vec2 - {get_timestamp()}")
     if verbose:
         print(f" files saved to {out_dir}")
@@ -310,7 +311,7 @@ def prep_w_multi(
             this_clip = my_clip.subclip(t_end=this_end)
         else:
             this_clip = my_clip.subclip(t_start=this_st, t_end=this_end)
-        this_filename = f"{_vid2beconv}_clipaudio_{i}.wav"
+        this_filename = f"{trim_fname(_vid2beconv)}_clipaudio_{i}.wav"
         _clip_path = (
             join(out_dir, this_filename) if out_dir is not None else this_filename
         )
@@ -339,7 +340,7 @@ def prep_w_multi(
         pbar.update(1)
         return basename(_clip_path)
 
-    print(f"\nstarting multiprocessing of audio:\n File: {_vid2beconv} Time: {get_timestamp(True)}")
+    print(f"\nstarting multiprocessing of audio:\n File: {shorten_title(_vid2beconv)} Time: {get_timestamp(True)}")
     stored_chunk_fnames = joblib.Parallel(n_jobs=usr_cpus, backend=backend)(
         joblib.delayed(write_chunk)(i, chunk_t) for i, chunk_t in enumerate(chunk_times)
     )
