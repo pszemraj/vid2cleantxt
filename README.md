@@ -92,7 +92,6 @@ Here's a high-level overview of what happens in the `vid2cleantxt_folder.py` scr
       for comparison, and exported to .xlsx format.
 6. cleanup tasks, report runtime, and exit.
 
-
 _\*\* (where X is some duration that does not overload your computer or crash your IDE)_
 
 By default,
@@ -108,7 +107,7 @@ By default,
 
 Essentially, clone the repo, and run `vid2cleantxt/transcribe.py --input-dir "path to inputs`. the main arg to pass is `--input-dir` for, well, the inputs.
 
-> **Note:** *the first time the code runs on your machine, it will download the pretrained transformers models* which include wav2vec2 and a scibert model for spell correction. After the first run, it will be cached locally, and you will not need to sit through that pat .
+> **Note:** _the first time the code runs on your machine, it will download the pretrained transformers models_ which include wav2vec2 and a scibert model for spell correction. After the first run, it will be cached locally, and you will not need to sit through that pat .
 
 1.  fastest (in bash command line):
 
@@ -233,43 +232,40 @@ Comparing frequency of terms in one body of text vs. another
 
 ## What python package dependencies does this repo have?
 
-Upon cloning the repo, run the command `pip install -r requirements.txt` in a terminal opened in the project directory. Requirements (upd. Oct 12, 2021) are:
+Upon cloning the repo, run the command `pip install -r requirements.txt` in a terminal opened in the project directory. Requirements (upd. Dec 14, 2021) are:
 
 ```
-GPUtil>=1.4.0
-clean-text>=0.4.0
-humanize>=3.10.0
+plotly>=4.14.3
 librosa>=0.8.1
-moviepy==1.0.3
-natsort>=7.1.1
-neuspell>=1.0.0
-openpyxl >=3
-pandas>=1.2.5
-plotly>=5.1.0
-psutil>=5.8.0
-pysbd>=0.3.4
-pyspellchecker>=0.6.2
-spacy>=3.0.0,<4.0.0
-https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.0.0/en_core_web_sm-3.0.0.tar.gz#egg=en_core_web_sm
-spellchecker>=0.4
-symspellpy>=6.7.0
-texthero>=1.1.0
-torch~=1.9.0
-tqdm>=4.61.2
 transformers>=4.8.2
 wordninja>=2.0.0
+psutil>=5.8.0
+pysbd>=0.3.4
+torch>=1.9.0
+moviepy>=1.0.3
 yake>=0.4.8
+natsort>=7.1.1
+symspellpy>=6.7.0
+pandas>=1.3.0
+tqdm>=4.43.0
+numpy>=1.21.0
+clean-text
+GPUtil>=1.4.0
+humanize>=3.13.1
+neuspell>=1.0.0
+openpyxl >=3
+unidecode~1.3.2
+spacy>=3.0.0,<4.0.0
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.0.0/en_core_web_sm-3.0.0.tar.gz#egg=en_core_web_sm
 ```
 
 -   _Note: the github link in the reqs above downloads the spaCy model `en_core_web_sm` as part of the setup/installation process so you don't have to manually type `python -m spacy download en_core_web_sm` into the terminal to be able to run the code. More on this is described on spaCy's website [here](https://spacy.io/usage/models#production)_
 
-## I tried to transcribe an audio file, and it gave me an error:
-
-Planning to update the code to detect audio files and handle those. For now, only works on video files. If you want to try yourself, `convert_vidfile` and `convert_vid_for_transcription` just need to be updated.
-
 ## My computer crashes once it starts running the wav2vec2 model:
 
-Try decreasing 'chunk_length' in vid2cleantxt_folder.py or vid2cleantxt_single.py (whichever you use). Until you get to really small intervals (say &lt; 10 seconds) each audio chunk can be treated as approximately independent as they are different sentences.
+Try passing a lower `--chunk-len <INT>` when calling `vid2cleantxt/transcribe.py`. Until you get to really small intervals (say &lt; 8 seconds) each audio chunk can be treated as approximately independent as they are different sentences.
+
+Note that as you decrease `--chunk-len` the total amount of chunks created increases, so you may want to consider having the script create them with multiprocessing, which is the argument `--use-mp`
 
 ## How can I improve the performance of the model from a word-error-rate perspective?
 
