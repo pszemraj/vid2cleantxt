@@ -191,7 +191,6 @@ def transcribe_video_wav2vec(
     GPU_update_incr = (
         math.ceil(len(chunk_directory) / 2) if len(chunk_directory) > 1 else 1
     )
-    ts_tokenizer.model
     pbar = tqdm(total=len(chunk_directory), desc="Transcribing video")
     for i, audio_chunk in enumerate(chunk_directory):
 
