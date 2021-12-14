@@ -74,7 +74,7 @@ See the examples folder for more detail / full transcript.
 Here's a high-level overview of what happens in the `vid2cleantxt_folder.py` script to create the output shown above:
 
 1. Imports relevant packages, and imports relevant functions from audio2text_functions.py
-2. Receive **directory** string input from user in "script run window\*. Then iterates through that directory, and finds
+2. Receive **directory** string input from user as an argument behind `--input-dir`. Then iterates through that directory, and finds
    all video files
 3. FOR each video file found:
     - convert video to .wav format audio chunks of duration X\*\* seconds with MoviePy
@@ -92,7 +92,6 @@ Here's a high-level overview of what happens in the `vid2cleantxt_folder.py` scr
       for comparison, and exported to .xlsx format.
 6. cleanup tasks, report runtime, and exit.
 
-_\* the 'single file' version needs to have the name defined in the python code itself_
 
 _\*\* (where X is some duration that does not overload your computer or crash your IDE)_
 
@@ -107,32 +106,31 @@ By default,
 
 ## How to get this to work on your machine
 
-Essentially, clone the repo, and run `vid2cleantxt/vid2cleantxt_folder.py`. The script does not require any args as it will immediately prompt you for the directory to search for video files in.
+Essentially, clone the repo, and run `vid2cleantxt/transcribe.py --input-dir "path to inputs`. the main arg to pass is `--input-dir` for, well, the inputs.
 
-> **Note:** the first time the code runs on your machine, it will download the pretrained transformers model (~1
-> gb). After the first run, it will be cached locally, and you will not need to sit through that again.
+> **Note:** *the first time the code runs on your machine, it will download the pretrained transformers models* which include wav2vec2 and a scibert model for spell correction. After the first run, it will be cached locally, and you will not need to sit through that pat .
 
 1.  fastest (in bash command line):
 
     1. `git clone https://github.com/pszemraj/vid2cleantxt.git`
     2. `cd vid2cleantxt/`
     3. `pip install -r requirements.txt`
-    4. `python vid2cleantxt/transcribe.py --input-dir "C:\Users\peter\source"`
-        > in this example, all video and audio files in "C:\Users\peter\source" would be transcribed.
+    4. `python vid2cleantxt/transcribe.py --input-dir "example_JFK_speech/TEST_singlefile"`
+        > in this example, all video and audio files in the repo example "example_JFK_speech/TEST_singlefile" would be transcribed.
 
-2.  Clone with github desktop
+2.  Clone with [github desktop](https://desktop.github.com/)
 
-        1. install requirements.txt either from your IDE prompt or via the command above
-        2. open terminal in the local folder via your IDE or manual
-        3. `python vid2cleantxt/transcribe.py --input-dir "C:\Users\peter\source"` in said terminal
+    1. install requirements.txt either from your IDE prompt or via the command above
+    2. open terminal in the local folder via your IDE or manual
+    3. `python vid2cleantxt/transcribe.py --input-dir "example_JFK_speech/TEST_singlefile"` in said terminal
 
-    > in this example, all video and audio files in "C:\Users\peter\source" would be transcribed.
+    > in this example, all video and audio files in "example_JFK_speech/TEST_singlefile" would be transcribed.
 
-3.  If neither of those are convenient, see the next section on how to use Colab
+3.  If neither of those are convenient, see the next section on how to use Colab (which for most users, would be faster anyway)
 
 ## Notebooks on Colab
 
-Notebook versions are available on Google Colab, because they offer free GPUs which makes vid2cleantxt _much_ faster. If you want a notebook, in Colab you can download as .ipynb, but you may need to make some small changes (some directories, packages, etc. are specific to Colab's structure). The same goes for the colab noteboooks in this repo.
+Notebook versions are available on Google Colab, because they offer free GPUs which makes vid2cleantxt _much_ faster. If you want a notebook to run locally for whatever reason, in Colab you can download as .ipynb, but you may need to make some small changes (some directories, packages, etc. are specific to Colab's structure) - the same goes for the colab noteboooks in this repo.
 
 Links to Colab Scripts:
 
