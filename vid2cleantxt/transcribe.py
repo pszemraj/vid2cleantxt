@@ -27,7 +27,9 @@ sys.path.append(dirname(dirname(os.path.abspath(__file__))))
 
 import logging
 
-logging.basicConfig(level=logging.WARNING, filename="LOGFILE_vid2cleantxt_transcriber.log")
+logging.basicConfig(
+    level=logging.WARNING, filename="LOGFILE_vid2cleantxt_transcriber.log"
+)
 
 import math
 import shutil
@@ -181,7 +183,7 @@ def transcribe_video_wav2vec(
         clip_name, src_dir, ac_storedir, chunk_dur, verbose=verbose
     )
     torch_validate_cuda()
-    gc.collect() # free up memory
+    gc.collect()  # free up memory
     device = "cuda:0" if torch.cuda.is_available() else "cpu"  # set device
     full_transc = []
     GPU_update_incr = (
@@ -221,8 +223,8 @@ def transcribe_video_wav2vec(
         del input_values
         del logits
         del predicted_ids
-        if device=="cuda:0": torch.cuda.empty_cache() # empty memory on GPU
-
+        if device == "cuda:0":
+            torch.cuda.empty_cache()  # empty memory on GPU
 
     pbar.close()
     if verbose:
@@ -444,7 +446,7 @@ if __name__ == "__main__":
         )
 
         if move_comp:
-            move2completed(directory, filename=filename) # move src to completed folder
+            move2completed(directory, filename=filename)  # move src to completed folder
 
     # postprocess the transcriptions
     out_p_tscript = storage_locs.get("t_out")

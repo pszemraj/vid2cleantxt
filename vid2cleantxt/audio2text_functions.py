@@ -27,9 +27,16 @@ import yake
 from symspellpy import SymSpell
 from tqdm.auto import tqdm
 from natsort import natsorted
-from vid2cleantxt.v2ct_utils import shorten_title, trim_fname, create_folder, NullIO, get_timestamp
+from vid2cleantxt.v2ct_utils import (
+    shorten_title,
+    trim_fname,
+    create_folder,
+    NullIO,
+    get_timestamp,
+)
 import joblib
 from pydub import AudioSegment
+
 # ------------------------------------------------------------------------
 
 
@@ -166,7 +173,6 @@ def create_audiofile(
     return audio_conv_results
 
 
-
 def prep_transc_pydub(
     _vid2beconv,
     in_dir,
@@ -193,7 +199,6 @@ def prep_transc_pydub(
     vid_audio = AudioSegment.from_file(load_path)
     sound = AudioSegment.set_channels(vid_audio, 1)
 
-
     create_folder(out_dir)  # create the output directory if it doesn't exist
     dur_seconds = len(sound) / 1000
     n_chunks = math.ceil(dur_seconds / len_chunks)  # to get in minutes, round up
@@ -201,7 +206,7 @@ def prep_transc_pydub(
     preamble = trim_fname(_vid2beconv)
     chunk_fnames = []
     # split sound in 5-second slices and export
-    slicer = 1000 * len_chunks # in milliseconds
+    slicer = 1000 * len_chunks  # in milliseconds
     for i, chunk in enumerate(sound[::slicer]):
         chunk_name = f"{preamble}_clipaudio_{i}.wav"
         with open(join(out_dir, chunk_name), "wb") as f:
@@ -215,8 +220,6 @@ def prep_transc_pydub(
         print(f" files saved to {out_dir}")
 
     return natsorted(chunk_fnames)
-
-
 
 
 # ------------------------------------------------------------------------
