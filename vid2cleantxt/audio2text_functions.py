@@ -29,7 +29,7 @@ from tqdm.auto import tqdm
 from natsort import natsorted
 from vid2cleantxt.v2ct_utils import shorten_title, trim_fname, create_folder, NullIO, get_timestamp
 import joblib
-
+from pydub import AudioSegment
 # ------------------------------------------------------------------------
 
 
@@ -219,7 +219,7 @@ def prep_transc_src(
             this_clip = my_clip.subclip(t_end=len_chunks)
         else:
             this_clip = my_clip.subclip(t_start=this_st, t_end=(this_st + len_chunks))
-        this_filename = f"{preamble}_clipaudio_{i}.wav"
+        this_filename = f"{preamble}_clipaudio_{i}.ogg"
         chunk_fnames.append(this_filename)
         _clip_path = (
             join(out_dir, this_filename)
@@ -228,23 +228,77 @@ def prep_transc_src(
         )
 
         this_clip.audio.write_audiofile(
-            filename=_clip_path,
-            codec="copy",
-            ffmpeg_params=[
-                "-ar",
-                "16000", # sampling rate
-                "-ac", # number of channels
-                "1",
-                # "-preset",
-                # "fastest",
-                "-f",
-                "wav",
-                "y",
-            ],
+            _clip_path,
+            codec=None,
+            ffmpeg_params=["-preset",'ultrafast'],
+            # nbytes=2,
+            # bitrate='16k',
+            # ffmpeg_params=[
+            #     "acodec",
+            #     "copy",
+            #     # "-ar",
+            #     # "16000",
+            #     "-ac",
+            #     "1",
+            #     "-preset",
+            #     "fastest",
+            #     "-f",
+            #     "ogg",
+            #     "-y",
+            # ],
             logger=None,
         )
         this_clip.close()
     my_clip.close()
+    print(f"\ncreated audio chunks for wav2vec2 - {get_timestamp()}")
+    if verbose:
+        print(f" files saved to {out_dir}")
+
+    return natsorted(chunk_fnames)
+
+def prep_transc_pydub(
+    _vid2beconv,
+    in_dir,
+    out_dir,
+    len_chunks=15,
+    verbose=False,
+):
+    """
+    prep_transc_src - prepares the source video files for transcription by creating audio files and metadata
+
+    Parameters
+    ----------
+    vid2beconv : str, the name of the video file to be converted (or audio file)
+    len_chunks : int, the length of the audio chunks to be created, by default 20 (seconds)
+    input_directory : str, the path to the video file, by default None, which means the current working directory
+    output_directory : str, the path to the output audio file, by default None, which means the current working directory
+    verbose : bool, optional
+    use_mp : bool, optional, whether to use multiprocessing, by default True
+    Returns
+    -------
+    """
+
+    load_path = join(in_dir, _vid2beconv) if in_dir is not None else _vid2beconv
+    vid_audio = AudioSegment.from_file(load_path)
+    sound = AudioSegment.set_channels(vid_audio, 1)
+
+
+    create_folder(out_dir)  # create the output directory if it doesn't exist
+    dur_seconds = len(sound) / 1000
+    n_chunks = math.ceil(dur_seconds / len_chunks)  # to get in minutes, round up
+    pbar = tqdm(total=n_chunks, desc="Creating .wav audio clips")
+    preamble = trim_fname(_vid2beconv)
+    chunk_fnames = []
+    # split sound in 5-second slices and export
+    slicer = 1000 * len_chunks # in milliseconds
+    for i, chunk in enumerate(sound[::slicer]):
+        chunk_name = f"{preamble}_clipaudio_{i}.wav"
+        with open(join(out_dir, chunk_name), "wb") as f:
+            chunk.export(f, format="wav")
+        chunk_fnames.append(chunk_name)
+        pbar.update(1)
+    pbar.close()
+
     print(f"\ncreated audio chunks for wav2vec2 - {get_timestamp()}")
     if verbose:
         print(f" files saved to {out_dir}")

@@ -22,6 +22,8 @@ import gc
 import sys
 from os.path import dirname, join
 
+from audio2text_functions import prep_transc_pydub
+
 sys.path.append(dirname(dirname(os.path.abspath(__file__))))
 
 
@@ -183,7 +185,7 @@ def transcribe_video_wav2vec(
     # functions have the same signature, so we can use the same function for both mp and non-mp
 
     # get the audio chunks
-    chunk_directory = prepare_audio(
+    chunk_directory = prep_transc_pydub(
         clip_name, src_dir, ac_storedir, chunk_dur, verbose=verbose
     )
     torch_validate_cuda()
@@ -222,12 +224,13 @@ def transcribe_video_wav2vec(
         )
         # double-check if "" should be joined on  or " "
         full_transc.append(f"{this_transc}\n")
+        pbar.update(1)
         # empty memory so you don't overload the GPU
         del input_values
         del logits
         del predicted_ids
-        torch.cuda.empty_cache()
-        pbar.update(1)
+        if device=="cuda:0": torch.cuda.empty_cache() # empty memory on GPU
+
 
     pbar.close()
     if verbose:
