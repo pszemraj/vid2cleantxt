@@ -22,8 +22,6 @@ import gc
 import sys
 from os.path import dirname, join
 
-from audio2text_functions import prep_transc_pydub
-
 sys.path.append(dirname(dirname(os.path.abspath(__file__))))
 
 
@@ -51,8 +49,6 @@ transformers.utils.logging.set_verbosity(40)
 
 from audio2text_functions import (
     trim_fname,
-    prep_transc_src,
-    prep_w_multi,
     corr,
     create_metadata_df,
     init_neuspell,
@@ -61,6 +57,7 @@ from audio2text_functions import (
     spellcorrect_pipeline,
     setup_out_dirs,
     get_av_fmts,
+    prep_transc_pydub,
 )
 from v2ct_utils import (
     check_runhardware,
@@ -179,11 +176,6 @@ def transcribe_video_wav2vec(
     use_attn = wav2vec2_islarge(
         ts_model
     )  # if they pass in a large model, use attention masking
-    prepare_audio = (
-        prep_w_multi if use_mp else prep_transc_src
-    )  # set the function to use for preparing audio chunks
-    # functions have the same signature, so we can use the same function for both mp and non-mp
-
     # get the audio chunks
     chunk_directory = prep_transc_pydub(
         clip_name, src_dir, ac_storedir, chunk_dur, verbose=verbose
