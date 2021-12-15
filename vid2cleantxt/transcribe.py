@@ -364,7 +364,7 @@ def get_parser():
         "--model-name",
         required=False,
         default=None,
-        help="huggingface wav2vec2 model name, ex 'facebook/wav2vec2-base-960h'",
+        help="huggingface wav2vec2 model name, ex 'facebook/wav2vec2-base-96~0h'",
         # "facebook/wav2vec2-large-960h-lv60-self" is the best model but VERY taxing on the GPU/CPU
     )
 
