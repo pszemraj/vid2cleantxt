@@ -156,7 +156,11 @@ New to Colab? Some links I found useful:
 On Google Colab with a 16 gb GPU (should be available to free Colab accounts): **approximately 8 minutes to transcribe ~
 90 minutes of audio**. As of July 13, 2021, updated to ensure that CUDA will be used on local machines - if you have an NVIDIA graphics card, you may see runtimes closer to that estimate.
 
-On my machine (CPU only due to Windows + AMD GPU) it takes approximately 80-120% of the total duration of input video files. You can also take a look at the "console printout" text files in `example_JFK_speech/TEST_folder_edition` and `TEST_singlefile` for more details.
+On my machine (CPU only due to Windows + AMD GPU) it takes approximately 30-70% of the total duration of input video files. You can also take a look at the "console printout" text files in `example_JFK_speech/TEST_singlefile`.
+
+- with model = "facebook/wav2vec2-base-960h" (default) approx 30% of original RT
+- with model = "facebook/wav2vec2-large-960h-lv60-self" approx 70% of original RT
+
 
 **Specs:**
 
@@ -234,26 +238,28 @@ Comparing frequency of terms in one body of text vs. another
 Upon cloning the repo, run the command `pip install -r requirements.txt` in a terminal opened in the project directory. Requirements (upd. Dec 14, 2021) are:
 
 ```
-plotly>=4.14.3
-librosa>=0.8.1
-transformers>=4.8.2
-wordninja>=2.0.0
-psutil>=5.8.0
-pysbd>=0.3.4
-torch>=1.9.0
-moviepy>=1.0.3
-yake>=0.4.8
-natsort>=7.1.1
-symspellpy>=6.7.0
-pandas>=1.3.0
-tqdm>=4.43.0
-numpy>=1.21.0
+librosa~=0.8.1
+wordninja~=2.0.0
+psutil~=5.8.0
+natsort~=7.1.1
+pandas~=1.3.0
+moviepy~=1.0.3
+transformers~=4.8.2
+numpy~=1.21.0
+pydub~=0.24.1
+symspellpy~=6.7.0
+joblib~=1.0.1
+torch~=1.9.0
+tqdm~=4.43.0
+plotly~=4.14.3
+yake~=0.4.8
+pysbd~=0.3.4
 clean-text
-GPUtil>=1.4.0
-humanize>=3.13.1
-neuspell>=1.0.0
+GPUtil~=1.4.0
+humanize~=3.13.1
+neuspell~=1.0.0
 openpyxl >=3
-unidecode~1.3.2
+unidecode~=1.3.2
 spacy>=3.0.0,<4.0.0
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.0.0/en_core_web_sm-3.0.0.tar.gz#egg=en_core_web_sm
 ```
@@ -284,109 +290,8 @@ Transcription of Public Domain Speeches from President John F. Kennedy
 
 _Please note the below example needs to be updated to latest terms_
 
-## Description
+TODO: Update example with latest output
 
-The "example_JFK_speech" folder contains the results and interim files of running both the single file and folder version. Recap:
-
--   for the single file version, you need to update the `input_file` variable with the filepath to the desired video file.
-
-    -   if the path to the video file does not exist, the console should prompt the user to enter a new path
-
--   for the folder version, just run the .py script, and the console will prompt the user for input right away. Paste the directory path (to the video file folder), and it will handle it from there.
--   output files from already-run scripts on the examples are located in:
-
-    1. `vid2cleantxt\example_JFK_speech\TEST_folder_edition`
-    2. `vid2cleantxt\example_JFK_speech\TEST_singlefile`
-
-        for the folder and single-file versions respectively.
-
-## Output (sentence boundary disambiguation) of JFK's Moon Speech @ Rice University:
-
-The input video was `example_JFK_speech/TEST_folder_edition/completed/GPU_President Kennedy speech on the space effort a_part_1.mp4`. The video was originally downloaded from [C-Span](https://www.c-span.org/video/?96805-52/john-f-kennedy-audio-recording):
-
-> President pitzer minister vice president governor congressman thomas senator widely and congressman miller minister web mystery bill scientists distinguished guest of ladies and gentlemen and appreciate your president having made me an honorary visiting professor and I will assure you that my first letter will be a very. If I am delighted to be here and I am particularly delighted to be here on this occasion we meet at a college noted for knowledge in a city noted for progress in a state noted for strength and we stand in need of all three of we meet in an hour of change and challenge in a decade of hope and fear in an age of both knowledge and ignorance the greater. Our knowledge increases the greater our ignorance unfolds despite the striking fact that most of the scientists that the world has ever known are alive and working to say despite the fact that this nation's own scientific human power is doubling every twelve years in a rate of growth more than three times that of our population as a whole despite that. The vast stretches of the unknown and the unanswered and the unfinished still far outstripped are collective comprehension no man can fully grasp how far and how fast we have come but immense if you will the fifty thousand years of man's recorded history in a time span of about half a century. Stated in these terms we know very little about the first forty years except at the end of them advanced men had learned to use the skins of animals to cover them then about ten years ago under this standard man emerged from his caves to construct other kinds of shelter only five years ago man learned to write and use a cart with wheels christianity began. Less than two years ago the printing press came this year and then less than two months ago during this whole fifty years span of human history the steam engine provided a new source of power network explored the meaning of gravity last month electric lights and telephones and automobiles and airplanes became available only last week. Did we develop penecilum and television and nuclear power and now if america's new spacecraft succeeds in reaching Venus we will have literally reached the start before midnight to night this is a breath taking place and such a pace cannot help but create new ills as it dispels old new ignorance new problems new dangers. Surely the opening vistas of space promise
-
-(continued in next video file + transcription)
-
-## Output script run log for the "single_file" version:
-
-For a transcription of the **President John F. Kennedy's Peace Speech.mp4** video file. See `example_JFK_speech/TEST_singlefile/v2clntxt_transcriptions/NSC + SBD` to read the full text for this.
-
-```
-C:\Users\peter\AppData\Local\Programs\Python\Python39\python.exe C:/Users/peter/GIT_repos/vid2cleantxt/vid2cleantxt/vid2cleantxt_single.py
-data folder is set to `C:\Users\peter\AppData\Local\Programs\Python\Python39\lib\site-packages
-\neuspell\../data` script
-
- Enter full path to the video to be transcribed ---->C:\Users\peter\GIT_repos\vid2cleantxt\exa
-mple_JFK_speech\TEST_singlefile\President John F. Kennedy's Peace Speech.mp4
-
-Preparing to load model: facebook/wav2vec2-large-960h-lv60-self -  2021-07-13 01:09:57.762653
-Some weights of Wav2Vec2ForCTC were not initialized from the model checkpoint at facebook/wav2
-vec2-large-960h-lv60-self and are newly initialized: ['wav2vec2.masked_spec_embed']
-You should probably TRAIN this model on a down-stream task to be able to use it for prediction
-s and inference.
-Some weights of the model checkpoint at bert-base-cased were not used when initializing BertMo
-del: ['cls.predictions.transform.dense.bias', 'cls.predictions.decoder.weight', 'cls.predictio
-ns.transform.dense.weight', 'cls.seq_relationship.weight', 'cls.predictions.bias', 'cls.predic
-tions.transform.LayerNorm.bias', 'cls.predictions.transform.LayerNorm.weight', 'cls.seq_relati
-onship.bias']
-- This IS expected if you are initializing BertModel from the checkpoint of a model trained on
- another task or with another architecture (e.g. initializing a BertForSequenceClassification
-model from a BertForPreTraining model).
-- This IS NOT expected if you are initializing BertModel from the checkpoint of a model that y
-ou expect to be exactly identical (initializing a BertForSequenceClassification model from a B
-ertForSequenceClassification model).
-Converting Video to Audio: 100%|█████████████████████████████| 55/55 [03:29<00:00,  3.80s/it]
-Finished creating audio chunks at  _01.14.09
-WARNING - unable to start CUDA. If you wanted to use a GPU, exit and check hardware.
-
-Gen RAM Free: 8.8 GB  | Proc size: 3.1 GB  | 8 CPUs  loaded at 34.8 % |
-No GPU being used :(
------------------
-
-Transcribing President John F. Ke... :   0%|                          | 0/55 [00:00<?, ?it/s]
-Gen RAM Free: 8.8 GB  | Proc size: 3.1 GB  | 8 CPUs  |
-No GPU being used :(
------------------
-
-2021-07-13 01:14:13.854223: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Co
-uld not load dynamic library 'cudart64_110.dll'; dlerror: cudart64_110.dll not found
-2021-07-13 01:14:13.867744: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above
-cudart dlerror if you do not have a GPU set up on your machine.
-Transcribing President John F. Ke... :  51%|████████▋        | 28/55 [17:51<16:56, 37.65s/it]
-Gen RAM Free: 13.6 GB  | Proc size: 1.5 GB  | 8 CPUs  loaded at 67.2 % |
-No GPU being used :(
------------------
-
-Transcribing President John F. Ke... : 100%|█████████████████| 55/55 [34:19<00:00, 37.45s/it]
-successfully moved the file President John F. Kennedy's Peace Speech.mp4 to */completed.
-
-----------------------------
-transcription process completed -  2021-07-13 01:48:29.504284
-
-top 5 phrases are:
-
-['nations world peace',
- 'war total war',
- 'interests nuclear powers',
- 'world security system',
- 'peace corps abroad']
-Transcription files used to extract KW can be found in:
-  C:\Users\peter\GIT_repos\vid2cleantxt\example_JFK_speech\TEST_singlefile\v2clntxt_transcript
-ions\neuspell_sc
-
-
------------------------------------ Script Complete -------------------------------
-2021-07-13 01:49:20.620811
-Transcription files + more in folder:
- C:\Users\peter\GIT_repos\vid2cleantxt\example_JFK_speech\TEST_singlefile\v2clntxt_transcripti
-ons
-Metadata for each transcription located @
- C:\Users\peter\GIT_repos\vid2cleantxt\example_JFK_speech\TEST_singlefile\v2clntxt_transc_meta
-data
-total runtime was 40 minutes
-
-Process finished with exit code 0
 ```
 
 ---
@@ -397,6 +302,7 @@ Process finished with exit code 0
 
 A _rough_ timeline of what has been going on in the repo:
 
+- Dec 2021 - greatly improved runtime of the script, and added more features
 -   Sept-Oct 2021: Fixing bugs, formatting code.
 -   July 12, 2021 - sync work from Colab notebooks: add CUDA support for pytorch in the `.py` versions, added Neuspell as a spell checker. General organization and formatting improvements.
 -   July 8, 2021 - python scripts cleaned and updated.
