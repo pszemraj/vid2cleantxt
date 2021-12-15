@@ -282,7 +282,8 @@ _`*` these statements reflect the assessment completed around project inception 
 
 Transcription of Public Domain Speeches from President John F. Kennedy
 
-*Please note the below example needs to be updated to latest terms*
+_Please note the below example needs to be updated to latest terms_
+
 ## Description
 
 The "example_JFK_speech" folder contains the results and interim files of running both the single file and folder version. Recap:
