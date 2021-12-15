@@ -55,7 +55,7 @@ TL;DR check out [this Colab script](https://colab.research.google.com/drive/1WfJ
 
 # Motivation
 
-When compared to other media (such as text and pictures), video (specifically the audio) is an inefficient way to convey dense or technical information, as in the base case the viewer has to sit through the whole thing, while only part of the video may be relevant to them. Even worse, if you don't understand a statement or concept, you have to search through the video, or re-watch it, taking up significant amounts of time. This project attempts to help solve that problem by converting long video files into text that you can read, CTRL+F, keyword extract, and summarize.
+Video, specifically audio, is an inefficient way to convey dense or technical information. The viewer has to sit through the whole thing, while only part of the video may be relevant to them. If you don't understand a statement or concept, you have to search through the video, or re-watch it. This project attempts to help solve that problem by converting long video files into text that can be easily searched and summarized.
 
 # Overview
 
