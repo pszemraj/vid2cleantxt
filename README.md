@@ -71,27 +71,15 @@ See the examples folder for more detail / full transcript.
 
 ![vid2cleantxt detailed](https://user-images.githubusercontent.com/74869040/131499569-c894c096-b6b8-4d17-b99c-a4cfce395ea8.png)
 
-Here's a high-level overview of what happens in the `vid2cleantxt_folder.py` script to create the output shown above:
-
-1. Imports relevant packages, and imports relevant functions from audio2text_functions.py
-2. Receive **directory** string input from user as an argument behind `--input-dir`. Then iterates through that directory, and finds
-   all video files
-3. FOR each video file found:
-    - convert video to .wav format audio chunks of duration X\*\* seconds with MoviePy
-    - transcribe all X audio chunks through
-      a [pretrained wav2vec2 model](https://github.com/pytorch/fairseq/tree/master/examples/wav2vec)
-      (in this repo - using huggingface transformers) and store the resulting text in a list
-    - write all results of the list into a text file, store various runtime metrics into a separate text list
-    - Delete .wav audio chunk directory after completed using them
-4. Next, create two new text files: one with all transcriptions appended, one with all metadata appended.
-5. Then FOR each transcription text file:
-    - Pass the 'base' transcription text through a spell checker (symspellpy) and autocorrect spelling. save as new text
-      file.
-    - Use pySBD to infer sentence boundaries on the spell-corrected text and add periods in to delineate sentences. Save as new file.
-    - Run basic keyword extraction (via YAKE) on spell-corrected file. All keywords per file are stored in one dataframe
-      for comparison, and exported to .xlsx format.
-6. cleanup tasks, report runtime, and exit.
-
+1. The `transcribe.py` script uses audio2text_functions.py to convert video files to .wav format audio chunks of duration X* seconds, 
+2. transcribe all X audio chunks through a pretrained wav2vec2 model, s
+3. Write all results of the list into a text file, stores various runtime metrics into a separate text list, and deletes the .wav audio chunk directory after completed using them. 
+4. creates two new text files: one with all transcriptions appended, and one with all metadata appended. The script then 
+5. FOR each transcription text file:
+    - Passes the 'base' transcription text through a spell checker (_Neuspell_) and autocorrects spelling. Saves as new text file.
+    - Uses pySBD to infer sentence boundaries on the spell-corrected text and add periods in to delineate sentences. Saves as new file.
+    - Runs basic keyword extraction (via YAKE) on spell-corrected file. All keywords per file are stored in one dataframe for comparison, and exported to .xlsx format
+  
 _\*\* (where X is some duration that does not overload your computer or crash your IDE)_
 
 By default,
@@ -190,8 +178,7 @@ short answer: noam_chomsky.jpeg
 
 more comprehensive answer:
 
-A large corpus of text can be visualized / summarized / reduced in many ways with natural language processing / typical
-machine learning algorithms (i.e., classifying text, so on). Some packages to check out regarding this are TextHero and ScatterText. An example use case is combining the text from audio transcriptions with written documents (say textbooks or lecture slides converted to text) for comparison of how similar they are. You can also use topic models (available in ScatterText and many other packages) or statistical models (YAKE) to extract key topics from each file (or file group) and compare those (how they change over time, what are the key topics in practice exam PDF files, etc).
+Text data can be visualized, summarized, or reduced in many ways with natural language processing and machine learning algorithms. For example, you can use TextHero or ScatterText to compare audio transcriptions with written documents, or use topic models or statistical models to extract key topics from each file. Comparing text data in this way can help you understand how similar they are, or identify key differences.
 
 ### Visualization and Analysis
 
@@ -270,11 +257,11 @@ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.0.0
 
 Try passing a lower `--chunk-len <INT>` when calling `vid2cleantxt/transcribe.py`. Until you get to really small intervals (say &lt; 8 seconds) each audio chunk can be treated as approximately independent as they are different sentences.
 
-Note that as you decrease `--chunk-len` the total amount of chunks created increases, so you may want to consider having the script create them with multiprocessing, which is the argument `--use-mp`
-
 ## How can I improve the performance of the model from a word-error-rate perspective?
 
-You can train the model, but that requires that you already have a transcription of that person's speech already. As you may find, manual transcription is a bit of a pain and therefore transcripts are rarely provided - hence this repo.
+if you change the default model by passing `--model "facebook/wav2vec2-large-960h-lv60-self"`from the default  `facebook/wav2vec2-base-960h` the model will be considerably more accurate - I defer to facebook for the official stats. 
+
+You can also train the model, but that requires that you already have a transcription of that person's speech already. As you may find, manual transcription is a bit of a pain and therefore transcripts are rarely provided - hence this repo.
 
 ## Why use wav2vec2 instead of SpeechRecognition or other transcription methods?
 
@@ -288,7 +275,7 @@ _`*` these statements reflect the assessment completed around project inception 
 
 Transcription of Public Domain Speeches from President John F. Kennedy
 
-_Please note the below example needs to be updated to latest terms_
+Please note: the below example needs to be updated to latest model outputs_
 
 TODO: Update example with latest output
 
