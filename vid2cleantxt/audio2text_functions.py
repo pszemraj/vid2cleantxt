@@ -28,13 +28,11 @@ from symspellpy import SymSpell
 from tqdm.auto import tqdm
 from natsort import natsorted
 from vid2cleantxt.v2ct_utils import (
-    shorten_title,
     trim_fname,
     create_folder,
     NullIO,
     get_timestamp,
 )
-import joblib
 from pydub import AudioSegment
 
 # ------------------------------------------------------------------------
@@ -123,7 +121,8 @@ def create_audiofile(
     new_filename="",
 ):
     """
-    create_audiofile - takes a video file and creates an audiofile with various parameters. It is currently not used in the main pipelien (i.e., vid2cleantxt)
+    create_audiofile - takes a video file and creates an audiofile with various parameters. It is currently not used in the main pipeline (i.e., vid2cleantxt)
+    TODO:: remove this function from the repo
 
     Parameters
     ----------
@@ -181,7 +180,7 @@ def prep_transc_pydub(
     verbose=False,
 ):
     """
-    prep_transc_src - prepares the source video files for transcription by creating audio files and metadata
+    prep_transc_src - prepares the source video files for transcription by creating audio files and metadata by splitting the video into chunks of specified length (in seconds). Chunks are created in the output directory, and have the same name as the video file, but with the extension .wav.
 
     Parameters
     ----------
@@ -239,7 +238,7 @@ def quick_keys(
     ddup_thresh=0.3,
 ):
     """
-    quick_keys - extracts keywords from a text file using ngrams and a TF-IDF model (Yake)
+    quick_keys - extracts keywords from a text file using ngrams and a TF-IDF model (Yake). The keywords are returned as a list of strings and then turned into a dataframe.
 
     Parameters
     ----------
@@ -366,7 +365,7 @@ def corr(s: str):
 
 def init_symspell(max_dist=3, pref_len=7):
     """
-    init_symspell - initialize the SymSpell object
+    init_symspell - initialize the SymSpell object. This is used to correct misspelled words in the text (interchangeable with NeuSpell)
 
     Parameters
     ----------
@@ -396,7 +395,7 @@ def symspell_freetext(
     textlines, dist=3, keep_numb_words=True, verbose=False, speller=None
 ):
     """
-    symspell_freetext - spell check a text file using SymSpell
+    symspell_freetext - spell check a text file using SymSpell. This is used to correct misspelled words in the text (interchangeable with NeuSpell)
     https://github.com/mammothb/symspellpy
     Parameters
     ----------
@@ -457,7 +456,7 @@ def symspell_freetext(
 
 def init_neuspell(verbose=False):
     """
-    init_neuspell - initialize the neuspell object
+    init_neuspell - initialize the neuspell object. This is used to correct misspelled words in the text (interchangeable with SymSpell)
 
     Returns
     -------
@@ -478,7 +477,7 @@ def init_neuspell(verbose=False):
 
 def neuspell_freetext(textlines, ns_checker=None, verbose=False):
     """
-    neuspell_freetext - spell check a text object using Neuspell
+    neuspell_freetext - spell check a text object using Neuspell. This is used to correct misspelled words in the text (interchangeable with SymSpell)
 
     Parameters
     ----------
@@ -564,7 +563,7 @@ def SBD_freetext(text, verbose=False, lang="en"):
 
 def spellcorrect_pipeline(filepath, filename, ns_checker=None, verbose=False):
     """
-    spellcorrect_pipeline - takes a filepath and filename and returns a corrected version of the text. It uses both the PySBD and Neuspell algorithms to correct the text.
+    spellcorrect_pipeline - takes a filepath and filename and returns a corrected version of the text. It uses both the PySBD and Neuspell algorithms to correct the text. Note that the Neuspell algorithm is more accurate than the SymSpell algorithm, but it is slower - it is recommended to use the SymSpell algorithm if you are dealing with a large corpus of text or see runtime issues.
 
     Parameters
     ----------
@@ -640,4 +639,4 @@ def spellcorrect_pipeline(filepath, filename, ns_checker=None, verbose=False):
         "SBD_filename": final_outname,
     }
 
-    return pipelineout
+    return pipelineout # return the corrected text and other data

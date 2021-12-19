@@ -426,7 +426,7 @@ if __name__ == "__main__":
     for ext in get_av_fmts():  # now include audio formats and video formats
         approved_files.extend(find_ext_local(directory, req_ext=ext, full_path=False))
 
-    print(f"\nFound {len(approved_files)} video files in {directory}")
+    print(f"\nFound {len(approved_files)} audio or video files in {directory}")
 
     storage_locs = setup_out_dirs(directory)  # create and get output folders
 
@@ -459,7 +459,7 @@ if __name__ == "__main__":
     )
 
     print(
-        f"\n\nFinished at: {get_timestamp()} taking a total of {(time.perf_counter() - st)/60} mins"
+        f"\n\nFinished at: {get_timestamp()}. Total RT was {(time.perf_counter() - st)/60} mins"
     )
     print(
         f"relevant files for run are in: \n{out_p_tscript} \n and: \n{out_p_metadata}"
