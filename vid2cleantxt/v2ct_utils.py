@@ -1,5 +1,7 @@
 """
-    v2ct_utils.py - a bunch of general utilities like loading all files of a certain extension in a directory, etc. FUnctions for the actual processing of the files are in audio2text_functions.py
+    v2ct_utils.py - a bunch of general utilities like loading all files of a certain extension in a directory, etc.
+
+    Note: Functions for the actual processing of the files are in audio2text_functions.py
 """
 import os
 import sys

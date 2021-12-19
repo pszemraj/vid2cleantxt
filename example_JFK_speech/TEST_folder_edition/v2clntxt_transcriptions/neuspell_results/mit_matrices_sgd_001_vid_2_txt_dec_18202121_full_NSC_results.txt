@@ -1,0 +1,80 @@
+times some randomly chosen data point you compute its gradient this is s g d that ' s what we ' re running and we threw away tons of information
+ we didn ' t use the full gradient we are just using this crude crude gradient so this process is very sensitive to the other parometer in the system which is the step size much more sensitive than gradient descent in fact anybody let ' s see as
+ vary the steep size see if you can notice some patrons on a how it tries to go towards an optimum
+ is a funding version also of this letter where I ' come to
+ Shortly again I ' ll repeat again and then I ' ll ask you for your observations if you notice some parents I don ' t know if they ' re necessarily apparent you know that ' s the thing with parents because I know the answer so I ' ll see the parent if you
+ know the answer you may or may not see the pattern but I want to see if you actually see the pattern as a move changed the step size so maybe that was enough simulation anybody have any comments on what kind of pattern you may have observed seems in
+ cluster in the middle is getting larger and why more widespread youhave definitely that ' s a great observation any other comments there ' s one more interesting thing
+ happening here which is a very very typical thing for us me d in one of the reasons why people love s to d let me do that once again briefly on this is tiny step size almost
+ zero close to zerus not exactly zero so you see what happens for a very tiny step size it doesn ' t look that starcastic right but that ' s kind of obvious from there if attack is very tiny
+ you ' ll hardly make any move so things will look very stable and in fact the speed at which the caste gradiant converses is thatswy extremely sensitive to how you pick the step sites it ' s still an open research problem to come
+ the best way to pick step sizes okisits even though it ' s simple it doesn ' t mean it ' s trivial and as is vary the step size of it makes some progress and it goes towards the solution are you now beginning to see that
+ seems to be making a more stable progress in the beginning and when it comes close to the solution it ' s fluctuating more and the bigger the step size the amount of
+ situation near the solution is wilder as he noticed back there but one very interesting thing is more or less constant there is more fluctuation also on the outside but you see that the initial
+ still seems to be making pretty good progress and as you come close to the solution it fluctuates more and that is a very principally typical behavior of sarcastic gradient dissent that in the beginning it makes
+ rapid strides so you may see your training laws decrease whole superfast and then kind of inopera out and it ' s this particular behaviour which got people super excited that day
+ in machine learning we are working with all sorts of big data I just want a quick and dirty progress on my training training I don ' t care about getting to the best optimum because in machine learning you don ' t just care about solving the
+ optimization problems you actually care about finding solutions that work well on unseen data so that means you don ' t want to permit and solve the optimization problem supremely well so it ' s great to make rapid initial progress and if
+ that progress peers out it ' s to be this enthusiastic statements that I ' m making in some nice cases like convex optimization problems one can mathematically fully quantify these ones can prove theorems to
+ by each thing that I said in terms of how close how fast and so on we ' ll see a little bit of that and this is what really happens to as go do you know it makes great initial progress and regardless of a
+ how you use step sizes close to the optimum it can either get stuck or enter some kind of chaos dynamics or just behave like crazy that ' s typical of a giddy and let ' s look at now slight
+ medical insight into her roughly why this behavior may happen this is a trivial one dimensional optimization problem but it conveys the crux of why this
+ behavior is displayed by sarcastic gradient methods that it works really well in the beginning and then it can god knows what happens when it comes close to the opium anything can happen so let ' s look at that
+ o k so let ' s look at a simple one dimensional optimization problem I ' ll kind of draw it out maybe on the other side so that people on this side are not disadvantaged
+ so I ' ll just draw out a l squares problem x is one dimensional previously I had as transposed x now as is also a scale subject only stuff
+ everything is one day so this is our setup think of a i into x minus public if these are quadratic functions right
+ they looked like this corresponding to different eyes that ' s like some different functions sitting and so on so
+ else are my indifferent laws functions and I want to minimize those
+ we know we can actually explicitly compute the solution of that problem right you set so you set the derivative of that of x to zero so far you set the gradient of that of x to zero hopefully
+ that ' s easy for you to do if you do that differentiation we ' ll get gradient of that of x will be just given by well you can do that in your head I ' ll just write it out explicitly and
+ x minus b i times as it is equal to zero and you solve that for x you get a start the optimum of this lean square problem right
+ so we actually know how to solve it pretty easily it ' s a really cold example actually I got that from text book by professor committee butzakers
+ a very interesting thing we are not going to use the full gradient we are only going to use the gradients of individual components right so what does the minimum of an individual component look like well the mini
+ of an individual component is attained when we can set this thing to zero and that thing becomes zero if you just pack it equal to be so divided by a right so a single component we can be minimized by
+ that choice so you can do a little bit of arithmetic mean geometric means type inequalities to draw this picture
+ so over all it from one through on this is the minimum value of this ratio as i by b i and let ' s say this is the maximum value
+ of a i b b i and we know that close formed solution that is the true solution so you can verify with some algebra that that solution will lie
+ in this interval so let ' s so you may want to this is a tiny exercise for you hopefully some of your love inequalities like me so this is hopefully
+ not such a bad exercise but you can verify that within this range of the individual mind and max is where the combined solution lies so of course intuitively you would have physical style thinking you would have guessed that right away
+ so means when you ' re outside we ' re the individual solutions let ' s call this the far out zone and also this side is the far out zone and this region
+ within which the true minimum can lie you can say versus the region of confusion why I ' m called calling it the region of confusion because there by minimizing an individual if if you ' re not going
+ to be able to tell what is the combined ex star that ' s all and a very interesting thing happens now just to gain some mathematics insight into that simulation that I showed you that if you have
+ of that is outside this region of confusion which states that if you ' re far from the region within which an optimum can lie so you ' re far away you ' ve just
+ read out your progress you made a random initialization most likely you ' re far away from where the solution is to suppose that ' s where you are what happens when you ' re in that far our region so you ' re in that far out region you use a stoccastic grade
+ of some in component so the full gradient will look like that a sarcastic gradient looks like just one component and when you ' re far out outside that mind and place
+ regime then you can check by just by just looking at it that sarcastic gradient in that far away region
+ has exactly the same sign as the full gradient what does gradient descended to it says well walk in the direction of the negative gradient and if far away from the optimum outside the region of
+ fusion your stocastic gradient has the same sign as the true gradient maybe in more liberal zebra terms it makes you know it makes an acute angle with your gradients that means if even though stocast
+ gradient is not exactly the full gradient it has some component in the direction of the true gradient this is one day where it is exactly the same sign in multiple dimensions this is the idea that it will have some component in the
+ direction of the true gradient when you ' re far away which means if you then use that direction to make an up date in that style you will end up making solid progress
+ and the beauty is in the time it would have taken you to do one single generation of back gradian descent far away you can do millions to plastic steps and each step will make some progress and that ' s why
+ we see this dramatic in uphill again this is in the handy case this is explicit mathematically in the hide case this is more intuitive without further assumptions about angles yet veteran one can ' t make such a broad
+ claim that intuitively this is what ' s happening on why you see this awesome initial speed and once you ' re inside the region of confusion then this behavior
+ breaks down some sarcastic gradient may have the same sign as the full gradient some may not and that ' s why you can get at crazy fluctuations so this simple workday example kind of exactly shows you what we saw in that
+ picture and people really love this initial progress because often we also do early stopping and do train for some time and then you say to k I ' m doing so
+ portantly if you are purely an optimization person not thinking so much in terms of machine learning then please keep in mind that strocastic gradient descent on stratospheric gradient method is not such a great
+ isolation method because once in the region of confusion it can just fluctuate all over forever and in machine learning you say of the region of confusion that ' s fine if it ' ll make my method robust it ' ll make my neural network training more robust it ' ll generalize be
+ et cetera et cetera we like that so it depends on which your frame of mind you ' re in ok so that ' s that ' s the awesome thing about this socastic gradient method so
+ I ' ll give you now the key mathematics idea behind the success of us me this was like a little illustration very abstractly this is an idea that records throughout machine
+ learning and throughout theoretical computer science and statistics any time you are faced with the need to compute an expensive quantity resort to randomization to speed up the computation
+ so is one example the true gradient was expensive to computer so we create a randomized estimate of the true gradient and the randomized estimate is much faster to
+ and mathematically what will start happening is depending on how good your randomized estimate is your method may or may not converge to the right answer
+ so of course one has to be careful about what particular randomized estimate one makes so but really abstractly even if I hadn ' t shown you the main idea this idea you can apply in many other settings if you ever
+ difficult quantity come of it the random is estimate and save on computing this is a very important theme throughout machine learning and later science or and this is the key property so
+ stocastic gradient descent it uses stocastic gradients statistics is here just used very looselyan it just means there ' s some randomization that ' s all it means and the property the key property that we
+ as is in expectation the expectation is over whatever random news you used so if you picked you know some random training data point out of the million
+ then it is the expectation is over the probability distribution over what kind of random news you used if you like picked uniformly at random from a million points then this expectation is over that uniform probability but the key property for
+ I do or at least the version of s g d I ' m talking about is that in expectation over that random needs the thing that you ' re pretending to use instead of the true gradient in expectation actually it is the true grade
+ so in statistics language this is called the statistics gradient that we use is an unbiased estimate of the true gradient and this is a very important property in the past
+ medical analysis of socastic radiant dissent that it is an unbiased estimate and intuitively speaking any time you did any proof in class or in the book or lecture notes wherever where you were using
+ true gradients more or less you can do those same proofs more or less not always using starcastic gradients by replaced by and captulating everything within expectations over the randomness
+ I ' ll show you an example of what I mean by that I ' m just trying to simplify that for you and in particular the unbiased news is great so it means it can kind of plug
+ in these starcastic gradients in place of the true gradient and I ' m still doing something meaningful so this is answering that earlier question you know why this random stuff why should we think it may work but there ' s another
+ important aspect to it why it works beyond their unbiased news that the amount of noise or like the amount of batter the amount of stocasticity is controlled so just because
+ is an unbiased estimate doesn ' t mean that it ' s going to work that well why because it could still fluctuate hugely right essentially plus infinity here minus infinity here you take an average you get zero
+ so that is essentially unbiased but the fluctuation is gigantic so whenever talking about estimates what ' s the other key quantity we need to care about beyond expectation experience
+ and really the key hand that governs the speed at which socastic gradient descent does the job that we wanted to do is how much variance to the stocastic gradients have
+ just this simple statistical point in fact is at the heart of a sequence of research progress in the past five years in the field of stocastic gradient where people have worked really hard to come up with new
+ and newer fancier and fancier versions of stocastic gradient which have the unbiaseness property but have smaller and smaller variants and the smaller the variants you have the better your stocastic gradient
+ is as a replacement of the true gradient and of course the better is is the replacement of the true gradient then you truly get that in a time speed up
+ so the speed of convergence depends on how noisy the sarcastic gradients are it seems like I ' m going too slow I won ' t be able to do a proof i will sucks but it
