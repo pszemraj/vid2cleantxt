@@ -639,4 +639,4 @@ def spellcorrect_pipeline(filepath, filename, ns_checker=None, verbose=False):
         "SBD_filename": final_outname,
     }
 
-    return pipelineout # return the corrected text and other data
+    return pipelineout  # return the corrected text and other data
