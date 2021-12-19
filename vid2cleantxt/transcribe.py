@@ -363,7 +363,7 @@ def get_parser():
     )
 
     parser.add_argument(
-        "--model-name",
+        "--model",
         required=False,
         default=None,
         help="huggingface wav2vec2 model name, ex 'facebook/wav2vec2-base-96~0h'",
@@ -402,7 +402,7 @@ if __name__ == "__main__":
     is_verbose = args.verbose
     move_comp = args.move_input_vids
     chunk_length = int(args.chunk_length)
-    model_arg = args.model_name
+    model_arg = args.model
     convert_mp = args.use_mp
 
     print(f"Loading models @ {get_timestamp(True)} - may take a while...")
