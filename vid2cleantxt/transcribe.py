@@ -263,7 +263,9 @@ def transcribe_video_wav2vec(
     return transc_res
 
 
-def postprocess_transc(tscript_dir, mdata_dir, merge_files=False, linebyline=True, verbose=False):
+def postprocess_transc(
+    tscript_dir, mdata_dir, merge_files=False, linebyline=True, verbose=False
+):
     """
     postprocess_transc - postprocess the transcribed text by consolidating the text and metadata, and spell checking + sentence splitting
 
@@ -299,7 +301,11 @@ def postprocess_transc(tscript_dir, mdata_dir, merge_files=False, linebyline=Tru
         desc="SC_pipeline - transcribed audio",
     ):
         PL_out = spellcorrect_pipeline(
-            out_p_tscript, this_transc, verbose=False, ns_checker=checker, linebyline=linebyline,
+            out_p_tscript,
+            this_transc,
+            verbose=False,
+            ns_checker=checker,
+            linebyline=linebyline,
         )
         # get locations of where corrected files were saved
         kw_dir = PL_out.get("spell_corrected_dir")

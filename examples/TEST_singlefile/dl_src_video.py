@@ -14,6 +14,7 @@ single_test = {
     "President John F. Kennedy's Peace Speech.mp4": "https://www.dropbox.com/s/61ppfw0dwtw8dct/President%20John%20F.%20Kennedy%27s%20Peace%20Speech.mp4?dl=1"
 }
 
+
 def download_single_file(link, filename):
     """Download a single file from a remote server."""
     local_name = join(os.getcwd(), "examples", "TEST_singlefile", filename)
@@ -24,6 +25,7 @@ def download_single_file(link, filename):
     with open(local_name, "wb") as f:
         f.write(requests.get(link).content)
     print("Download complete.")
+
 
 if __name__ == "__main__":
     for filename, link in single_test.items():

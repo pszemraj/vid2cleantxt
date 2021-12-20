@@ -561,8 +561,9 @@ def SBD_freetext(text, verbose=False, lang="en"):
     return seg_and_capital
 
 
-def spellcorrect_pipeline(filepath, filename, ns_checker=None, linebyline=True,
-                          verbose=False):
+def spellcorrect_pipeline(
+    filepath, filename, ns_checker=None, linebyline=True, verbose=False
+):
     """
     spellcorrect_pipeline - takes a filepath and filename and returns a corrected version of the text. It uses both the PySBD and Neuspell algorithms to correct the text. Note that the Neuspell algorithm is more accurate than the SymSpell algorithm, but it is slower - it is recommended to use the SymSpell algorithm if you are dealing with a large corpus of text or see runtime issues.
 
@@ -623,11 +624,19 @@ def spellcorrect_pipeline(filepath, filename, ns_checker=None, linebyline=True,
     fin_textlines = [
         line.strip() for line in fin_textlines if line.strip()
     ]  # remove empty lines
-    fin_textlines = fin_textlines[0] if linebyline and len(fin_textlines) == 1 else fin_textlines
+    fin_textlines = (
+        fin_textlines[0] if linebyline and len(fin_textlines) == 1 else fin_textlines
+    )
     if linebyline and isinstance(fin_textlines, str):
         # if the corrected text is a single string, convert it to a list of lines
-        fin_textlines = fin_textlines.split(". ") if isinstance(fin_textlines, str) else fin_textlines
-        fin_textlines = [line + ".\n" for line in fin_textlines] # add periods to the end of each line
+        fin_textlines = (
+            fin_textlines.split(". ")
+            if isinstance(fin_textlines, str)
+            else fin_textlines
+        )
+        fin_textlines = [
+            line + ".\n" for line in fin_textlines
+        ]  # add periods to the end of each line
     # save the corrected text, my boys
     loc_FIN = "results_SC_pipeline"
     create_folder(join(filepath, loc_FIN))
