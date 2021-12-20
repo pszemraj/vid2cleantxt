@@ -561,7 +561,8 @@ def SBD_freetext(text, verbose=False, lang="en"):
     return seg_and_capital
 
 
-def spellcorrect_pipeline(filepath, filename, ns_checker=None, verbose=False):
+def spellcorrect_pipeline(filepath, filename, ns_checker=None, linebyline=True,
+                          verbose=False):
     """
     spellcorrect_pipeline - takes a filepath and filename and returns a corrected version of the text. It uses both the PySBD and Neuspell algorithms to correct the text. Note that the Neuspell algorithm is more accurate than the SymSpell algorithm, but it is slower - it is recommended to use the SymSpell algorithm if you are dealing with a large corpus of text or see runtime issues.
 
@@ -569,8 +570,9 @@ def spellcorrect_pipeline(filepath, filename, ns_checker=None, verbose=False):
     ----------
     filepath : [type], optional,    the filepath to the file to be corrected
     filename : [type], optional,    the filename of the file to be corrected
-    ns_checker : [type], optional, the neuspell object to be used for spellchecking
-    verbose : bool, optional
+    ns_checker : [type], optional, the neuspell object to be used for spellchecking, by default None
+    linebyline : bool, optional,    whether to save the corrected text as a list of lines or a single string in the output file, by default True
+    verbose : bool, optional,      whether to print out the progress of the spellchecking process, by default False
 
     Returns
     -------
@@ -618,9 +620,14 @@ def spellcorrect_pipeline(filepath, filename, ns_checker=None, verbose=False):
             sentenced = sentenced.replace(key, value)  # fix punctuation
         fin_textlines.append(sentenced)
 
-    sentenced = [
-        line.strip() for line in sentenced if line.strip()
+    fin_textlines = [
+        line.strip() for line in fin_textlines if line.strip()
     ]  # remove empty lines
+    fin_textlines = fin_textlines[0] if linebyline and len(fin_textlines) == 1 else fin_textlines
+    if linebyline and isinstance(fin_textlines, str):
+        # if the corrected text is a single string, convert it to a list of lines
+        fin_textlines = fin_textlines.split(". ") if isinstance(fin_textlines, str) else fin_textlines
+        fin_textlines = [line + ".\n" for line in fin_textlines] # add periods to the end of each line
     # save the corrected text, my boys
     loc_FIN = "results_SC_pipeline"
     create_folder(join(filepath, loc_FIN))

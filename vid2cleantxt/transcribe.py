@@ -147,7 +147,6 @@ def transcribe_video_wav2vec(
     src_dir,
     clip_name: str,
     chunk_dur: int,
-    use_mp=False,
     verbose=False,
     temp_dir: str = "audio_chunks",
 ):
@@ -264,7 +263,7 @@ def transcribe_video_wav2vec(
     return transc_res
 
 
-def postprocess_transc(tscript_dir, mdata_dir, merge_files=False, verbose=False):
+def postprocess_transc(tscript_dir, mdata_dir, merge_files=False, linebyline=True, verbose=False):
     """
     postprocess_transc - postprocess the transcribed text by consolidating the text and metadata, and spell checking + sentence splitting
 
@@ -300,7 +299,7 @@ def postprocess_transc(tscript_dir, mdata_dir, merge_files=False, verbose=False)
         desc="SC_pipeline - transcribed audio",
     ):
         PL_out = spellcorrect_pipeline(
-            out_p_tscript, this_transc, verbose=False, ns_checker=checker
+            out_p_tscript, this_transc, verbose=False, ns_checker=checker, linebyline=linebyline,
         )
         # get locations of where corrected files were saved
         kw_dir = PL_out.get("spell_corrected_dir")
@@ -379,11 +378,11 @@ def get_parser():
     )
 
     parser.add_argument(
-        "--use-mp",
+        "--join-text",
         required=False,
         default=False,  # note that the standard iteration of the model is more robust
         action="store_true",
-        help="When converting inputs to .wav chunks, use multiprocessing = faster",
+        help="Save the transcribed text as a single line of text instead of one line per sentence",
     )
 
     return parser
@@ -403,7 +402,8 @@ if __name__ == "__main__":
     move_comp = args.move_input_vids
     chunk_length = int(args.chunk_length)
     model_arg = args.model
-    convert_mp = args.use_mp
+    join_text = args.join_text
+    linebyline = not join_text
 
     print(f"Loading models @ {get_timestamp(True)} - may take a while...")
     print("If RT seems excessive, try --verbose flag or checking logfile")
@@ -442,7 +442,6 @@ if __name__ == "__main__":
             src_dir=directory,
             clip_name=filename,
             chunk_dur=chunk_length,
-            use_mp=convert_mp,
         )
 
         if move_comp:
@@ -456,6 +455,7 @@ if __name__ == "__main__":
         mdata_dir=out_p_metadata,
         merge_files=False,
         verbose=is_verbose,
+        linebyline=linebyline,
     )
 
     print(
