@@ -262,7 +262,7 @@ def check_runhardware(verbose=False):
     if GPUs is not None and len(GPUs) > 0:
         gpu = GPUs[0]
     else:
-        print("No GPU being used :/\n")
+        print("No GPU being used\n")
         GPUs = gpu = None
     process = psutil.Process(os.getpid())
 

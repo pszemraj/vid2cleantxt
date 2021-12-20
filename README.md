@@ -71,31 +71,31 @@ See the examples folder for more detail / full transcript.
 
 ![vid2cleantxt detailed](https://user-images.githubusercontent.com/74869040/131499569-c894c096-b6b8-4d17-b99c-a4cfce395ea8.png)
 
-1. The `transcribe.py` script uses audio2text_functions.py to convert video files to .wav format audio chunks of duration X* seconds, 
+1. The `transcribe.py` script uses audio2text_functions.py to convert video files to .wav format audio chunks of duration X\* seconds,
 2. transcribe all X audio chunks through a pretrained wav2vec2 model, s
-3. Write all results of the list into a text file, stores various runtime metrics into a separate text list, and deletes the .wav audio chunk directory after completed using them. 
-4. creates two new text files: one with all transcriptions appended, and one with all metadata appended. The script then 
+3. Write all results of the list into a text file, stores various runtime metrics into a separate text list, and deletes the .wav audio chunk directory after completed using them.
+4. creates two new text files: one with all transcriptions appended, and one with all metadata appended. The script then
 5. FOR each transcription text file:
     - Passes the 'base' transcription text through a spell checker (_Neuspell_) and autocorrects spelling. Saves as new text file.
     - Uses pySBD to infer sentence boundaries on the spell-corrected text and add periods in to delineate sentences. Saves as new file.
     - Runs basic keyword extraction (via YAKE) on spell-corrected file. All keywords per file are stored in one dataframe for comparison, and exported to .xlsx format
-  
+
 _\*\* (where X is some duration that does not overload your computer or crash your IDE)_
 
 By default,
 
--   results are stored in ~/w2v2_video_transcriptions
--   metadata in ~/w2v2_transcription_metadata
+-   results are stored in `~/v2clntxt_transcriptions`
+-   metadata in `~/v2clntxt_transc_metadata`
 
 (where **~** is path entered by user)
 
 # Installation
 
-## Quickstart aka How to get this to work on your machine
+## Quickstart (aka: how to get the script running)
 
 Essentially, clone the repo, and run `vid2cleantxt/transcribe.py --input-dir "path to inputs`. the main arg to pass is `--input-dir` for, well, the inputs.
 
-> **Note:** _the first time the code runs on your machine, it will download the pretrained transformers models_ which include wav2vec2 and a scibert model for spell correction. After the first run, it will be cached locally, and you will not need to sit through that pat .
+> **Note:** _the first time the code runs on your machine, it will download the pretrained transformers models_ which include wav2vec2 and a scibert model for spell correction. After the first run, it will be cached locally, and you will not need to sit through that again.
 
 1.  fastest (in bash command line):
 
@@ -146,9 +146,8 @@ On Google Colab with a 16 gb GPU (should be available to free Colab accounts): *
 
 On my machine (CPU only due to Windows + AMD GPU) it takes approximately 30-70% of the total duration of input video files. You can also take a look at the "console printout" text files in `example_JFK_speech/TEST_singlefile`.
 
-- with model = "facebook/wav2vec2-base-960h" (default) approx 30% of original RT
-- with model = "facebook/wav2vec2-large-960h-lv60-self" approx 70% of original RT
-
+-   with model = "facebook/wav2vec2-base-960h" (default) approx 30% of original RT
+-   with model = "facebook/wav2vec2-large-960h-lv60-self" approx 70% of original RT
 
 **Specs:**
 
@@ -166,7 +165,7 @@ On my machine (CPU only due to Windows + AMD GPU) it takes approximately 30-70% 
 	Operating System  Windows 10 64-bit
 ```
 
-> _Note:_ if you change `wav2vec2_model = "facebook/wav2vec2-large-960h-lv60-self"` to `wav2vec2_model = " facebook/wav2vec2-base-960h"`the runtime will be considerably faster. I do not have stats on differences in WER, but [facebook](https://github.com/pytorch/fairseq/tree/master/examples/wav2vec) may have some posted.
+> _NOTE:_ that the default model is facebook/wav2vec2-base-960h. This is a pre-trained model that is trained on the librispeech corpus. If you want to use a different model, you can pass the `--model` argument (for example `--model "facebook/wav2vec2-large-960h-lv60-self"`). The model is downloaded from the internet if it does not exist locally. The large model is more accurate, but is also slower to run. I do not have stats on differences in WER, but [facebook](https://github.com/pytorch/fairseq/tree/master/examples/wav2vec) may have some posted.
 
 ---
 
@@ -257,9 +256,15 @@ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.0.0
 
 Try passing a lower `--chunk-len <INT>` when calling `vid2cleantxt/transcribe.py`. Until you get to really small intervals (say &lt; 8 seconds) each audio chunk can be treated as approximately independent as they are different sentences.
 
+## The transcription is not perfect, and therefore I am mad:
+
+Perfect transcripts are not always possible, especially when the audio is not clean. For example, the audio is recorded with a microphone that is not always perfectly tuned to the speaker can cause the model to have issues. Additionally, the default models are not trained on specific speakers and therefore the model will not be able to recognize the speaker / their accent.
+
+Despite the small amount of errors, the model is still able to recognize the speaker and their accent and capture a vast majority of the text. This should still save you a lot of time and effort.
+
 ## How can I improve the performance of the model from a word-error-rate perspective?
 
-if you change the default model by passing `--model "facebook/wav2vec2-large-960h-lv60-self"`from the default  `facebook/wav2vec2-base-960h` the model will be considerably more accurate - I defer to facebook for the official stats. 
+if you change the default model by passing `--model "facebook/wav2vec2-large-960h-lv60-self"`from the default `facebook/wav2vec2-base-960h` the model will be considerably more accurate - I defer to facebook for the official stats.
 
 You can also train the model, but that requires that you already have a transcription of that person's speech already. As you may find, manual transcription is a bit of a pain and therefore transcripts are rarely provided - hence this repo.
 
@@ -275,9 +280,59 @@ _`*` these statements reflect the assessment completed around project inception 
 
 Transcription of Public Domain Speeches from President John F. Kennedy
 
-Please note: the below example needs to be updated to latest model outputs_
+## Result
 
-TODO: Update example with latest output
+> Surely the opening vistas of space promise high costs and hardships as well as high reward so it is not surprising that some would have us stay where we are a little long. To rest to wait but this city of question this state of taxes this country of the united states was not built by those who waited and rested but if I were to say my fellow citizens. That we shall send to the moon two hundred and forty thousand miles away from the control station in Houston a giant rocket more than three hundred feet tall the length of this football field. Made of new metal alloys some of which have not yet been invented capable of standing heat and stresses several times more than have ever been experienced fitted together with a precision better than the. Itself watch carrying all the equipment needed for propulsion guidance control communications food and survival on an untried mission to an unknown celestial body and then. Turn it safely to earth re entering the atmosphere at speeds of over twenty five thousand miles per hour causing heat about half that on the temperature of the sun almost as hot as it is here to day and do all this. And do all this and do it right and do it first before this dictate is out then we must be for. I'm the one who's doing all the work so well to get it to stay cool for a minute however I think we're going to do it and I think that we must pay what needs to be paid I don't think we ought to waste any. Money but I think we ought to do the job and this will be done in the decade of the sixty it may be done while some of you are still here at school at this college and university it will be done during the terms of office of some of the people who sit here on this platform. It will be gone many years ago the great British explorer george military who was to die on mount everist was asked why did he want to climb it he said because it is there well space is there. And we're going to climb it and the moon and the planets are there and new hopes for knowledge and peace are there and therefore as we set sail we ask god's blessing on the most hazardous and dangerous and. Greatest adventure on which man has ever embarked again.
+
+## Console output
+
+```
+
+(v2ct) C:\Users\peter\Dropbox\programming_projects\vid2cleantxt>python vid2cleantxt\transcribe.py --input-dir "C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech" --model "facebook/wav2vec2-large-960h-lv60-self"
+data folder is set to `C:\Users\peter\.conda\envs\v2ct\lib\site-packages\neuspell\../data` script
+Loading models @ Dec-19-2021_-20-51-56 - may take a while...
+If RT seems excessive, try --verbose flag or checking logfile
+
+Found 1 audio or video files in C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech
+Creating .wav audio clips: 100%|███████████████████████████████████████████████████████| 12/12 [00:00<00:00, 84.82it/s]
+Creating .wav audio clips:   8%|████▋                                                   | 1/12 [00:00<00:01,  9.11it/s]
+created audio chunks for wav2vec2 - Dec-19-2021_-20
+No GPU being used by this machine :(
+
+                                                                                                                       No GPU being used :/   0%|                                                                       | 0/12 [00:00<?, ?it/s]
+
+
+Gen RAM Free: 10.8 GB | Proc size: 3.1 GB | 8 CPUs  loaded at 22.7 % |
+
+                                                                                                                       No GPU being used :/  50%|███████████████████████████████▌                               | 6/12 [00:57<00:51,  8.65s/it]
+
+
+Gen RAM Free: 10.3 GB | Proc size: 3.2 GB | 8 CPUs  loaded at 67.8 % |
+
+Transcribing video: 100%|██████████████████████████████████████████████████████████████| 12/12 [01:43<00:00,  8.67s/it]
+Saved transcript and metadata to C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech\v2clntxt_transcriptions and C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech\v2clntxt_transc_metadata
+transcribing vids: 100%|████████████████████████████████████████████████████████████████| 1/1 [01:45<00:00, 105.41s/it]
+SC_pipeline - transcribed audio:   0%|                                                           | 0/1 [00:00<?, ?it/s]
+Top 10 Key Phrases from YAKE, with max n-gram length 3
+['forty thousand miles',
+ 'promise high costs',
+ 'hundred feet tall',
+ 'guidance control communications',
+ 'unknown celestial body',
+ 'station in Houston',
+ 'high reward',
+ 'causing heat',
+ 'surely the opening',
+ 'waited and rested']
+SC_pipeline - transcribed audio: 100%|███████████████████████████████████████████████████| 1/1 [00:06<00:00,  6.09s/it]
+
+
+Finished at: Dec-19-2021_-20. Total RT was 2.2819159250000003 mins
+relevant files for run are in:
+C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech\v2clntxt_transcriptions
+ and:
+C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech\v2clntxt_transc_metadata
+
 
 ```
 
@@ -311,10 +366,6 @@ A _rough_ timeline of what has been going on in the repo:
     - report generation (see results in .PDF for notes, etc.)
 
 5. py2exe (once code optimized)
-
-## What about a version where I don't need python at all?
-
-Plan to do this eventually [py2exe](https://www.py2exe.org/). Currently backlogged - will update repo when complete.
 
 ## I've found x repo / script / concept that I think you should incorporate or collaborate with the author.
 
@@ -376,3 +427,4 @@ Send me a message / start a discussion! Always looking to improve.
     > Collection-independent Automatic Keyword Extractor. In: Pasi G., Piwowarski B., Azzopardi L., Hanbury A. (eds).
     > Advances in Information Retrieval. ECIR 2018 (Grenoble, France. March 26 – 29). Lecture Notes in Computer Science, vol
     > 10772, pp. 806 - 810. pdf
+```
