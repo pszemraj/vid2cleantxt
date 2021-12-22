@@ -262,12 +262,18 @@ def check_runhardware(verbose=False):
     check_runhardware - checks if CUDA is available and if it is, it checks if the GPU is available.
 
     """
-    GPUs = GPU.getGPUs()
-    if GPUs is not None and len(GPUs) > 0:
-        gpu = GPUs[0]
-    else:
+    try:
+        GPUs = GPU.getGPUs()
+        if GPUs is not None and len(GPUs) > 0:
+            gpu = GPUs[0]
+        else:
+            print("No GPU being used\n")
+            GPUs = gpu = None
+    except Exception as e:
+        print(f"ERROR: {e}")
         print("No GPU being used\n")
         GPUs = gpu = None
+
     process = psutil.Process(os.getpid())
 
     CPU_load = psutil.cpu_percent()
