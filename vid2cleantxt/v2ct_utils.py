@@ -241,16 +241,20 @@ def torch_validate_cuda(verbose=False):
     torch_validate_cuda - checks if CUDA is available and if it is, it checks if the GPU is available.
 
     """
-    GPUs = GPU.getGPUs()
-
-    if GPUs is not None and len(GPUs) > 0:
-        torch.cuda.init()
-        print("Cuda availability (PyTorch): ", torch.cuda.is_available())
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        if verbose:
-            print("Active GPU device: ", torch.cuda.get_device_name(device=device))
-    else:
+    try:
+        GPUs = GPU.getGPUs()
+        if GPUs is not None and len(GPUs) > 0:
+            torch.cuda.init()
+            print("Cuda availability (PyTorch): ", torch.cuda.is_available())
+            device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+            if verbose:
+                print("Active GPU device: ", torch.cuda.get_device_name(device=device))
+        else:
+            print("No GPU being used by this machine :(\n")
+    except Exception as e:
+        print(f"ERROR: {e}")
         print("No GPU being used by this machine :(\n")
+
 
 
 def check_runhardware(verbose=False):
