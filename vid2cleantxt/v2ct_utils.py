@@ -256,7 +256,6 @@ def torch_validate_cuda(verbose=False):
         print("No GPU being used by this machine :(\n")
 
 
-
 def check_runhardware(verbose=False):
     """
     check_runhardware - checks if CUDA is available and if it is, it checks if the GPU is available.
