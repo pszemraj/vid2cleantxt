@@ -203,12 +203,13 @@ def transcribe_video_wav2vec(
         inputs = ts_tokenizer(audio_input, return_tensors="pt", padding="longest")
         input_values = inputs.input_values.to(device)
         attention_mask = inputs.attention_mask.to(device) if use_attn else None
+        ts_model = ts_model.to(device)
         # run the model
         with torch.no_grad():
             if use_attn:
                 logits = ts_model(input_values, attention_mask=attention_mask).logits
             else:
-                logits = ts_model(input_values.to(device)).logits
+                logits = ts_model(input_values).logits
 
         predicted_ids = torch.argmax(logits, dim=-1)  # get the predicted ids by argmax
         this_transc = ts_tokenizer.batch_decode(predicted_ids)
