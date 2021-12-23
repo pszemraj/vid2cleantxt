@@ -10,6 +10,7 @@ link to folder containing all videos : https://www.dropbox.com/sh/0u3easov5bygo5
 import requests
 import os
 from os.path import join
+from tqdm.auto import tqdm
 
 multi_test = {
     "MIT_MatricesSGD_000.mp4": "https://www.dropbox.com/s/9b0j41zf3jaswv2/MIT_MatricesSGD_000.mp4?dl=1",
@@ -29,14 +30,17 @@ def download_single_file(link, filename):
     """Download a single file from a remote server."""
     local_name = join(os.getcwd(), "examples", "TEST_folder_edition", filename)
     if os.path.exists(local_name):
-        print(f"File {filename} already exists. Skipping download.")
+        print(f"\nFile {filename} already exists. Skipping download.")
         return
-    print("Downloading file...")
+    print("\nDownloading file...")
     with open(local_name, "wb") as f:
         f.write(requests.get(link).content)
-    print("Download complete.")
+    print(f"\nDownload of {filename} complete.")
 
 
 if __name__ == "__main__":
+    pbar = tqdm(total=multi_test.__len__(), desc="Downloading example videos")
     for filename, link in multi_test.items():
         download_single_file(link, filename)
+        pbar.update(1)
+    pbar.close()
