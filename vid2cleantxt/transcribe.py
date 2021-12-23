@@ -109,6 +109,7 @@ def save_transc_results(
     vid_name: str,
     ttext: str,
     mdata: pd.DataFrame,
+    verbose=False,
 ):
     """
     save_transc_results - save the transcribed text to a file and a metadata file
@@ -119,6 +120,11 @@ def save_transc_results(
     vid_name : str, name of the video file
     ttext : str, the transcribed text
     mdata : pd.DataFrame, the metadata for the video file
+    verbose : bool, whether to print the transcribed text locations to the console
+
+    Returns
+    -------
+    None
     """
     storage_locs = setup_out_dirs(out_dir)  # create and get output folders
     out_p_tscript = storage_locs.get("t_out")
@@ -135,12 +141,10 @@ def save_transc_results(
 
     mdata.to_csv(join(out_p_metadata, f"{header}_metadata.csv"), index=False)
 
-    # if verbose:
-    print(
-        "Saved transcript and metadata to {} and {}".format(
-            out_p_tscript, out_p_metadata
-        )
-    )
+    if verbose:
+        print(
+            f"Saved transcript and metadata to: {out_p_tscript} \n and {out_p_metadata}"
+            )
 
 
 def transcribe_video_wav2vec(
@@ -204,7 +208,7 @@ def transcribe_video_wav2vec(
         # convert audio to tensor
         inputs = ts_tokenizer(audio_input, return_tensors="pt", padding="longest")
         input_values = inputs.input_values.to(device)
-        attention_mask = inputs.attention_mask.to(device) if use_attn else None
+        attention_mask = inputs.attention_mask.to(device) if use_attn else None # if using attention masking, set it. for large wav2vec2 model.
         ts_model = ts_model.to(device)
         # run the model
         with torch.no_grad():
@@ -252,6 +256,7 @@ def transcribe_video_wav2vec(
         vid_name=clip_name,
         ttext=full_text,
         mdata=md_df,
+        verbose=verbose,
     )  # save the results here
 
     shutil.rmtree(ac_storedir, ignore_errors=True)  # remove audio chunks folder
@@ -476,7 +481,7 @@ if __name__ == "__main__":
     )
 
     print(
-        f"\n\nFinished at: {get_timestamp()}. Total RT was {(time.perf_counter() - st)/60} mins"
+        f"\n\nFinished at: {get_timestamp()}. Total RT was {round((time.perf_counter() - st)/60, 3)} mins"
     )
     print(
         f"relevant files for run are in: \n{out_p_tscript} \n and: \n{out_p_metadata}"
