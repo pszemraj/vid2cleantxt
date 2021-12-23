@@ -5,7 +5,7 @@ All videos are under creative commons license and are cited in CITATIONS file in
 
 link to folder containing all videos : https://www.dropbox.com/sh/0u3easov5bygo5l/AACXWZ_gXhAsSTHg64FYsjf5a?dl=0
 
-
+In case of dropbox server issues, please refer to original URLs in CITATIONS file.
 """
 import requests
 import os
