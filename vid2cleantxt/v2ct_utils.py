@@ -248,7 +248,9 @@ def torch_validate_cuda(verbose=False):
             print(f"Cuda availability (PyTorch) is {torch.cuda.is_available()}\n")
             device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
             if verbose:
-                print(f"Active GPU device: {torch.cuda.get_device_name(device=device)}\n")
+                print(
+                    f"Active GPU device: {torch.cuda.get_device_name(device=device)}\n"
+                )
         else:
             print("No GPU being used by this machine :(\n")
     except Exception as e:
