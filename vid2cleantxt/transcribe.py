@@ -41,7 +41,13 @@ import argparse
 import torch
 from tqdm import tqdm
 import transformers
-from transformers import Wav2Vec2Processor, Wav2Vec2ForCTC,  WavLMModel, WavLMConfig, WavLMForCTC
+from transformers import (
+    Wav2Vec2Processor,
+    Wav2Vec2ForCTC,
+    WavLMModel,
+    WavLMConfig,
+    WavLMForCTC,
+)
 import warnings
 
 #  filter out warnings that pretend transfer learning does not exist
@@ -94,8 +100,14 @@ def wav2vec2_islarge(model_obj):
         "large": 315471520,  # recorded by  loading the model in known environment
     }
     if not isinstance(model_obj, Wav2Vec2ForCTC):
-        warnings.warn(message="Model is not a wav2vec2 model - this function is for wav2vec2 models only", category=None, stacklevel=1)
-        return False # not a wav2vec2 model - return false so it is handled per standard
+        warnings.warn(
+            message="Model is not a wav2vec2 model - this function is for wav2vec2 models only",
+            category=None,
+            stacklevel=1,
+        )
+        return (
+            False  # not a wav2vec2 model - return false so it is handled per standard
+        )
 
     np_proposed = model_obj.num_parameters()
 
@@ -144,7 +156,7 @@ def save_transc_results(
     if verbose:
         print(
             f"Saved transcript and metadata to: {out_p_tscript} \n and {out_p_metadata}"
-            )
+        )
 
 
 def transcribe_video_wav2vec(
@@ -208,7 +220,9 @@ def transcribe_video_wav2vec(
         # convert audio to tensor
         inputs = ts_tokenizer(audio_input, return_tensors="pt", padding="longest")
         input_values = inputs.input_values.to(device)
-        attention_mask = inputs.attention_mask.to(device) if use_attn else None # if using attention masking, set it. for large wav2vec2 model.
+        attention_mask = (
+            inputs.attention_mask.to(device) if use_attn else None
+        )  # if using attention masking, set it. for large wav2vec2 model.
         ts_model = ts_model.to(device)
         # run the model
         with torch.no_grad():
@@ -388,7 +402,7 @@ def get_parser():
     parser.add_argument(
         "--chunk-length",
         required=False,
-        default=15, # pass lower value if running out of memory / GPU memory
+        default=15,  # pass lower value if running out of memory / GPU memory
         type=int,
         help="Duration of .wav chunks (in seconds) that the transformer model will be fed",
     )
@@ -425,7 +439,9 @@ if __name__ == "__main__":
     print("If RT seems excessive, try --verbose flag or checking logfile")
     # load the model
     wav_model = "facebook/wav2vec2-base-960h" if model_arg is None else model_arg
-    tokenizer = Wav2Vec2Processor.from_pretrained(wav_model) # use wav2vec2processor for tokenization always
+    tokenizer = Wav2Vec2Processor.from_pretrained(
+        wav_model
+    )  # use wav2vec2processor for tokenization always
     if "wavlm" in wav_model.lower():
         # for example --model "patrickvonplaten/wavlm-libri-clean-100h-large"
         print(f"Loading wavlm model - {wav_model}")
