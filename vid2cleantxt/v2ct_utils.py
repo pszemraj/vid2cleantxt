@@ -130,6 +130,19 @@ def find_ext_recursive(src_dir, req_ext=".txt", full_path=True, verbose=False):
 
 
 def shorten_title(title_text, max_no=20):
+    """
+    shorten_title - shorten a title to a max length of max_no characters
+
+    Parameters
+    ----------
+    title_text : str, required, the title to shorten, e.g. "This is a very long title"
+    max_no : int, optional, the max length of the title, e.g. 20
+
+    Returns
+    -------
+    str, the shortened title
+    """
+
     if len(title_text) < max_no:
         return title_text
     else:
@@ -141,7 +154,7 @@ def create_folder(new_path):
 
 
 class NullIO(StringIO):
-    # used to redirect system output for things that print a lot to console
+    """NullIO - used to redirect system output for things that print a lot to console"""
     def write(self, txt):
         pass
 
@@ -176,7 +189,19 @@ def move2completed(from_dir, filename, new_folder="completed", verbose=False):
         print(e)
 
 
-def cleantxt_wrap(ugly_text):
+def cleantxt_wrap(ugly_text, lang="en", ):
+    """
+    cleantxt_wrap - a wrapper for the clean() function from the cleantext module
+
+    Parameters
+    ----------
+    ugly_text : str, the text to clean
+    lang : str, the language of the text, by default "en", set to 'de' for German special handling
+
+    Returns
+    -------
+    str, the cleaned text
+    """
     # a wrapper for clean text with options different than default. This is used for the audio2text_functions.py
 
     # https://pypi.org/project/clean-text/
@@ -199,7 +224,7 @@ def cleantxt_wrap(ugly_text):
         replace_with_phone_number="<PHONE>",
         replace_with_number="<NUM>",
         replace_with_digit="0",
-        lang="en",  # set to 'de' for German special handling
+        lang=lang,
     )
 
     return cleaned_text

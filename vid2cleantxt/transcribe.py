@@ -435,8 +435,8 @@ if __name__ == "__main__":
     join_text = args.join_text
     linebyline = not join_text
 
-    print(f"Loading models @ {get_timestamp(True)} - may take a while...")
-    print("If RT seems excessive, try --verbose flag or checking logfile")
+    print(f"\nLoading models @ {get_timestamp(True)} - may take some time...")
+    print("if RT seems excessive, try --verbose flag or checking logfile")
     # load the model
     wav_model = "facebook/wav2vec2-base-960h" if model_arg is None else model_arg
     tokenizer = Wav2Vec2Processor.from_pretrained(
