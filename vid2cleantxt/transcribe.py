@@ -418,16 +418,16 @@ if __name__ == "__main__":
     print("If RT seems excessive, try --verbose flag or checking logfile")
     # load the model
     wav_model = "facebook/wav2vec2-base-960h" if model_arg is None else model_arg
-    if is_verbose:
-        print("Loading model: {}".format(wav_model))
-    tokenizer = Wav2Vec2Processor.from_pretrained(wav_model)
+    tokenizer = Wav2Vec2Processor.from_pretrained(wav_model) # use wav2vec2processor for tokenization always
     if "wavlm" in wav_model.lower():
         # for example --model "patrickvonplaten/wavlm-libri-clean-100h-large"
         print(f"Loading wavlm model - {wav_model}")
         model = WavLMForCTC.from_pretrained(wav_model)
     else:
-        print("Loading wav2vec2 model")
+        # for example --model "facebook/wav2vec2-large-960h-lv60-self"
+        print(f"Loading wav2vec2 model - {wav_model}")
         model = Wav2Vec2ForCTC.from_pretrained(wav_model)
+        # TODO: add option for other models (if relevant?)
 
     # load the spellchecker models. suppress outputs as there are way too many
     orig_out = sys.__stdout__
