@@ -1,0 +1,80 @@
+lands very very similar between the two waves right so therefore what I am going to do is that I am going to assume me one is very close to go two
+ is roughly k ok and I am got end because of this since I have a continuous function if k why is really close to key too that means no maga one is going to
+ also very cause to omega too right so what I am going to get is omega one is going to be also very similar to omega too and I will call it omega or
+ so if I do this when I have very similar a one and key to what is going to happen what is going to happen is that no one minus a two will be
+ rysmall data means a this very small k means large wave lands therefore this cosinten will become twelve
+ because they say we are slowly bariting a empty as a function of position because a case very small case case malmeans land are large therefore them
+ do is going to be having this modulation which is stay like an envelope he is the speed of this envelope the oscillation of this envelope is as to control by the of
+ last look at the lap site a one pros a two over two it ' s kind of like the calculating the average of the first and second of the wave number of the first and second waves right so you will
+ flat average it can be still very large therefore you have small life right compared to the difference therefore you see that that i should contribute to those little structures in
+ an indiscrepent called carrier yes tatas
+ so they can be different thought why so you are absolutely right that so you can you can produce some something like a carrier as even when line is not equal to key to this is just at every bit your right
+ but the then there on the other hand the difference may and my too will be also large therefore you it ' s not as easy as what we have been doing here to identify who is the
+ ear and who is the envelope but you do you do get some kind of grade which is icillating really fast but the envelope is going to appear also icillating really fast that is harder to to see all the structure but
+ your absolutely right yes very good question so now I have this set up I assume that they are very close to each other so now I can define face velocity finally
+ will define what is I you the face of velocity the face of velocity i call it v but you can see that before I already have been using face velocity v up for the previous
+ astions that in the case of non dispersal medium the face velocity is just a b p which is the velocity in the equation and in this case be up will be equal to your image of
+ as we discuss for law at the definition of this face velacity of k and I can now also define the govelocity of
+ group velocity we say should the velocity of the envelope or i can calculate the velocity of the envelope right in the case of face velocity i and calculating
+ the velocity of the carrier on and taking a ratio of the average and the time the average is so close to k and omega therefore the face velocity v but would teach us the speed of the publication
+ of the carrier which is a omega k i call it be up and in case of group velocity I call it be g b g is describing the speed of propagation of the envelope therefore
+ what I ' m getting is omega one minus omega two or ten despite one minus k two post of and have an effect of one over two like whicha
+ can sit run and when they are really so close to each other this is a sell roughly like the omega and the question so far
+ so we have derived two different kinds of speed one is act related to the face of quality which one is a one is actually called
+ velocity is related to the speed of the carrier or the other one is cro velocity which essentially related to the speed of the envelope or so do me disguise you
+ are interesting interesting examples and the s like what we can really learn from this in the first example I am walking on a non dispersive medium or if I have
+ non dispersal median of k then paste what is going to get omega will be proportional to
+ k if the part omega versus k is a straight line or now if I have omega I choose the omega of the two omega was omega to
+ the two waves to be pretty equal to women do or I can now evaluate the v but the v but will be near the slope right of the
+ of this point the slope of a line connecting the euro to that point right which say to the omega to be care so that is the definition of the face velocity get this slope
+ this is the slope of this this line essentially calledereated to the face velocity or I can also calculate the slope of a line cut to this point
+ but I should cut through his desert this curve and in this case I am also going to get a line overlapping with face velocity because in this case image over
+ is the constant which is v therefore if no matter what you calculate if you calculate v p as a ratio of omega and the k for you calculate v g which is as the slow
+ the line cutting through that point you always get get as you be or therefore what we learn from here is that for a non disservice median v but will be equal to
+ g ok not means most of this a two curves post of the curve of the envelope describing the envelope and describing the carrier
+ is going to be propagating at the same speed any questions so the whole thing is going to be moving at a constant speed for that I can not show you
+ some example which is prepared a sun simulation which is prepared
+ ok see so what he does is that it really with a second did is
+ bidziro or so this is the case when I have a non dispersive medium or if I have a non dispersal medium what is going to happen is that boys that is a poster la carries
+ which is the speed of the audio ' s little structure and the envelope is going to be propagating at the sent speed so you can see the wig is like a fixed pattern is propagating toward the right hand side and in the relative motion
+ between the fine structure and the envelope I sat dero sopesi you have exactly the same pattern as a function of time or so now I am going to move from away from the non disservice medium
+ how about we discuss what will happen if we have considered the stiffness of the string and see what we get from there so if I brought omega
+ as a function of k o k and the consider advantage to be non zero is a positive value so if I have had to be a positive value on zero to k
+ in this case him going to get a curve like this on the slope is sentially a changing and because it ' s a curling down it ' s covering up because if you have a large
+ then you will see that the a ratio of omega and k as to increase so that essentially the kind of curve which we would get if I set the omega of the first and second
+ a wag in the top of increase in this study to be omegadiro obesity what you going to get is that you k now i have this point here under cuff or if I
+ calculate the face velocity the face of velocity how do I calculate that I can now connect zero and that point by a line of and I can now calculate
+ love of this line and I can get the face velocity up ok on the other hand I can also calculate a the slope of a line cutting
+ throw tangential to the the point of interest ok and that is going to give me a good velacity to k as you can see from here which slope is as your larger
+ anybody no demand pointed out group velocity is larger right so in this case if I turn on a far greater than zero what is going to happen is that since the crop velocity is larger than
+ the face velocity that means if I go back to that picture of the envelope is going to be moving faster than the fine structure inside the envelope how about we take a five
+ break on from here and we continue discussion after break faces a good time to take afreghto welcome back everybody so we will continue the discuss
+ one of the pit phenomena so what we have shown you is that a pace on those curves as we canneswit determining what will be the relative velocity of the day of the
+ what what would be the velocity of to the carrier which I say would be debated by am the up and the what would be the velocity of the envelope which I say slowly debated
+ by a lagruplosity of him ending in the in this case what to be parting here is that in this case because arfaisetaly greater than zero
+ therefore this a cufisasoe a curling up therefore you have larger a grovelocity compared to the face velocity so what you would expect is that the empathy
+ lot is going to be actually progressing at a speed higher than the speed of a time la carries or on the other hand if mangicode or i can
+ construct some kind of a median which can be highest in which the situations are far smaller than deron what is going to happen so if it protest that if the protest
+ action which as smaller than very so and the new the pro omega was the function of it what is going to happen just like this topacity you have something which is is receiving
+ can to k so if I now again walk on some point of interest here to t you can see that theslo
+ of the face velocity is now it should be and the slope of the the face velocity is now that should be larger than the slope which is usually a
+ line cutting through the tangent to the the cuff which we are getting you the gruplasy so in the case of afas more than zero
+ which is some strange amedium which I can create from whatever pasma or some reality a strange a kind of kind of material of interest if that happens then that means you were a group
+ city will be smaller than dug the faceelacety on and if you look at this point here you can see that this curve to the
+ a meximman here and if you truly are operating at this point what is going to happen what is going to happen is that if you calculate the group
+ city will bet about you you ' ll be torn what does that mean that means the envelope will not be moving along or but the time the carriers are still moving
+ sindeed at this point you are gay going to get good volocity equal to zero ok and finally if you should
+ going to a very large car value in this scenery as smaller than zero you see that even you can have face velocity public place
+ positive because he says why a positive slope and about velocity he is negative why what does that mean any means you
+ going to see a situation that the careers are progressing in a positive direction and the as time the envelope is going to be a
+ progressing in the negative direction produce foquessing to the new lapping side of the sport so what does that mean that means this wave is doing
+ what Michael lesson is doing lies essentially twin eh so this essentially the kind of thing which could have happened that it looks like that
+ are you are doing your going forward because all the air carriers are moving in a positive direction but the body are says going to earth
+ negative direction or maybe I can also learn moon work at some point or so that ' s going back to the demonstration which I got started and somehow I got meet up and
+ so lets take a look at the detemo again so has look at all the different situations at once so in this case us we discussed before this essentially happening in the
+ non dispersive situation that in this situation you have a straight line non dispersal median as we give you always the group velocity equal to a face velocity or so
+ means the carrier and the as the envelope is going to be moving in the same direction at the same as a speed ok on the
+ hands in this case we can actually have a situation that the the face velocity essentially faster than the group velocity do so what I mean is that usual situation here
+ face velocity calculated from a line connecting from zero to that point you is actually having a larger slope compared to the tengentra line and you will see this situation so easy do you see that
+ inside the envelope all those carriers are actually moving faster than the envelope now I can have a disservice medium where
+ local velocity is sequel to there so what is going to happen is that really the envelope essentially not moving is not like like this eh but that the party is not moving right so you have so

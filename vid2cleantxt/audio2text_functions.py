@@ -1,16 +1,22 @@
 """
-
-a list of common functions used repeatedly in audio 2 text project, so I don't have to copy and paste them all each time,
-and update each individually
-
+    audio2text_functions.py - functions for vid2cleantxt project, these functions are used to convert audio files to text.
+    general helper functions are in v2ct_utils.py
 """
+import os
+from posixpath import basename
+import sys
+from os.path import dirname, join
+
+import numpy as np
+
+sys.path.append(dirname(dirname(os.path.abspath(__file__))))
+
 import math
 import pprint as pp
 import re
 import sys
 import time
 from datetime import datetime
-from os.path import join
 
 import moviepy.editor as mp
 import neuspell
@@ -20,42 +26,41 @@ import pysbd
 import yake
 from symspellpy import SymSpell
 from tqdm.auto import tqdm
-
-from v2ct_utils import beautify_filename, create_folder, NullIO
-
+from natsort import natsorted
+from vid2cleantxt.v2ct_utils import (
+    trim_fname,
+    create_folder,
+    NullIO,
+    get_timestamp,
+)
+from pydub import AudioSegment
 
 # ------------------------------------------------------------------------
 
 
-def avg_word(sentence):
-    # returns average word length as a float
-    words = sentence.split()
-    num_words = len(words)
-    if num_words == 0:
-        num_words = 1
-    return sum(len(word) for word in words) / num_words
+def get_av_fmts():
+    """
+    get_audio_video_fmts - returns the audio and video formats supported by the system
+
+    Returns
+    -------
+    supported_fmts : list, all formats supported by vid2cleantxt
+    """
+    audio_fmt = [".wav", ".mp3", ".m4a", ".flac"]
+    video_fmt = [".mp4", ".mov", ".avi", ".mkv", ".ogg", ".webm"]
+    supported_fmts = audio_fmt + video_fmt
+    return supported_fmts
 
 
-# returns number of numeric "words" (i.e., digits that are surrounded by spaces)
-def num_numeric_chars(free_text):
-    # returns number of numeric words in your text "I love 202 memes" --> 202 is one numeric word
-    num_numeric_words = len(
-        [free_text for free_text in free_text.split() if free_text.isdigit()]
-    )
-    return num_numeric_words
-
-
-def corr(s):
-    # adds space after period if there isn't one
-    # removes extra spaces
-    return re.sub(r"\.(?! )", ". ", re.sub(r" +", " ", s))
-
-
-def validate_output_directories(
+def setup_out_dirs(
     directory,
     t_folder_name="v2clntxt_transcriptions",
     m_folder_name="v2clntxt_transc_metadata",
 ):
+    """
+    creates output directories for audio2text project
+    """
+
     t_path_full = join(directory, t_folder_name)
     create_folder(t_path_full)
 
@@ -66,7 +71,33 @@ def validate_output_directories(
     return output_locs
 
 
+def check_if_audio(filename):
+    """
+    check_if_audio - checks if a file is an audio file
+
+    Parameters
+    ----------
+    filename : str, the name of the file to be checked
+
+    Returns
+    -------
+    bool
+    """
+    return (
+        filename.endswith(".wav")
+        or filename.endswith(".mp3")
+        or filename.endswith(".m4a")
+    )
+
+
 def create_metadata_df():
+    """
+    create_metadata_df - creates a dataframe to store metadata for each video file transcribed
+
+    Returns
+    -------
+    metadata_df : pd.DataFrame
+    """
     md_colnames = [
         "orig_file",
         "num_audio_chunks",
@@ -78,98 +109,116 @@ def create_metadata_df():
         "word_count",
     ]
 
-    md_df = pd.DataFrame(columns=md_colnames)
-    return md_df
+    return pd.DataFrame(columns=md_colnames)
 
 
-def convert_vidfile(
-    vidfilename,
+def create_audiofile(
+    _vidname,
     start_time=0,
     end_time=6969,
-    input_directory="",
-    output_directory="",
+    in_path=None,
+    out_path="",
     new_filename="",
 ):
-    # takes a video file and creates an audiofile with various parameters
-    # NOTE video filename is required
-    if len(input_directory) < 1:
-        my_clip = mp.VideoFileClip(vidfilename)
-    else:
-        my_clip = mp.VideoFileClip(join(input_directory, vidfilename))
+    """
+    create_audiofile - takes a video file and creates an audiofile with various parameters. It is currently not used in the main pipeline (i.e., vid2cleantxt)
+    TODO:: remove this function from the repo
+
+    Parameters
+    ----------
+    _vidname : [type], required, the name of the video file to be converted
+    start_time : int, optional, the start time of the video file, by default 0
+    end_time : int, optional, the end time of the video file, by default 6969
+    in_path : str, optional, the path to the video file, by default None
+    out_path : str, optional, the path to the output audio file, by default ""
+    new_filename : str, optional, the name of the output audio file, by default ""
+
+    Returns
+    -------
+    audio_conv_results : dict, the results of the conversion
+    """
+    my_clip = (
+        mp.VideoFileClip(_vidname)
+        if in_path is None
+        else mp.VideoFileClip(join(in_path, _vidname))
+    )
 
     if end_time == 6969:
+        # if end_time is not specified, use the duration of the video
         modified_clip = my_clip.subclip(t_start=int(start_time * 60))
     else:
+        # the user has specified a start and end time
         modified_clip = my_clip.subclip(
             t_start=int(start_time * 60), t_end=int(end_time * 60)
         )
 
     converted_filename = (
-        vidfilename[: (len(vidfilename) - 4)]
-        + "-converted_"
-        + datetime.now().strftime("day_%d_time_%H-%M-%S_")
-        + ".wav"
+        new_filename
+        if new_filename != ""
+        else f"vid_{trim_fname(_vidname)}_conv_{get_timestamp()}.wav"
     )
-    # update_filename
-    if len(new_filename) > 0:
-        converted_filename = new_filename
-
-    if len(output_directory) < 1:
+    if out_path == "":
+        # if no output path is specified, use the current working directory
         modified_clip.audio.write_audiofile(converted_filename)
     else:
-        modified_clip.audio.write_audiofile(join(output_directory, converted_filename))
+        modified_clip.audio.write_audiofile(join(out_path, converted_filename))
 
     audio_conv_results = {
         "output_filename": converted_filename,
-        "output_folder": output_directory,
+        "output_folder": out_path,
         "clip_length": modified_clip.duration,
     }
 
     return audio_conv_results
 
 
-def convert_vid_for_transcription(
-    vid2beconv, len_chunks, input_directory, output_directory, verbose=False
+def prep_transc_pydub(
+    _vid2beconv,
+    in_dir,
+    out_dir,
+    len_chunks=15,
+    verbose=False,
 ):
-    # Oriented specifically for the "wav2vec2" model speech to text transcription
-    # takes a video file, turns it into .wav audio chunks of length <input> and stores them in a specific location
-    # TODO add function that is run instead of user already has .WAV files or other audio to be converted
-    my_clip = mp.VideoFileClip(join(input_directory, vid2beconv))
-    number_of_chunks = math.ceil(my_clip.duration / len_chunks)  # to get in minutes
-    if verbose:
-        print("converting into " + str(number_of_chunks) + " audio chunks")
-    preamble = beautify_filename(vid2beconv)
-    outfilename_storage = []
-    if verbose:
-        print(
-            "separating audio into chunks starting at ",
-            datetime.now().strftime("_%H.%M.%S"),
-        )
-    update_incr = math.ceil(number_of_chunks / 10)
+    """
+    prep_transc_src - prepares the source video files for transcription by creating audio files and metadata by splitting the video into chunks of specified length (in seconds). Chunks are created in the output directory, and have the same name as the video file, but with the extension .wav.
 
-    for i in tqdm(
-        range(number_of_chunks),
-        total=number_of_chunks,
-        desc="Converting Video to Audio",
-    ):
-        start_time = i * len_chunks
-        if i == number_of_chunks - 1:
-            this_clip = my_clip.subclip(t_start=start_time)
-        else:
-            this_clip = my_clip.subclip(
-                t_start=start_time, t_end=(start_time + len_chunks)
-            )
-        this_filename = preamble + "_run_" + str(i) + ".wav"
-        outfilename_storage.append(this_filename)
-        this_clip.audio.write_audiofile(
-            join(output_directory, this_filename), logger=None
-        )
+    Parameters
+    ----------
+    vid2beconv : str, the name of the video file to be converted (or audio file)
+    len_chunks : int, the length of the audio chunks to be created, by default 20 (seconds)
+    input_directory : str, the path to the video file, by default None, which means the current working directory
+    output_directory : str, the path to the output audio file, by default None, which means the current working directory
+    verbose : bool, optional
+    use_mp : bool, optional, whether to use multiprocessing, by default True
+    Returns
+    -------
+    """
 
-    print("Finished creating audio chunks at ", datetime.now().strftime("_%H.%M.%S"))
+    load_path = join(in_dir, _vid2beconv) if in_dir is not None else _vid2beconv
+    vid_audio = AudioSegment.from_file(load_path)
+    sound = AudioSegment.set_channels(vid_audio, 1)
+
+    create_folder(out_dir)  # create the output directory if it doesn't exist
+    dur_seconds = len(sound) / 1000
+    n_chunks = math.ceil(dur_seconds / len_chunks)  # to get in minutes, round up
+    pbar = tqdm(total=n_chunks, desc="Creating .wav audio clips")
+    preamble = trim_fname(_vid2beconv)
+    chunk_fnames = []
+    # split sound in 5-second slices and export
+    slicer = 1000 * len_chunks  # in milliseconds
+    for i, chunk in enumerate(sound[::slicer]):
+        chunk_name = f"{preamble}_clipaudio_{i}.wav"
+        with open(join(out_dir, chunk_name), "wb") as f:
+            chunk.export(f, format="wav")
+        chunk_fnames.append(chunk_name)
+        pbar.update(1)
+    pbar.close()
+
+    print(f"\ncreated audio chunks for wav2vec2 - {get_timestamp()}")
     if verbose:
-        print("Files are located in ", output_directory)
+        print(f" files saved to {out_dir}")
 
-    return outfilename_storage
+    return natsorted(chunk_fnames)
 
 
 # ------------------------------------------------------------------------
@@ -180,32 +229,52 @@ def convert_vid_for_transcription(
 def quick_keys(
     filename,
     filepath,
-    max_ngrams=3,
-    num_keywords=20,
+    max_ngrams: int = 3,
+    num_kw: int = 20,
+    disp_max: int = 10,
     save_db=False,
     verbose=False,
     txt_lang="en",
     ddup_thresh=0.3,
 ):
-    # uses YAKE to quickly determine keywords in a text file. Saves Keywords and YAKE score (0 means very important) in
-    with open(join(filepath, filename), "r", encoding="utf-8", errors="ignore") as file:
-        text = file.read()
+    """
+    quick_keys - extracts keywords from a text file using ngrams and a TF-IDF model (Yake). The keywords are returned as a list of strings and then turned into a dataframe.
 
-    custom_kw_extractor = yake.KeywordExtractor(
+    Parameters
+    ----------
+    filename : str, required, the name of the text file to be processed
+    filepath : str, required, the path to the text file to be processed
+    max_ngrams : int, optional, the maximum number of ngrams to use, by default 3
+    num_kw : int, optional, the number of keywords to extract, by default 20
+    disp_max : int, optional, the maximum number of keywords to display, by default 10
+    save_db : bool, optional, whether to save the keyword extraction results to excel, by default False
+    verbose : bool, optiona,
+    txt_lang : str, optional, the language of the text file, by default "en"
+    ddup_thresh : float, optional, the threshold for duplicate keywords, by default 0.3
+
+    Returns
+    -------
+    kw_df : pd.DataFrame, the results of the keyword extraction
+    """
+
+    with open(join(filepath, filename), "r", encoding="utf-8", errors="ignore") as fi:
+        text = fi.read()
+
+    kw_extractor = yake.KeywordExtractor(
         lan=txt_lang,
         n=max_ngrams,
         dedupLim=ddup_thresh,
-        top=num_keywords,
+        top=num_kw,
         features=None,
     )
-    yake_keywords = custom_kw_extractor.extract_keywords(text)
-    phrase_db = pd.DataFrame(yake_keywords)
+    kw_result = kw_extractor.extract_keywords(text)
+    phrase_db = pd.DataFrame(kw_result)
     if len(phrase_db) == 0:
         print("warning - no phrases were able to be extracted... ")
         return None
 
     if verbose:
-        print("YAKE keywords are: \n", yake_keywords)
+        print(f"YAKE keywords are: {kw_result}\n")
         print("dataframe structure: \n")
         pp.pprint(phrase_db.head())
 
@@ -214,7 +283,7 @@ def quick_keys(
     # add a column for how many words the phrases contain
     yake_kw_len = []
     yake_kw_freq = []
-    for entry in yake_keywords:
+    for entry in kw_result:
         entry_wordcount = len(str(entry).split(" ")) - 1
         yake_kw_len.append(entry_wordcount)
 
@@ -223,129 +292,90 @@ def quick_keys(
         entry_freq = text.count(str(search_term))
         yake_kw_freq.append(entry_freq)
 
-    word_len_series = pd.Series(yake_kw_len, name="No. Words in Phrase")
-    word_freq_series = pd.Series(yake_kw_freq, name="Phrase Freq. in Text")
-    phrase_db2 = pd.concat([phrase_db, word_len_series, word_freq_series], axis=1)
-    # add column names and save file as excel because CSVs suck
-    phrase_db2.columns = [
+    word_len_series = pd.Series(yake_kw_len, name="word_count")
+    word_freq_series = pd.Series(yake_kw_freq, name="phrase_freq")
+    kw_report = pd.concat([phrase_db, word_len_series, word_freq_series], axis=1)
+    kw_report.columns = [
         "key_phrase",
-        "YAKE Score (Lower = More Important)",
-        "num_words",
-        "freq_in_text",
+        "YAKE_score",
+        "word_count",
+        "phrase_freq",
     ]
     if save_db:  # saves individual file if user asks
         yake_fname = (
-            beautify_filename(filename=filename, start_reverse=False)
-            + "_top_phrases_YAKE.xlsx"
+            f"{trim_fname(filename=filename, start_rev=False)}_YAKE_keywords.xlsx"
         )
-        phrase_db2.to_excel(join(filepath, yake_fname), index=False)
+        kw_report.to_excel(join(filepath, yake_fname), index=False)
 
-    # print out top 10 keywords, or if desired num keywords less than 10, all of them
-    max_no_disp = 10
-    if num_keywords > max_no_disp:
-        num_phrases_disp = max_no_disp
-    else:
-        num_phrases_disp = num_keywords
+    num_phrases_disp = min(num_kw, disp_max)  # number of phrases to display
 
     if verbose:
-        print("Top Key Phrases from YAKE, with max n-gram length: ", max_ngrams, "\n")
-        pp.pprint(phrase_db2.head(n=num_phrases_disp))
+        print(f"\nTop Key Phrases from YAKE, with max n-gram length {max_ngrams}")
+        pp.pprint(kw_report.head(n=num_phrases_disp))
     else:
-        list_o_words = phrase_db2["key_phrase"].to_list()
-        print("top 5 phrases are: \n")
-        if len(list_o_words) < 5:
-            pp.pprint(list_o_words)
-        else:
-            pp.pprint(list_o_words[:5])
+        kw_list = kw_report["key_phrase"].to_list()
+        print(
+            f"\nTop {num_phrases_disp} Key Phrases from YAKE, with max n-gram length {max_ngrams}"
+        )
+        pp.pprint(kw_list[:num_phrases_disp])
 
-    return phrase_db2
+    return kw_report
 
 
 # ------------------------------------------------------------------------
 # Spelling
+# TODO: move to spelling module
 
 
-def symspell_file(
-    filepath, filename, dist=2, keep_numb_words=True, want_folder=True, verbose=False
-):
-    # original spell-checking method pre SBD (before neuspell. Here for reference / if Neuspell is hard to use on the
-    # user's machine/ https://github.com/mammothb/symspellpy
+def avg_word(sentence):
+    """
+    avg_word - calculates the average word length of a sentence
+    """
+    words = sentence.split()
+    num_words = len(words)
+    if num_words == 0:
+        num_words = 1
+    return sum(len(word) for word in words) / num_words
 
-    script_start_time = time.time()
-    if verbose:
-        print("\nPySymSpell - Starting to correct the file: ", filename)
-    # ------------------------------------
-    sym_spell = init_symspell()
-    with open(join(filepath, filename), "r", encoding="utf-8", errors="ignore") as file:
-        textlines = file.readlines()  # return a list
 
-    if want_folder:
-        # create a folder
-        output_folder_name = "auto-corrected"
-        filepath = join(filepath, output_folder_name)
-        create_folder(filepath)
-
-    if verbose:
-        print("loaded text with {} lines ".format(len(textlines)))
-
-    corrected_list = []
-
-    # iterate through list of lines. Pass each line to be corrected.
-    # Append / sum results from each line till done
-    for line in textlines:
-        if line == "":
-            continue  # blank line, skip to next run
-
-        # correct the line of text using spellcorrect_line() which returns a dictionary
-        suggestions = sym_spell.lookup_compound(
-            phrase=line,
-            max_edit_distance=dist,
-            ignore_non_words=keep_numb_words,
-            ignore_term_with_digits=keep_numb_words,
-        )
-        all_sugg_for_line = []
-        for suggestion in suggestions:
-            all_sugg_for_line.append(
-                suggestion.term
-            )  # append / sum / log results from correcting the line
-
-        corrected_list.append(" ".join(all_sugg_for_line) + "\n")
-
-    # finished iterating through lines. Now sum total metrics
-
-    corrected_doc = "".join(corrected_list)
-    corrected_fname = (
-        "[corr_symsp]"
-        + beautify_filename(filename, num_words=15, start_reverse=False)
-        + ".txt"
+def num_numeric_chars(free_text):
+    """
+    returns number of numeric "words" (i.e., digits that are surrounded by spaces)
+    """
+    num_numeric_words = len(
+        [free_text for free_text in free_text.split() if free_text.isdigit()]
     )
+    return num_numeric_words
 
-    # proceed to saving
-    with open(
-        join(filepath, corrected_fname), "w", encoding="utf-8", errors="ignore"
-    ) as file_out:
-        file_out.writelines(corrected_doc)
 
-    if verbose:
-        script_rt_m = (time.time() - script_start_time) / 60
-        print("RT for this file was {0:5f} minutes".format(script_rt_m))
-        print("output folder for this transcription is: \n", filepath)
+def corr(s: str):
+    """
+    corr - adds space after period if there isn't one. removes extra spaces
 
-    print(
-        "Done correcting {} -".format(filename),
-        datetime.now().strftime("%H:%M:%S"),
-        "\n",
-    )
+    Parameters
+    ----------
+    s : str, text to be corrected
 
-    corr_file_Data = {
-        "corrected_ssp_text": corrected_doc,
-        "corrected_ssp_fname": corrected_fname,
-        "output_path": filepath,
-    }
-    return corr_file_Data
+    Returns
+    -------
+    str
+    """
+    return re.sub(r"\.(?! )", ". ", re.sub(r" +", " ", s))
 
 
 def init_symspell(max_dist=3, pref_len=7):
+    """
+    init_symspell - initialize the SymSpell object. This is used to correct misspelled words in the text (interchangeable with NeuSpell)
+
+    Parameters
+    ----------
+    max_dist : int, optional, by default 3, max distance between words to be considered a match
+    pref_len : int, optional, by default 7, minimum length of word to be considered a valid word
+
+    Returns
+    -------
+    symspell : SymSpell object
+    """
     sym_spell = SymSpell(max_dictionary_edit_distance=max_dist, prefix_length=pref_len)
 
     dictionary_path = pkg_resources.resource_filename(
@@ -364,31 +394,36 @@ def init_symspell(max_dist=3, pref_len=7):
 def symspell_freetext(
     textlines, dist=3, keep_numb_words=True, verbose=False, speller=None
 ):
-    # https://github.com/mammothb/symspellpy
-    if speller is None:
-        if verbose:
-            print(
-                "Warning - symspell object not passed in, creating one. - ",
-                datetime.now(),
-            )
-        sym_spell = init_symspell()
-    else:
-        sym_spell = speller
+    """
+    symspell_freetext - spell check a text file using SymSpell. This is used to correct misspelled words in the text (interchangeable with NeuSpell)
+    https://github.com/mammothb/symspellpy
+    Parameters
+    ----------
 
+    textlines : list, list of strings, or string, text to be spell checked
+    dist : int, optional, by default 3, max distance between words to be considered a match
+    keep_numb_words : bool, optional, by default True, whether to keep numbers in the text
+    verbose : bool, optional, by default False, whether to print out the results
+    speller : SymSpell object, optional, by default None, if None, will initialize a new SymSpell object
+
+    Returns
+    -------
+    corrected_text : list, list of strings, or string, the corrected text
+    """
+
+    sym_spell = speller or init_symspell(
+        max_dist=dist
+    )  # initialize a new SymSpell object if none is provided
     corrected_list = []
-
-    if type(textlines) == str:
-        textlines = [textlines]  # put in a list if a string
-
+    textlines = list(textlines) if isinstance(textlines, str) else textlines
     if verbose:
-        print("\nStarting to correct text with {0:6d} lines ".format(len(textlines)))
-        print("the type of textlines var is ", type(textlines))
+        print(f"{len(textlines)} lines to be spell checked")
 
     # iterate through list of lines. Pass each line to be corrected. Append / sum results from each line till done
-    for line_obj in textlines:
+    for i, line_obj in enumerate(textlines):
         line = "".join(line_obj)
         if verbose:
-            print("line {} in the text is: ".format(textlines.index(line_obj)))
+            print(f"line {i} in the source is: ")
             pp.pprint(line)
         if line == "":
             continue  # blank line, skip to next run
@@ -399,24 +434,35 @@ def symspell_freetext(
             ignore_non_words=keep_numb_words,
             ignore_term_with_digits=keep_numb_words,
         )
-        all_sugg_for_line = []
-        for suggestion in suggestions:
-            all_sugg_for_line.append(
-                suggestion.term
-            )  # append / sum / log results from correcting the line
+        line_suggests = [
+            s.term for s in suggestions
+        ]  # list of suggested words for the line
 
-        corrected_list.append(" ".join(all_sugg_for_line) + "\n")
+        corrected_list.append(
+            " ".join(line_suggests) + "\n"
+        )  # add newline to end of each line appended
 
-    corrected_text = "".join(corrected_list)  # join corrected text
+    corrected_text = corr(
+        " ".join(corrected_list)
+    )  # join list of lines into a single string and correct spaces
 
     if verbose:
-        print("Finished correcting w/ symspell at time: ", datetime.now(), "\n")
+        print(
+            f"fineshed spelling correction on {len(textlines)} lines at {datetime.now()}"
+        )
 
     return corrected_text
 
 
 def init_neuspell(verbose=False):
-    # TODO check if options for diferent languages with Neuspell
+    """
+    init_neuspell - initialize the neuspell object. This is used to correct misspelled words in the text (interchangeable with SymSpell)
+
+    Returns
+    -------
+    checker : neuspell.SpellChecker object
+    """
+    # TODO: check if options for different languages with Neuspell
     if verbose:
         checker = neuspell.SclstmbertChecker()
         checker.from_pretrained()
@@ -430,18 +476,25 @@ def init_neuspell(verbose=False):
 
 
 def neuspell_freetext(textlines, ns_checker=None, verbose=False):
-    if ns_checker is None:
-        print(
-            "Warning - neuspell object not passed in, creating one. - ", datetime.now()
-        )
-        ns_checker = init_neuspell()
+    """
+    neuspell_freetext - spell check a text object using Neuspell. This is used to correct misspelled words in the text (interchangeable with SymSpell)
 
-    if type(textlines) == str:
-        textlines = [textlines]  # put in a list if a string
+    Parameters
+    ----------
+    textlines : list, list of strings, or string, text to be spell checked
+    ns_checker : neuspell.SpellChecker object, optional, by default None, if None, will initialize a new Neuspell object
+    verbose : bool, optional
 
+    Returns
+    -------
+    corrected_text : list, list of strings, or string, the corrected text
+    """
+    ns_checker = ns_checker or init_neuspell(
+        verbose=verbose
+    )  # initialize a new Neuspell object if none is provided
+    textlines = list(textlines) if isinstance(textlines, str) else textlines
     corrected_list = []
 
-    # iterate through list of lines. Pass each line to be corrected. Append / sum results from each line till done
     for line_obj in textlines:
         line = "".join(line_obj)
 
@@ -451,38 +504,49 @@ def neuspell_freetext(textlines, ns_checker=None, verbose=False):
         if line == "" or (len(line) <= 5):
             continue  # blank line
 
-        line = line.lower()
-        corrected_text = ns_checker.correct_strings([line])
+        corrected_text = ns_checker.correct_strings(
+            [line.lower()]
+        )  # spell check the lowercase line
         corrected_text_f = " ".join(corrected_text)
 
         corrected_list.append(corrected_text_f + "\n")
 
-    corrected_text = " ".join(corrected_list)  # join corrected text
+    corrected_text = corr(
+        " ".join(corrected_list)
+    )  # join list of lines into a single string and correct spaces
 
     if verbose:
         print("Finished correcting w/ neuspell at time: ", datetime.now(), "\n")
-
+    assert isinstance(corrected_text, str), "corrected text is not a string"
     return corrected_text
 
 
 def SBD_freetext(text, verbose=False, lang="en"):
-    # use pysbd to segment
+    """
+    SBD_freetext - spell check a text object using pySBD, a python implementation of the Sentence Boundary Detection algorithm
+
+    Parameters
+    ----------
+    text : list, list of strings, or string, text to be spell checked
+    verbose : bool, optional
+    lang : str, optional, by default "en", language of the text
+
+    Returns
+    -------
+    seg_and_capital = list, list of strings, or string, the corrected text
+    """
 
     if isinstance(text, list):
-        print(
-            "Warning, input ~text~ has type {}. Will convert to str".format(type(text))
-        )
         text = " ".join(text)
+        if verbose:
+            print("text is a list, converting to string")
 
     seg = pysbd.Segmenter(language=lang, clean=True)
     sentences = seg.segment(text)
 
     if verbose:
-        print(
-            "input text of {} words was split into ".format(len(text.split(" "))),
-            len(sentences),
-            "sentences",
-        )
+        print("Finished sentence boundary detection at time: ", datetime.now(), "\n")
+        print("Number of sentences: ", len(sentences))
 
     capitalized = []
     for sentence in sentences:
@@ -497,70 +561,98 @@ def SBD_freetext(text, verbose=False, lang="en"):
     return seg_and_capital
 
 
-def spellcorrect_pipeline(filepath, filename, ns_checker=None, verbose=False):
-    # uses two functions (neuspell_freetext, SBD_freetext) in a pipeline
+def spellcorrect_pipeline(
+    filepath, filename, ns_checker=None, linebyline=True, verbose=False
+):
+    """
+    spellcorrect_pipeline - takes a filepath and filename and returns a corrected version of the text. It uses both the PySBD and Neuspell algorithms to correct the text. Note that the Neuspell algorithm is more accurate than the SymSpell algorithm, but it is slower - it is recommended to use the SymSpell algorithm if you are dealing with a large corpus of text or see runtime issues.
+
+    Parameters
+    ----------
+    filepath : [type], optional,    the filepath to the file to be corrected
+    filename : [type], optional,    the filename of the file to be corrected
+    ns_checker : [type], optional, the neuspell object to be used for spellchecking, by default None
+    linebyline : bool, optional,    whether to save the corrected text as a list of lines or a single string in the output file, by default True
+    verbose : bool, optional,      whether to print out the progress of the spellchecking process, by default False
+
+    Returns
+    -------
+    pipelineoutput : dict, the corrected text and other data
+    """
 
     with open(join(filepath, filename), "r", encoding="utf-8", errors="ignore") as file:
         textlines = file.readlines()  # return a list
 
+    # step 1: spellcheck using neuspell
     sc_textlines = neuspell_freetext(textlines, ns_checker=ns_checker, verbose=verbose)
 
-    loc_SC = "neuspell_sc"
+    loc_SC = "neuspell_results"
     create_folder(join(filepath, loc_SC))
 
-    sc_outname = (
-        "NSC_" + beautify_filename(filename, num_words=15, start_reverse=False) + ".txt"
-    )
+    sc_outname = f"{trim_fname(filename)}_NSC_results.txt"
 
     with open(
         join(filepath, loc_SC, sc_outname), "w", encoding="utf-8", errors="replace"
-    ) as file_sc:
-        file_sc.writelines(sc_textlines)  # save spell-corrected text
-
-    # TODO update logic in the respective functions instead of using quick_sc_fixes to fix recurring small issues
-    quick_sc_fixes = {
+    ) as fo:
+        fo.writelines(sc_textlines)  # save spell-corrected text
+    # step 2: sentence boundary detection & misc punctuation removal
+    misc_fixes = {
         " ' ": "'",
-    }
-    if isinstance(sc_textlines, list):
-        SBD_sc_textlines = []
-        for line in sc_textlines:
-            if isinstance(line, list):
-                # handles weird corner cases
-                line = " ".join(line)
+        " - ": "-",
+        " . ": ".",
+    }  # dictionary of miscellaneous fixes, mostly for punctuation
 
-            sentenced = SBD_freetext(line, verbose=verbose)
-            for key, value in quick_sc_fixes.items():
-                sentenced = sentenced.replace(key, value)
-            SBD_sc_textlines.append(sentenced)
-    else:
-        SBD_sc_textlines = SBD_freetext(sc_textlines, verbose=verbose)
-        for key, value in quick_sc_fixes.items():
-            SBD_sc_textlines = SBD_sc_textlines.replace(key, value)
-
-    # SBD_text = " ".join(SBD_sc_textlines)
-
-    loc_SBD = "NSC + SBD"
-    create_folder(join(filepath, loc_SBD))
-
-    SBD_outname = (
-        "FIN_" + beautify_filename(filename, num_words=15, start_reverse=False) + ".txt"
+    sc_textlines = (
+        [sc_textlines] if not isinstance(sc_textlines, list) else sc_textlines
     )
+    fin_textlines = []
+    for line in sc_textlines:
+        line = (
+            " ".join(line) if isinstance(line, list) else line
+        )  # check for list of lists/strings
 
-    with open(
-        join(filepath, loc_SBD, SBD_outname), "w", encoding="utf-8", errors="replace"
-    ) as file_sc:
-        file_sc.writelines(
-            SBD_sc_textlines
-        )  # save spell-corrected AND sentence-boundary disambig text
+        for key, value in misc_fixes.items():
+            line = line.replace(key, value)
+        sentenced = SBD_freetext(line, verbose=verbose)
+        assert isinstance(
+            sentenced, str
+        ), f"sentenced, with type {type(sentenced)}  and valye {sentenced} is not a string.. fix it"
+        for key, value in misc_fixes.items():
+            sentenced = sentenced.replace(key, value)  # fix punctuation
+        fin_textlines.append(sentenced)
+
+    fin_textlines = [
+        line.strip() for line in fin_textlines if line.strip()
+    ]  # remove empty lines
+    fin_textlines = (
+        fin_textlines[0] if linebyline and len(fin_textlines) == 1 else fin_textlines
+    )
+    if linebyline and isinstance(fin_textlines, str):
+        # if the corrected text is a single string, convert it to a list of lines
+        fin_textlines = (
+            fin_textlines.split(". ")
+            if isinstance(fin_textlines, str)
+            else fin_textlines
+        )
+        fin_textlines = [
+            line + ".\n" for line in fin_textlines
+        ]  # add periods to the end of each line
+    # save the corrected text, my boys
+    loc_FIN = "results_SC_pipeline"
+    create_folder(join(filepath, loc_FIN))
+    final_outname = f"{trim_fname(filename)}_NSC_SBD.txt"
+    SBD_out_path = join(filepath, loc_FIN, final_outname)
+    with open(SBD_out_path, "w", encoding="utf-8", errors="replace") as fo2:
+        fo2.writelines(fin_textlines)
 
     pipelineout = {
         "origi_tscript_text": " ".join(textlines),
         "spellcorrected_text": " ".join(sc_textlines),
-        "final_text": " ".join(SBD_sc_textlines),
+        "final_text": " ".join(fin_textlines),
         "spell_corrected_dir": join(filepath, loc_SC),
         "sc_filename": sc_outname,
-        "SBD_dir": join(filepath, loc_SBD),
-        "SBD_filename": SBD_outname,
+        "SBD_dir": join(filepath, loc_FIN),
+        "SBD_filename": final_outname,
     }
 
-    return pipelineout
+    return pipelineout  # return the corrected text and other data
