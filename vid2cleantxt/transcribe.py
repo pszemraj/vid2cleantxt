@@ -419,7 +419,6 @@ if __name__ == "__main__":
     if is_verbose:
         print("Loading model: {}".format(wav_model))
     tokenizer = Wav2Vec2Processor.from_pretrained(wav_model)
-
     if "wavlm" in wav_model.lower():
         print("Loading wavlm model")
         model = WavLMModel.from_pretrained(wav_model)
