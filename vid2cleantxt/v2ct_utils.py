@@ -245,15 +245,15 @@ def torch_validate_cuda(verbose=False):
         GPUs = GPU.getGPUs()
         if GPUs is not None and len(GPUs) > 0:
             torch.cuda.init()
-            print("Cuda availability (PyTorch): ", torch.cuda.is_available())
+            print(f"Cuda availability (PyTorch) is {torch.cuda.is_available()}\n")
             device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
             if verbose:
-                print("Active GPU device: ", torch.cuda.get_device_name(device=device))
+                print(f"Active GPU device: {torch.cuda.get_device_name(device=device)}\n")
         else:
             print("No GPU being used by this machine :(\n")
     except Exception as e:
-        print(f"ERROR: {e}")
-        print("No GPU being used by this machine :(\n")
+        print(f"\nERROR upon attempting to validate CUDA: {e}\n")
+        print("\nNo GPU being used by this machine :(\n")
 
 
 def check_runhardware(verbose=False):
@@ -269,8 +269,8 @@ def check_runhardware(verbose=False):
             print("No GPU being used\n")
             GPUs = gpu = None
     except Exception as e:
-        print(f"ERROR: {e}")
-        print("No GPU being used\n")
+        print(f"\nERROR: {e}\n")
+        print("\nNo GPU being used\n")
         GPUs = gpu = None
 
     process = psutil.Process(os.getpid())
