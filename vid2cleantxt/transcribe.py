@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-vid2clntext by Peter Szemraj
+vid2cleantxt by Peter Szemraj
 
 Pipeline for Zero-shot transcription of a lecture video file to text using facebook's wav2vec2 model
 this is the primary pipeline for the project
@@ -28,7 +28,7 @@ sys.path.append(dirname(dirname(os.path.abspath(__file__))))
 import logging
 
 logging.basicConfig(
-    level=logging.WARNING, filename="LOGFILE_vid2cleantxt_transcriber.log"
+    level=logging.INFO, filename="LOGFILE_vid2cleantxt_transcriber.log"
 )
 
 import math
@@ -345,7 +345,7 @@ def postprocess_transc(
         kw_all_vids = pd.concat([kw_all_vids, qk_df], axis=1)
 
     # save overall transcription file
-    kwdb_fname = f"YAKE - all keys for batch {get_timestamp()}.csv"
+    kwdb_fname = f"YAKE - all keywords for run at {get_timestamp()}.csv"
     kw_all_vids.to_csv(
         join(out_p_tscript, kwdb_fname),
         index=True,
@@ -435,8 +435,8 @@ if __name__ == "__main__":
     join_text = args.join_text
     linebyline = not join_text
 
-    print(f"Loading models @ {get_timestamp(True)} - may take a while...")
-    print("If RT seems excessive, try --verbose flag or checking logfile")
+    print(f"\nLoading models @ {get_timestamp(True)} - may take some time...")
+    print("if RT seems excessive, try --verbose flag or checking logfile")
     # load the model
     wav_model = "facebook/wav2vec2-base-960h" if model_arg is None else model_arg
     tokenizer = Wav2Vec2Processor.from_pretrained(
