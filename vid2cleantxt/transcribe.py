@@ -360,7 +360,8 @@ def get_parser():
         required=False,
         default=False,
         action="store_true",
-        help="if specified, will move the files to the completed folder",
+        help="if specified, will move files that finished transcription to the completed folder",
+        # use case here is if there are so many files that run into CUDA memory issues resulting in a crash
     )
     parser.add_argument(
         "--verbose",
@@ -376,12 +377,13 @@ def get_parser():
         default=None,
         help="huggingface wav2vec2 model name, ex 'facebook/wav2vec2-base-96~0h'",
         # "facebook/wav2vec2-large-960h-lv60-self" is the best model but VERY taxing on the GPU/CPU
+        # for wavLM, "patrickvonplaten/wavlm-libri-clean-100h-large" or others
     )
 
     parser.add_argument(
         "--chunk-length",
         required=False,
-        default=15,  # may need to be adjusted based on hardware and model used
+        default=15, # pass lower value if running out of memory / GPU memory
         type=int,
         help="Duration of .wav chunks (in seconds) that the transformer model will be fed",
     )
@@ -389,7 +391,7 @@ def get_parser():
     parser.add_argument(
         "--join-text",
         required=False,
-        default=False,  # note that the standard iteration of the model is more robust
+        default=False,
         action="store_true",
         help="Save the transcribed text as a single line of text instead of one line per sentence",
     )
