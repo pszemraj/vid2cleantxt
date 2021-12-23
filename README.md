@@ -2,7 +2,7 @@
 
 ```
 
-vid2cleantxt
+# vid2cleantxt
 
 ![vid2cleantext simple](https://user-images.githubusercontent.com/74869040/131500291-ed0a9d7f-8be7-4f4b-9acf-c360cfd46f1f.png)
 
@@ -10,48 +10,45 @@ vid2cleantxt
 
 TL;DR check out [this Colab script](https://colab.research.google.com/drive/1WfJ1yQn-jtyZsoQXdzXx91FPbLo5t7Mg?usp=sharing) to see a transcription and keyword extraction of a speech by John F. Kennedy by simply running all cells.
 
----
+* * *
 
 **Table of Contents**
 
 <!-- TOC -->
 
--   [vid2cleantxt](#vid2cleantxt)
--   [Motivation](#motivation)
--   [Overview](#overview)
-    -   [Example Output](#example-output)
-    -   [Pipeline Intro](#pipeline-intro)
--   [Installation](#installation)
-    -   [Quickstart](#how-to-get-this-to-work-on-your-machine)
-    -   [Is there a jupyter notebook file?](#is-there-a-jupyter-notebook-file)
-    -   [How long does this take to run?](#how-long-does-this-take-to-run)
--   [Application](#application)
-    -   [Now I have a bunch of long text files. How are these useful?](#now-i-have-a-bunch-of-long-text-files-how-are-these-useful)
-        -   [Visualization and Analysis](#visualization-and-analysis)
-        -   [Text Extraction / Manipulation](#text-extraction--manipulation)
-        -   [Text Summarization](#text-summarization)
-    -   [TextHero example use case](#texthero-example-use-case)
-    -   [ScatterText example use case](#scattertext-example-use-case)
--   [Design Choices &amp; Troubleshooting](#design-choices--troubleshooting)
-    -   [What python package dependencies does this repo have?](#what-python-package-dependencies-does-this-repo-have)
-    -   [I tried to transcribe an audio file, and it gave me an error:](#i-tried-to-transcribe-an-audio-file-and-it-gave-me-an-error)
-    -   [My computer crashes once it starts running the wav2vec2 model:](#my-computer-crashes-once-it-starts-running-the-wav2vec2-model)
-    -   [How can I improve the performance of the model from a word-error-rate perspective?](#how-can-i-improve-the-performance-of-the-model-from-a-word-error-rate-perspective)
-    -   [Why use wav2vec2 instead of SpeechRecognition or other transcription methods?](#why-use-wav2vec2-instead-of-speechrecognition-or-other-transcription-methods)
--   [Example](#example)
-    -   [Description](#description)
-    -   [Output (sentence boundary disambiguation) of JFK&#39;s Moon Speech @ Rice University:](#output-sentence-boundary-disambiguation-of-jfks-moon-speech--rice-university)
-    -   [Output script run log for the &#34;single_file&#34; version:](#output-script-run-log-for-the-single_file-version)
--   [Future Work, Collaboration, &amp; Citations](#future-work-collaboration--citations)
-    -   [Project Updates](#project-updates)
-    -   [Future Work](#future-work)
-    -   [What about a version where I don&#39;t need python at all?](#what-about-a-version-where-i-dont-need-python-at-all)
-    -   [I&#39;ve found x repo / script / concept that I think you should incorporate or collaborate with the author.](#ive-found-x-repo--script--concept-that-i-think-you-should-incorporate-or-collaborate-with-the-author)
-    -   [Citations](#citations)
+- [Motivation](#motivation)
+- [Overview](#overview)
+  - [Example Output](#example-output)
+  - [Pipeline Intro](#pipeline-intro)
+- [Installation](#installation)
+  - [Quickstart (aka: how to get the script running)](#quickstart-aka-how-to-get-the-script-running)
+  - [Notebooks on Colab](#notebooks-on-colab)
+  - [How long does this take to run?](#how-long-does-this-take-to-run)
+- [Application](#application)
+  - [Now I have a bunch of long text files. How are these useful?](#now-i-have-a-bunch-of-long-text-files-how-are-these-useful)
+    - [Visualization and Analysis](#visualization-and-analysis)
+    - [Text Extraction / Manipulation](#text-extraction--manipulation)
+    - [Text Summarization](#text-summarization)
+  - [TextHero example use case](#texthero-example-use-case)
+  - [ScatterText example use case](#scattertext-example-use-case)
+- [Design Choices & Troubleshooting](#design-choices--troubleshooting)
+  - [What python package dependencies does this repo have?](#what-python-package-dependencies-does-this-repo-have)
+  - [My computer crashes once it starts running the wav2vec2 model:](#my-computer-crashes-once-it-starts-running-the-wav2vec2-model)
+  - [The transcription is not perfect, and therefore I am mad:](#the-transcription-is-not-perfect-and-therefore-i-am-mad)
+  - [How can I improve the performance of the model from a word-error-rate perspective?](#how-can-i-improve-the-performance-of-the-model-from-a-word-error-rate-perspective)
+  - [Why use wav2vec2 instead of SpeechRecognition or other transcription methods?](#why-use-wav2vec2-instead-of-speechrecognition-or-other-transcription-methods)
+- [Example](#example)
+  - [Result](#result)
+  - [Console output](#console-output)
+- [Future Work, Collaboration, & Citations](#future-work-collaboration--citations)
+  - [Project Updates](#project-updates)
+  - [Future Work](#future-work)
+  - [I've found x repo / script / concept that I think you should incorporate or collaborate with the author.](#ive-found-x-repo--script--concept-that-i-think-you-should-incorporate-or-collaborate-with-the-author)
+  - [Citations](#citations)
 
 <!-- /TOC -->
 
----
+* * *
 
 # Motivation
 
@@ -61,7 +58,7 @@ Video, specifically audio, is an inefficient way to convey dense or technical in
 
 ## Example Output
 
-Example output text of a video transcription of [JFK&#39;s peace speech](https://youtu.be/0fkKnfk4k40):
+Example output text of a video transcription of [JFK's peace speech](https://youtu.be/0fkKnfk4k40):
 
 > Surely the opening vistas of space promise high costs and hardships as well as high reward so it is not surprising that some would have us stay where we are a little longer to rest to wait but this city of question this state of taxes this country of the united states was not built by those who waited and rested but if I were to say my fellow citizens. That we shall send to the moon two hundred and forty thousand miles away from the control station in Houston a giant rocket more than three hundred feet tall the length of this football field made of new metal alloys some of which have not yet been invented capable of standing heat and stresses several times more than have ever been experienced fitted together with a precision better than the. First watch carrying all the equipment needed for propulsion guidance control communications food and survival on an untried mission to an unknown celestial body and then return it safely to earth re entering the atmosphere at speeds of over twenty five thousand miles per hour causing heat about half that on the temperature of the sun almost as hot as it is here to day and do all this. And do all this and do it right and do it first before this dictate is out then we must be so I'm the one who's doing all the work so to get me to stay cool for a minute however I think we're going to do it and I think that we must pay what needs to be paid I don't think we ought to waste any. Money but I think we ought to do the job and this will be done in the decade of the sixty it may be done while some of you are still here at school at this college and university it will be done during the terms of office of some of the people who sit here on this platform but it will be done many years ago the great British explorer garage memory who was to die on mount everist was asked why did he want to climb it the said because it is there well space is there. And we're going to climb it and the moon and the planets are there and new hopes for knowledge and peace are there and therefore as we set sail we ask god's blessing on the most hazardous and dangerous and greatest adventure on which man has ever embarked thank you
 
@@ -71,14 +68,14 @@ See the examples folder for more detail / full transcript.
 
 ![vid2cleantxt detailed](https://user-images.githubusercontent.com/74869040/131499569-c894c096-b6b8-4d17-b99c-a4cfce395ea8.png)
 
-1. The `transcribe.py` script uses audio2text_functions.py to convert video files to .wav format audio chunks of duration X\* seconds,
-2. transcribe all X audio chunks through a pretrained wav2vec2 model, s
-3. Write all results of the list into a text file, stores various runtime metrics into a separate text list, and deletes the .wav audio chunk directory after completed using them.
-4. creates two new text files: one with all transcriptions appended, and one with all metadata appended. The script then
-5. FOR each transcription text file:
-    - Passes the 'base' transcription text through a spell checker (_Neuspell_) and autocorrects spelling. Saves as new text file.
-    - Uses pySBD to infer sentence boundaries on the spell-corrected text and add periods in to delineate sentences. Saves as new file.
-    - Runs basic keyword extraction (via YAKE) on spell-corrected file. All keywords per file are stored in one dataframe for comparison, and exported to .xlsx format
+1.  The `transcribe.py` script uses audio2text_functions.py to convert video files to .wav format audio chunks of duration X\* seconds,
+2.  transcribe all X audio chunks through a pretrained wav2vec2 model, s
+3.  Write all results of the list into a text file, stores various runtime metrics into a separate text list, and deletes the .wav audio chunk directory after completed using them.
+4.  creates two new text files: one with all transcriptions appended, and one with all metadata appended. The script then
+5.  FOR each transcription text file:
+    -   Passes the 'base' transcription text through a spell checker (_Neuspell_) and autocorrects spelling. Saves as new text file.
+    -   Uses pySBD to infer sentence boundaries on the spell-corrected text and add periods in to delineate sentences. Saves as new file.
+    -   Runs basic keyword extraction (via YAKE) on spell-corrected file. All keywords per file are stored in one dataframe for comparison, and exported to .xlsx format
 
 _\*\* (where X is some duration that does not overload your computer or crash your IDE)_
 
@@ -99,17 +96,17 @@ Essentially, clone the repo, and run `vid2cleantxt/transcribe.py --input-dir "pa
 
 1.  fastest (in bash command line):
 
-    1. `git clone https://github.com/pszemraj/vid2cleantxt.git`
-    2. `cd vid2cleantxt/`
-    3. `pip install -r requirements.txt`
-    4. `python vid2cleantxt/transcribe.py --input-dir "example_JFK_speech/TEST_singlefile"`
+    1.  `git clone https://github.com/pszemraj/vid2cleantxt.git`
+    2.  `cd vid2cleantxt/`
+    3.  `pip install -r requirements.txt`
+    4.  `python vid2cleantxt/transcribe.py --input-dir "example_JFK_speech/TEST_singlefile"`
         > in this example, all video and audio files in the repo example "example_JFK_speech/TEST_singlefile" would be transcribed.
 
 2.  Clone with [github desktop](https://desktop.github.com/)
 
-    1. install requirements.txt either from your IDE prompt or via the command above
-    2. open terminal in the local folder via your IDE or manual
-    3. `python vid2cleantxt/transcribe.py --input-dir "example_JFK_speech/TEST_singlefile"` in said terminal
+    1.  install requirements.txt either from your IDE prompt or via the command above
+    2.  open terminal in the local folder via your IDE or manual
+    3.  `python vid2cleantxt/transcribe.py --input-dir "example_JFK_speech/TEST_singlefile"` in said terminal
 
     > in this example, all video and audio files in "example_JFK_speech/TEST_singlefile" would be transcribed.
 
@@ -121,22 +118,22 @@ Notebook versions are available on Google Colab, because they offer free GPUs wh
 
 Links to Colab Scripts:
 
-1. Single-File Version (Implements GPU)
-    - Link [here](https://colab.research.google.com/drive/1WfJ1yQn-jtyZsoQXdzXx91FPbLo5t7Mg?usp=sharing)
-    - This script downloads the video from a public link to one of the JFK videos stored on my Google Drive. As such, no
-      authentication / etc. is required and **this link is recommended for seeing how this pipeline works**.
-    - The only steps required are checking / adjusting the runtime to a GPU, and _Run All_
-2. Multi-File Version (Implements GPU)
-    - Link [here](https://colab.research.google.com/drive/1qOUkiPMaUZgBTMfCFF-fCRTPCMg1997J?usp=sharing), _note file was updated and posted to the repo July 13, 2021._
-    - This script connects to the user's google drive to convert a whole folder of videos using Google's Colab Python
-      package.
-    - It **does require the video files to be hosted on the user's drive**, as well as authorization of Colab (it will prompt you and walk you through this)
+1.  Single-File Version (Implements GPU)
+    -   Link [here](https://colab.research.google.com/drive/1WfJ1yQn-jtyZsoQXdzXx91FPbLo5t7Mg?usp=sharing)
+    -   This script downloads the video from a public link to one of the JFK videos stored on my Google Drive. As such, no
+        authentication / etc. is required and **this link is recommended for seeing how this pipeline works**.
+    -   The only steps required are checking / adjusting the runtime to a GPU, and _Run All_
+2.  Multi-File Version (Implements GPU)
+    -   Link [here](https://colab.research.google.com/drive/1qOUkiPMaUZgBTMfCFF-fCRTPCMg1997J?usp=sharing), _note file was updated and posted to the repo July 13, 2021._
+    -   This script connects to the user's google drive to convert a whole folder of videos using Google's Colab Python
+        package.
+    -   It **does require the video files to be hosted on the user's drive**, as well as authorization of Colab (it will prompt you and walk you through this)
 
 New to Colab? Some links I found useful:
 
--   [Google&#39;s FAQ](https://research.google.com/colaboratory/faq.html)
+-   [Google's FAQ](https://research.google.com/colaboratory/faq.html)
 -   [Medium Article on Colab + Large Datasets](https://satyajitghana.medium.com/working-with-huge-datasets-800k-files-in-google-colab-and-google-drive-bcb175c79477)
--   [Google&#39;s Demo Notebook on I/O](https://colab.research.google.com/notebooks/io.ipynb)
+-   [Google's Demo Notebook on I/O](https://colab.research.google.com/notebooks/io.ipynb)
 -   [A better Colab Experience](https://towardsdatascience.com/10-tips-for-a-better-google-colab-experience-33f8fe721b82)
 
 ## How long does this take to run?
@@ -151,23 +148,21 @@ On my machine (CPU only due to Windows + AMD GPU) it takes approximately 30-70% 
 
 **Specs:**
 
-```
-	Processor Intel(R) Core(TM) i7-8665U CPU @ 1.90GHz
-	Speed 4.8 GHz
-	Number of Cores 8
-	Memory RAM 32 GB
-	Video Card #1 Intel(R) UHD Graphics 620
-	Dedicated Memory 128 MB
-	Total Memory 16 GB
-	Video Card #2 AMD Radeon Pro WX3200 Graphics
-	Dedicated Memory 4.0 GB
-	Total Memory 20 GB
-	Operating System  Windows 10 64-bit
-```
+    	Processor Intel(R) Core(TM) i7-8665U CPU @ 1.90GHz
+    	Speed 4.8 GHz
+    	Number of Cores 8
+    	Memory RAM 32 GB
+    	Video Card #1 Intel(R) UHD Graphics 620
+    	Dedicated Memory 128 MB
+    	Total Memory 16 GB
+    	Video Card #2 AMD Radeon Pro WX3200 Graphics
+    	Dedicated Memory 4.0 GB
+    	Total Memory 20 GB
+    	Operating System  Windows 10 64-bit
 
 > _NOTE:_ that the default model is facebook/wav2vec2-base-960h. This is a pre-trained model that is trained on the librispeech corpus. If you want to use a different model, you can pass the `--model` argument (for example `--model "facebook/wav2vec2-large-960h-lv60-self"`). The model is downloaded from the internet if it does not exist locally. The large model is more accurate, but is also slower to run. I do not have stats on differences in WER, but [facebook](https://github.com/pytorch/fairseq/tree/master/examples/wav2vec) may have some posted.
 
----
+* * *
 
 # Application
 
@@ -181,23 +176,23 @@ Text data can be visualized, summarized, or reduced in many ways with natural la
 
 ### Visualization and Analysis
 
-1. [TextHero](https://github.com/jbesomi/texthero) - cleans text, allows for visualization / clustering (k-means) / dimensionality reduction (PCA, TSNE)
-    - Use case here: I want to see how _this speaker_'s speeches differ from each other. Which are "the most related"?
-2. [Scattertext](https://github.com/JasonKessler/scattertext) - allows for comparisons of one corpus of text to another via various methods and visualizes them.
-    - Use case here: I want to see how the speeches by _this speaker_ compare to speeches by _speaker B_ in terms of topics, word frequency… so on
+1.  [TextHero](https://github.com/jbesomi/texthero) - cleans text, allows for visualization / clustering (k-means) / dimensionality reduction (PCA, TSNE)
+    -   Use case here: I want to see how _this speaker_'s speeches differ from each other. Which are "the most related"?
+2.  [Scattertext](https://github.com/JasonKessler/scattertext) - allows for comparisons of one corpus of text to another via various methods and visualizes them.
+    -   Use case here: I want to see how the speeches by _this speaker_ compare to speeches by _speaker B_ in terms of topics, word frequency… so on
 
 Some examples from my own usage are illustrated below from both packages.
 
 ### Text Extraction / Manipulation
 
-1. [Textract](https://textract.readthedocs.io/)
-2. [Textacy](https://github.com/chartbeat-labs/textacy)
-3. [YAKE](https://github.com/LIAAD/yake)
-    - A brief YAKE analysis is completed in this pipeline after transcribing the audio.
+1.  [Textract](https://textract.readthedocs.io/)
+2.  [Textacy](https://github.com/chartbeat-labs/textacy)
+3.  [YAKE](https://github.com/LIAAD/yake)
+    -   A brief YAKE analysis is completed in this pipeline after transcribing the audio.
 
 ### Text Summarization
 
-Several options are available on the [HuggingFace website](https://huggingface.co/models?pipeline_tag=summarization). I have personally found [Google&#39;s pegasus](https://huggingface.co/google/pegasus-xsum) to be most effective for "lecture-esque" video conversion.
+Several options are available on the [HuggingFace website](https://huggingface.co/models?pipeline_tag=summarization). I have personally found [Google's pegasus](https://huggingface.co/google/pegasus-xsum) to be most effective for "lecture-esque" video conversion.
 
 I personally use several similar methods in combination with the transcription script, however it isn't in a place to be officially posted yet. It will be posted to a public repo on this account when ready. For now, you can check out [this Colab notebook](https://colab.research.google.com/drive/1BSIsYHH0w5pdVxqo_nK5vHgMeBiJKKGm?usp=sharing) using the same example text that is output when the JFK speeches are transcribed.
 
@@ -215,7 +210,7 @@ Comparing frequency of terms in one body of text vs. another
 
 ![ST P 1 term frequency I ML 2021 Docs I ML Prior Exams_072122_](https://user-images.githubusercontent.com/74869040/110546149-69e49980-812e-11eb-9c94-81fcb395b907.png)
 
----
+* * *
 
 # Design Choices & Troubleshooting
 
@@ -223,32 +218,30 @@ Comparing frequency of terms in one body of text vs. another
 
 Upon cloning the repo, run the command `pip install -r requirements.txt` in a terminal opened in the project directory. Requirements (upd. Dec 14, 2021) are:
 
-```
-librosa~=0.8.1
-wordninja~=2.0.0
-psutil~=5.8.0
-natsort~=7.1.1
-pandas~=1.3.0
-moviepy~=1.0.3
-transformers~=4.8.2
-numpy~=1.21.0
-pydub~=0.24.1
-symspellpy~=6.7.0
-joblib~=1.0.1
-torch~=1.9.0
-tqdm~=4.43.0
-plotly~=4.14.3
-yake~=0.4.8
-pysbd~=0.3.4
-clean-text
-GPUtil~=1.4.0
-humanize~=3.13.1
-neuspell~=1.0.0
-openpyxl >=3
-unidecode~=1.3.2
-spacy>=3.0.0,<4.0.0
-https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.0.0/en_core_web_sm-3.0.0.tar.gz#egg=en_core_web_sm
-```
+    librosa~=0.8.1
+    wordninja~=2.0.0
+    psutil~=5.8.0
+    natsort~=7.1.1
+    pandas~=1.3.0
+    moviepy~=1.0.3
+    transformers~=4.8.2
+    numpy~=1.21.0
+    pydub~=0.24.1
+    symspellpy~=6.7.0
+    joblib~=1.0.1
+    torch~=1.9.0
+    tqdm~=4.43.0
+    plotly~=4.14.3
+    yake~=0.4.8
+    pysbd~=0.3.4
+    clean-text
+    GPUtil~=1.4.0
+    humanize~=3.13.1
+    neuspell~=1.0.0
+    openpyxl >=3
+    unidecode~=1.3.2
+    spacy>=3.0.0,<4.0.0
+    https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.0.0/en_core_web_sm-3.0.0.tar.gz#egg=en_core_web_sm
 
 -   _Note: the github link in the reqs above downloads the spaCy model `en_core_web_sm` as part of the setup/installation process so you don't have to manually type `python -m spacy download en_core_web_sm` into the terminal to be able to run the code. More on this is described on spaCy's website [here](https://spacy.io/usage/models#production)_
 
@@ -286,57 +279,52 @@ Transcription of Public Domain Speeches from President John F. Kennedy
 
 ## Console output
 
-```
+    (v2ct) C:\Users\peter\Dropbox\programming_projects\vid2cleantxt>python vid2cleantxt\transcribe.py --input-dir "C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech" --model "facebook/wav2vec2-large-960h-lv60-self"
+    data folder is set to `C:\Users\peter\.conda\envs\v2ct\lib\site-packages\neuspell\../data` script
+    Loading models @ Dec-19-2021_-20-51-56 - may take a while...
+    If RT seems excessive, try --verbose flag or checking logfile
 
-(v2ct) C:\Users\peter\Dropbox\programming_projects\vid2cleantxt>python vid2cleantxt\transcribe.py --input-dir "C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech" --model "facebook/wav2vec2-large-960h-lv60-self"
-data folder is set to `C:\Users\peter\.conda\envs\v2ct\lib\site-packages\neuspell\../data` script
-Loading models @ Dec-19-2021_-20-51-56 - may take a while...
-If RT seems excessive, try --verbose flag or checking logfile
+    Found 1 audio or video files in C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech
+    Creating .wav audio clips: 100%|███████████████████████████████████████████████████████| 12/12 [00:00<00:00, 84.82it/s]
+    Creating .wav audio clips:   8%|████▋                                                   | 1/12 [00:00<00:01,  9.11it/s]
+    created audio chunks for wav2vec2 - Dec-19-2021_-20
+    No GPU being used by this machine :(
 
-Found 1 audio or video files in C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech
-Creating .wav audio clips: 100%|███████████████████████████████████████████████████████| 12/12 [00:00<00:00, 84.82it/s]
-Creating .wav audio clips:   8%|████▋                                                   | 1/12 [00:00<00:01,  9.11it/s]
-created audio chunks for wav2vec2 - Dec-19-2021_-20
-No GPU being used by this machine :(
-
-                                                                                                                       No GPU being used :/   0%|                                                                       | 0/12 [00:00<?, ?it/s]
+                                                                                                                           No GPU being used :/   0%|                                                                       | 0/12 [00:00<?, ?it/s]
 
 
-Gen RAM Free: 10.8 GB | Proc size: 3.1 GB | 8 CPUs  loaded at 22.7 % |
+    Gen RAM Free: 10.8 GB | Proc size: 3.1 GB | 8 CPUs  loaded at 22.7 % |
 
-                                                                                                                       No GPU being used :/  50%|███████████████████████████████▌                               | 6/12 [00:57<00:51,  8.65s/it]
-
-
-Gen RAM Free: 10.3 GB | Proc size: 3.2 GB | 8 CPUs  loaded at 67.8 % |
-
-Transcribing video: 100%|██████████████████████████████████████████████████████████████| 12/12 [01:43<00:00,  8.67s/it]
-Saved transcript and metadata to C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech\v2clntxt_transcriptions and C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech\v2clntxt_transc_metadata
-transcribing vids: 100%|████████████████████████████████████████████████████████████████| 1/1 [01:45<00:00, 105.41s/it]
-SC_pipeline - transcribed audio:   0%|                                                           | 0/1 [00:00<?, ?it/s]
-Top 10 Key Phrases from YAKE, with max n-gram length 3
-['forty thousand miles',
- 'promise high costs',
- 'hundred feet tall',
- 'guidance control communications',
- 'unknown celestial body',
- 'station in Houston',
- 'high reward',
- 'causing heat',
- 'surely the opening',
- 'waited and rested']
-SC_pipeline - transcribed audio: 100%|███████████████████████████████████████████████████| 1/1 [00:06<00:00,  6.09s/it]
+                                                                                                                           No GPU being used :/  50%|███████████████████████████████▌                               | 6/12 [00:57<00:51,  8.65s/it]
 
 
-Finished at: Dec-19-2021_-20. Total RT was 2.2819159250000003 mins
-relevant files for run are in:
-C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech\v2clntxt_transcriptions
- and:
-C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech\v2clntxt_transc_metadata
+    Gen RAM Free: 10.3 GB | Proc size: 3.2 GB | 8 CPUs  loaded at 67.8 % |
+
+    Transcribing video: 100%|██████████████████████████████████████████████████████████████| 12/12 [01:43<00:00,  8.67s/it]
+    Saved transcript and metadata to C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech\v2clntxt_transcriptions and C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech\v2clntxt_transc_metadata
+    transcribing vids: 100%|████████████████████████████████████████████████████████████████| 1/1 [01:45<00:00, 105.41s/it]
+    SC_pipeline - transcribed audio:   0%|                                                           | 0/1 [00:00<?, ?it/s]
+    Top 10 Key Phrases from YAKE, with max n-gram length 3
+    ['forty thousand miles',
+     'promise high costs',
+     'hundred feet tall',
+     'guidance control communications',
+     'unknown celestial body',
+     'station in Houston',
+     'high reward',
+     'causing heat',
+     'surely the opening',
+     'waited and rested']
+    SC_pipeline - transcribed audio: 100%|███████████████████████████████████████████████████| 1/1 [00:06<00:00,  6.09s/it]
 
 
-```
+    Finished at: Dec-19-2021_-20. Total RT was 2.2819159250000003 mins
+    relevant files for run are in:
+    C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech\v2clntxt_transcriptions
+     and:
+    C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech\v2clntxt_transc_metadata
 
----
+* * *
 
 # Future Work, Collaboration, & Citations
 
@@ -344,7 +332,7 @@ C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech\v2c
 
 A _rough_ timeline of what has been going on in the repo:
 
-- Dec 2021 - greatly improved runtime of the script, and added more features
+-   Dec 2021 - greatly improved runtime of the script, and added more features
 -   Sept-Oct 2021: Fixing bugs, formatting code.
 -   July 12, 2021 - sync work from Colab notebooks: add CUDA support for pytorch in the `.py` versions, added Neuspell as a spell checker. General organization and formatting improvements.
 -   July 8, 2021 - python scripts cleaned and updated.
@@ -353,19 +341,19 @@ A _rough_ timeline of what has been going on in the repo:
 
 ## Future Work
 
-1. ~~syncing improvements currently in the existing **Google Colab** notebooks (links) above such as [NeuSpell](https://github.com/neuspell/neuspell)~~
+1.  ~~syncing improvements currently in the existing **Google Colab** notebooks (links) above such as [NeuSpell](https://github.com/neuspell/neuspell)~~
 
-    - ~~this will include support for CUDA automatically when running the code (currently just on Colab)~~
+    -   ~~this will include support for CUDA automatically when running the code (currently just on Colab)~~
 
-2. convert groups of functions to a class object
-3. publish class as a python package to streamline process / reduce overhead, making it easier to use + adopt.
-4. Include additional features that are currently not public:
+2.  convert groups of functions to a class object
+3.  publish class as a python package to streamline process / reduce overhead, making it easier to use + adopt.
+4.  Include additional features that are currently not public:
 
-    - Summarization of video transcriptions
-    - Paragraph Disambiguation in both transcription & summarization
-    - report generation (see results in .PDF for notes, etc.)
+    -   Summarization of video transcriptions
+    -   Paragraph Disambiguation in both transcription & summarization
+    -   report generation (see results in .PDF for notes, etc.)
 
-5. py2exe (once code optimized)
+5.  py2exe (once code optimized)
 
 ## I've found x repo / script / concept that I think you should incorporate or collaborate with the author.
 
@@ -387,10 +375,10 @@ Send me a message / start a discussion! Always looking to improve.
 
 -   repo [link](https://github.com/mammothb/symspellpy/tree/e7a91a88f45dc4051b28b83e990fe072cabf0595)
 -   copyright:
-    > Copyright (c) 2020 Wolf Garbe Version: 6.7 Author: Wolf Garbe [mailto:wolf.garbe@seekstorm.com](mailto:wolf.garbe@seekstorm.com)
-    > Maintainer: Wolf Garbe [mailto:wolf.garbe@seekstorm.com](mailto:wolf.garbe@seekstorm.com)
-    > URL: [https://github.com/wolfgarbe/symspell](https://github.com/wolfgarbe/symspell)
-    > Description: [https://medium.com/@wolfgarbe/1000x-faster-spelling-correction-algorithm-2012-8701fcd87a5f](https://medium.com/@wolfgarbe/1000x-faster-spelling-correction-algorithm-2012-8701fcd87a5f)
+    > Copyright (c) 2020 Wolf Garbe Version: 6.7 Author: Wolf Garbe <mailto:wolf.garbe@seekstorm.com>
+    > Maintainer: Wolf Garbe <mailto:wolf.garbe@seekstorm.com>
+    > URL: <https://github.com/wolfgarbe/symspell>
+    > Description: <https://medium.com/@wolfgarbe/1000x-faster-spelling-correction-algorithm-2012-8701fcd87a5f>
     >
     > MIT License
     >
@@ -404,7 +392,7 @@ Send me a message / start a discussion! Always looking to improve.
     > The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
     > Software.
     >
-    > [https://opensource.org/licenses/MIT](https://opensource.org/licenses/MIT)
+    > <https://opensource.org/licenses/MIT>
 
 **YAKE (yet another keyword extractor)**
 
@@ -427,4 +415,8 @@ Send me a message / start a discussion! Always looking to improve.
     > Collection-independent Automatic Keyword Extractor. In: Pasi G., Piwowarski B., Azzopardi L., Hanbury A. (eds).
     > Advances in Information Retrieval. ECIR 2018 (Grenoble, France. March 26 – 29). Lecture Notes in Computer Science, vol
     > 10772, pp. 806 - 810. pdf
+
+
+```
+
 ```
