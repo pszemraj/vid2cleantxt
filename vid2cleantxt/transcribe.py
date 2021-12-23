@@ -41,7 +41,7 @@ import argparse
 import torch
 from tqdm import tqdm
 import transformers
-from transformers import Wav2Vec2Processor, Wav2Vec2ForCTC
+from transformers import Wav2Vec2Processor, Wav2Vec2ForCTC,  WavLMModel, WavLMConfig
 import warnings
 
 #  filter out warnings that pretend transfer learning does not exist
@@ -415,11 +415,17 @@ if __name__ == "__main__":
     print(f"Loading models @ {get_timestamp(True)} - may take a while...")
     print("If RT seems excessive, try --verbose flag or checking logfile")
     # load the model
-    wav2vec2_model = "facebook/wav2vec2-base-960h" if model_arg is None else model_arg
+    wav_model = "facebook/wav2vec2-base-960h" if model_arg is None else model_arg
     if is_verbose:
-        print("Loading model: {}".format(wav2vec2_model))
-    tokenizer = Wav2Vec2Processor.from_pretrained(wav2vec2_model)
-    model = Wav2Vec2ForCTC.from_pretrained(wav2vec2_model)
+        print("Loading model: {}".format(wav_model))
+    tokenizer = Wav2Vec2Processor.from_pretrained(wav_model)
+    
+    if "wavlm" in wav_model.lower():
+        print("Loading wavlm model")
+        model = WavLMModel.from_pretrained(wav_model)
+    else:
+        print("Loading wav2vec2 model")
+        model = Wav2Vec2ForCTC.from_pretrained(wav_model)
 
     # load the spellchecker models. suppress outputs as there are way too many
     orig_out = sys.__stdout__
