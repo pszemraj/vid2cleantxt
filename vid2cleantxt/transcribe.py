@@ -41,7 +41,7 @@ import argparse
 import torch
 from tqdm import tqdm
 import transformers
-from transformers import Wav2Vec2Processor, Wav2Vec2ForCTC,  WavLMModel, WavLMConfig
+from transformers import Wav2Vec2Processor, Wav2Vec2ForCTC,  WavLMModel, WavLMConfig, WavLMForCTC
 import warnings
 
 #  filter out warnings that pretend transfer learning does not exist
@@ -76,8 +76,10 @@ from v2ct_utils import (
 def wav2vec2_islarge(model_obj):
     """
     wav2vec2_check_size - compares the size of the passed model object, and whether
-    it is in fact a wav2vec2 model. this is because these models need special handling
-    w.r.t predictions. https://huggingface.co/facebook/wav2vec2-base-960h
+    it is in fact a wav2vec2 model. this is because the large model is a special case and
+    uses an attention mechanism that is not compatible with the rest of the models
+
+    https://huggingface.co/facebook/wav2vec2-base-960h
 
     Parameters
     ----------
@@ -92,9 +94,9 @@ def wav2vec2_islarge(model_obj):
         "large": 315471520,  # recorded by  loading the model in known environment
     }
     if not isinstance(model_obj, Wav2Vec2ForCTC):
-        sys.exit(
-            "Model is not a wav2vec2 model - this function is for wav2vec2 models only"
-        )
+        warnings.warn(message="Model is not a wav2vec2 model - this function is for wav2vec2 models only", category=None, stacklevel=1)
+        return False # not a wav2vec2 model - return false so it is handled per standard
+
     np_proposed = model_obj.num_parameters()
 
     dist_from_base = abs(np_proposed - approx_sizes.get("base"))
@@ -420,8 +422,9 @@ if __name__ == "__main__":
         print("Loading model: {}".format(wav_model))
     tokenizer = Wav2Vec2Processor.from_pretrained(wav_model)
     if "wavlm" in wav_model.lower():
-        print("Loading wavlm model")
-        model = WavLMModel.from_pretrained(wav_model)
+        # for example --model "patrickvonplaten/wavlm-libri-clean-100h-large"
+        print(f"Loading wavlm model - {wav_model}")
+        model = WavLMForCTC.from_pretrained(wav_model)
     else:
         print("Loading wav2vec2 model")
         model = Wav2Vec2ForCTC.from_pretrained(wav_model)
