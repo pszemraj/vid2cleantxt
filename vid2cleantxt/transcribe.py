@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-vid2clntext by Peter Szemraj
+vid2cleantxt by Peter Szemraj
 
 Pipeline for Zero-shot transcription of a lecture video file to text using facebook's wav2vec2 model
 this is the primary pipeline for the project
@@ -28,7 +28,7 @@ sys.path.append(dirname(dirname(os.path.abspath(__file__))))
 import logging
 
 logging.basicConfig(
-    level=logging.WARNING, filename="LOGFILE_vid2cleantxt_transcriber.log"
+    level=logging.INFO, filename="LOGFILE_vid2cleantxt_transcriber.log"
 )
 
 import math
@@ -41,7 +41,13 @@ import argparse
 import torch
 from tqdm import tqdm
 import transformers
-from transformers import Wav2Vec2Processor, Wav2Vec2ForCTC
+from transformers import (
+    Wav2Vec2Processor,
+    Wav2Vec2ForCTC,
+    WavLMModel,
+    WavLMConfig,
+    WavLMForCTC,
+)
 import warnings
 
 #  filter out warnings that pretend transfer learning does not exist
@@ -76,8 +82,10 @@ from v2ct_utils import (
 def wav2vec2_islarge(model_obj):
     """
     wav2vec2_check_size - compares the size of the passed model object, and whether
-    it is in fact a wav2vec2 model. this is because these models need special handling
-    w.r.t predictions. https://huggingface.co/facebook/wav2vec2-base-960h
+    it is in fact a wav2vec2 model. this is because the large model is a special case and
+    uses an attention mechanism that is not compatible with the rest of the models
+
+    https://huggingface.co/facebook/wav2vec2-base-960h
 
     Parameters
     ----------
@@ -92,9 +100,15 @@ def wav2vec2_islarge(model_obj):
         "large": 315471520,  # recorded by  loading the model in known environment
     }
     if not isinstance(model_obj, Wav2Vec2ForCTC):
-        sys.exit(
-            "Model is not a wav2vec2 model - this function is for wav2vec2 models only"
+        warnings.warn(
+            message="Model is not a wav2vec2 model - this function is for wav2vec2 models only",
+            category=None,
+            stacklevel=1,
         )
+        return (
+            False  # not a wav2vec2 model - return false so it is handled per standard
+        )
+
     np_proposed = model_obj.num_parameters()
 
     dist_from_base = abs(np_proposed - approx_sizes.get("base"))
@@ -107,6 +121,7 @@ def save_transc_results(
     vid_name: str,
     ttext: str,
     mdata: pd.DataFrame,
+    verbose=False,
 ):
     """
     save_transc_results - save the transcribed text to a file and a metadata file
@@ -117,6 +132,11 @@ def save_transc_results(
     vid_name : str, name of the video file
     ttext : str, the transcribed text
     mdata : pd.DataFrame, the metadata for the video file
+    verbose : bool, whether to print the transcribed text locations to the console
+
+    Returns
+    -------
+    None
     """
     storage_locs = setup_out_dirs(out_dir)  # create and get output folders
     out_p_tscript = storage_locs.get("t_out")
@@ -133,12 +153,10 @@ def save_transc_results(
 
     mdata.to_csv(join(out_p_metadata, f"{header}_metadata.csv"), index=False)
 
-    # if verbose:
-    print(
-        "Saved transcript and metadata to {} and {}".format(
-            out_p_tscript, out_p_metadata
+    if verbose:
+        print(
+            f"Saved transcript and metadata to: {out_p_tscript} \n and {out_p_metadata}"
         )
-    )
 
 
 def transcribe_video_wav2vec(
@@ -202,7 +220,9 @@ def transcribe_video_wav2vec(
         # convert audio to tensor
         inputs = ts_tokenizer(audio_input, return_tensors="pt", padding="longest")
         input_values = inputs.input_values.to(device)
-        attention_mask = inputs.attention_mask.to(device) if use_attn else None
+        attention_mask = (
+            inputs.attention_mask.to(device) if use_attn else None
+        )  # if using attention masking, set it. for large wav2vec2 model.
         ts_model = ts_model.to(device)
         # run the model
         with torch.no_grad():
@@ -250,6 +270,7 @@ def transcribe_video_wav2vec(
         vid_name=clip_name,
         ttext=full_text,
         mdata=md_df,
+        verbose=verbose,
     )  # save the results here
 
     shutil.rmtree(ac_storedir, ignore_errors=True)  # remove audio chunks folder
@@ -324,7 +345,7 @@ def postprocess_transc(
         kw_all_vids = pd.concat([kw_all_vids, qk_df], axis=1)
 
     # save overall transcription file
-    kwdb_fname = f"YAKE - all keys for batch {get_timestamp()}.csv"
+    kwdb_fname = f"YAKE - all keywords for run at {get_timestamp()}.csv"
     kw_all_vids.to_csv(
         join(out_p_tscript, kwdb_fname),
         index=True,
@@ -358,7 +379,8 @@ def get_parser():
         required=False,
         default=False,
         action="store_true",
-        help="if specified, will move the files to the completed folder",
+        help="if specified, will move files that finished transcription to the completed folder",
+        # use case here is if there are so many files that run into CUDA memory issues resulting in a crash
     )
     parser.add_argument(
         "--verbose",
@@ -374,12 +396,13 @@ def get_parser():
         default=None,
         help="huggingface wav2vec2 model name, ex 'facebook/wav2vec2-base-96~0h'",
         # "facebook/wav2vec2-large-960h-lv60-self" is the best model but VERY taxing on the GPU/CPU
+        # for wavLM, "patrickvonplaten/wavlm-libri-clean-100h-large" or others
     )
 
     parser.add_argument(
         "--chunk-length",
         required=False,
-        default=15,  # may need to be adjusted based on hardware and model used
+        default=15,  # pass lower value if running out of memory / GPU memory
         type=int,
         help="Duration of .wav chunks (in seconds) that the transformer model will be fed",
     )
@@ -387,7 +410,7 @@ def get_parser():
     parser.add_argument(
         "--join-text",
         required=False,
-        default=False,  # note that the standard iteration of the model is more robust
+        default=False,
         action="store_true",
         help="Save the transcribed text as a single line of text instead of one line per sentence",
     )
@@ -412,14 +435,22 @@ if __name__ == "__main__":
     join_text = args.join_text
     linebyline = not join_text
 
-    print(f"Loading models @ {get_timestamp(True)} - may take a while...")
-    print("If RT seems excessive, try --verbose flag or checking logfile")
+    print(f"\nLoading models @ {get_timestamp(True)} - may take some time...")
+    print("if RT seems excessive, try --verbose flag or checking logfile")
     # load the model
-    wav2vec2_model = "facebook/wav2vec2-base-960h" if model_arg is None else model_arg
-    if is_verbose:
-        print("Loading model: {}".format(wav2vec2_model))
-    tokenizer = Wav2Vec2Processor.from_pretrained(wav2vec2_model)
-    model = Wav2Vec2ForCTC.from_pretrained(wav2vec2_model)
+    wav_model = "facebook/wav2vec2-base-960h" if model_arg is None else model_arg
+    tokenizer = Wav2Vec2Processor.from_pretrained(
+        wav_model
+    )  # use wav2vec2processor for tokenization always
+    if "wavlm" in wav_model.lower():
+        # for example --model "patrickvonplaten/wavlm-libri-clean-100h-large"
+        print(f"Loading wavlm model - {wav_model}")
+        model = WavLMForCTC.from_pretrained(wav_model)
+    else:
+        # for example --model "facebook/wav2vec2-large-960h-lv60-self"
+        print(f"Loading wav2vec2 model - {wav_model}")
+        model = Wav2Vec2ForCTC.from_pretrained(wav_model)
+        # TODO: add option for other models (if relevant?)
 
     # load the spellchecker models. suppress outputs as there are way too many
     orig_out = sys.__stdout__
@@ -466,7 +497,7 @@ if __name__ == "__main__":
     )
 
     print(
-        f"\n\nFinished at: {get_timestamp()}. Total RT was {(time.perf_counter() - st)/60} mins"
+        f"\n\nFinished at: {get_timestamp()}. Total RT was {round((time.perf_counter() - st)/60, 3)} mins"
     )
     print(
         f"relevant files for run are in: \n{out_p_tscript} \n and: \n{out_p_metadata}"

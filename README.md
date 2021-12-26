@@ -1,7 +1,3 @@
-```
-
-```
-
 # vid2cleantxt
 
 ![vid2cleantext simple](https://user-images.githubusercontent.com/74869040/131500291-ed0a9d7f-8be7-4f4b-9acf-c360cfd46f1f.png)
@@ -10,45 +6,45 @@
 
 TL;DR check out [this Colab script](https://colab.research.google.com/drive/1WfJ1yQn-jtyZsoQXdzXx91FPbLo5t7Mg?usp=sharing) to see a transcription and keyword extraction of a speech by John F. Kennedy by simply running all cells.
 
-* * *
+---
 
 **Table of Contents**
 
 <!-- TOC -->
 
-- [Motivation](#motivation)
-- [Overview](#overview)
-  - [Example Output](#example-output)
-  - [Pipeline Intro](#pipeline-intro)
-- [Installation](#installation)
-  - [Quickstart (aka: how to get the script running)](#quickstart-aka-how-to-get-the-script-running)
-  - [Notebooks on Colab](#notebooks-on-colab)
-  - [How long does this take to run?](#how-long-does-this-take-to-run)
-- [Application](#application)
-  - [Now I have a bunch of long text files. How are these useful?](#now-i-have-a-bunch-of-long-text-files-how-are-these-useful)
-    - [Visualization and Analysis](#visualization-and-analysis)
-    - [Text Extraction / Manipulation](#text-extraction--manipulation)
-    - [Text Summarization](#text-summarization)
-  - [TextHero example use case](#texthero-example-use-case)
-  - [ScatterText example use case](#scattertext-example-use-case)
-- [Design Choices & Troubleshooting](#design-choices--troubleshooting)
-  - [What python package dependencies does this repo have?](#what-python-package-dependencies-does-this-repo-have)
-  - [My computer crashes once it starts running the wav2vec2 model:](#my-computer-crashes-once-it-starts-running-the-wav2vec2-model)
-  - [The transcription is not perfect, and therefore I am mad:](#the-transcription-is-not-perfect-and-therefore-i-am-mad)
-  - [How can I improve the performance of the model from a word-error-rate perspective?](#how-can-i-improve-the-performance-of-the-model-from-a-word-error-rate-perspective)
-  - [Why use wav2vec2 instead of SpeechRecognition or other transcription methods?](#why-use-wav2vec2-instead-of-speechrecognition-or-other-transcription-methods)
-- [Example](#example)
-  - [Result](#result)
-  - [Console output](#console-output)
-- [Future Work, Collaboration, & Citations](#future-work-collaboration--citations)
-  - [Project Updates](#project-updates)
-  - [Future Work](#future-work)
-  - [I've found x repo / script / concept that I think you should incorporate or collaborate with the author.](#ive-found-x-repo--script--concept-that-i-think-you-should-incorporate-or-collaborate-with-the-author)
-  - [Citations](#citations)
+-   [Motivation](#motivation)
+-   [Overview](#overview)
+    -   [Example Output](#example-output)
+    -   [Pipeline Intro](#pipeline-intro)
+-   [Installation](#installation)
+    -   [Quickstart (aka: how to get the script running)](#quickstart-aka-how-to-get-the-script-running)
+    -   [Notebooks on Colab](#notebooks-on-colab)
+    -   [How long does this take to run?](#how-long-does-this-take-to-run)
+-   [Application](#application)
+    -   [Now I have a bunch of long text files. How are these useful?](#now-i-have-a-bunch-of-long-text-files-how-are-these-useful)
+        -   [Visualization and Analysis](#visualization-and-analysis)
+        -   [Text Extraction / Manipulation](#text-extraction--manipulation)
+        -   [Text Summarization](#text-summarization)
+    -   [TextHero example use case](#texthero-example-use-case)
+    -   [ScatterText example use case](#scattertext-example-use-case)
+-   [Design Choices & Troubleshooting](#design-choices--troubleshooting)
+    -   [What python package dependencies does this repo have?](#what-python-package-dependencies-does-this-repo-have)
+    -   [My computer crashes once it starts running the wav2vec2 model:](#my-computer-crashes-once-it-starts-running-the-wav2vec2-model)
+    -   [The transcription is not perfect, and therefore I am mad:](#the-transcription-is-not-perfect-and-therefore-i-am-mad)
+    -   [How can I improve the performance of the model from a word-error-rate perspective?](#how-can-i-improve-the-performance-of-the-model-from-a-word-error-rate-perspective)
+    -   [Why use wav2vec2 instead of SpeechRecognition or other transcription methods?](#why-use-wav2vec2-instead-of-speechrecognition-or-other-transcription-methods)
+-   [Example](#example)
+    -   [Result](#result)
+    -   [Console output](#console-output)
+-   [Future Work, Collaboration, & Citations](#future-work-collaboration--citations)
+    -   [Project Updates](#project-updates)
+    -   [Future Work](#future-work)
+    -   [I've found x repo / script / concept that I think you should incorporate or collaborate with the author.](#ive-found-x-repo--script--concept-that-i-think-you-should-incorporate-or-collaborate-with-the-author)
+    -   [Citations](#citations)
 
 <!-- /TOC -->
 
-* * *
+---
 
 # Motivation
 
@@ -68,14 +64,14 @@ See the examples folder for more detail / full transcript.
 
 ![vid2cleantxt detailed](https://user-images.githubusercontent.com/74869040/131499569-c894c096-b6b8-4d17-b99c-a4cfce395ea8.png)
 
-1.  The `transcribe.py` script uses audio2text_functions.py to convert video files to .wav format audio chunks of duration X\* seconds,
-2.  transcribe all X audio chunks through a pretrained wav2vec2 model, s
+1.  The `transcribe.py` script uses audio2text_functions.py to convert video files to .wav format audio chunks of duration X\* seconds
+2.  transcribe all X audio chunks through a pretrained wav2vec2 model
 3.  Write all results of the list into a text file, stores various runtime metrics into a separate text list, and deletes the .wav audio chunk directory after completed using them.
-4.  creates two new text files: one with all transcriptions appended, and one with all metadata appended. The script then
+4.  (Optional) create two new text files: one with all transcriptions appended, and one with all metadata appended. The script then
 5.  FOR each transcription text file:
-    -   Passes the 'base' transcription text through a spell checker (_Neuspell_) and autocorrects spelling. Saves as new text file.
+    -   Passes the 'base' transcription text through a spell checker (_Neuspell_) and autocorrect spelling. Saves as new text file.
     -   Uses pySBD to infer sentence boundaries on the spell-corrected text and add periods in to delineate sentences. Saves as new file.
-    -   Runs basic keyword extraction (via YAKE) on spell-corrected file. All keywords per file are stored in one dataframe for comparison, and exported to .xlsx format
+    -   Runs basic keyword extraction (via YAKE) on spell-corrected file. All keywords per file are stored in one data frame for comparison, and exported to `.xlsx` format
 
 _\*\* (where X is some duration that does not overload your computer or crash your IDE)_
 
@@ -90,7 +86,7 @@ By default,
 
 ## Quickstart (aka: how to get the script running)
 
-Essentially, clone the repo, and run `vid2cleantxt/transcribe.py --input-dir "path to inputs`. the main arg to pass is `--input-dir` for, well, the inputs.
+Essentially, clone the repo, and run `python vid2cleantxt/transcribe.py --input-dir "filepath-to-the-inputs"`. the main arg to pass is `--input-dir` for, well, the inputs. You can get details on all the command line args by running `python vid2cleantxt/transcribe.py`.
 
 > **Note:** _the first time the code runs on your machine, it will download the pretrained transformers models_ which include wav2vec2 and a scibert model for spell correction. After the first run, it will be cached locally, and you will not need to sit through that again.
 
@@ -129,7 +125,7 @@ Links to Colab Scripts:
         package.
     -   It **does require the video files to be hosted on the user's drive**, as well as authorization of Colab (it will prompt you and walk you through this)
 
-New to Colab? Some links I found useful:
+If you are new to Colab, it is probably best to read the [Colab Quickstart](https://colab.research.google.com/notebooks/intro.ipynb) first and the below, for info on how to do file I/O etc.
 
 -   [Google's FAQ](https://research.google.com/colaboratory/faq.html)
 -   [Medium Article on Colab + Large Datasets](https://satyajitghana.medium.com/working-with-huge-datasets-800k-files-in-google-colab-and-google-drive-bcb175c79477)
@@ -139,12 +135,12 @@ New to Colab? Some links I found useful:
 ## How long does this take to run?
 
 On Google Colab with a 16 gb GPU (should be available to free Colab accounts): **approximately 8 minutes to transcribe ~
-90 minutes of audio**. As of July 13, 2021, updated to ensure that CUDA will be used on local machines - if you have an NVIDIA graphics card, you may see runtimes closer to that estimate.
+90 minutes of audio**. CUDA is supported - if you have an NVIDIA graphics card, you may see runtimes closer to that estimate on your local machine.
 
 On my machine (CPU only due to Windows + AMD GPU) it takes approximately 30-70% of the total duration of input video files. You can also take a look at the "console printout" text files in `example_JFK_speech/TEST_singlefile`.
 
--   with model = "facebook/wav2vec2-base-960h" (default) approx 30% of original RT
--   with model = "facebook/wav2vec2-large-960h-lv60-self" approx 70% of original RT
+-   with model = "facebook/wav2vec2-base-960h" (default) approx 30% of original video RT
+-   with model = "facebook/wav2vec2-large-960h-lv60-self" approx 70% of original video RT
 
 **Specs:**
 
@@ -160,9 +156,9 @@ On my machine (CPU only due to Windows + AMD GPU) it takes approximately 30-70% 
     	Total Memory 20 GB
     	Operating System  Windows 10 64-bit
 
-> _NOTE:_ that the default model is facebook/wav2vec2-base-960h. This is a pre-trained model that is trained on the librispeech corpus. If you want to use a different model, you can pass the `--model` argument (for example `--model "facebook/wav2vec2-large-960h-lv60-self"`). The model is downloaded from the internet if it does not exist locally. The large model is more accurate, but is also slower to run. I do not have stats on differences in WER, but [facebook](https://github.com/pytorch/fairseq/tree/master/examples/wav2vec) may have some posted.
+> _NOTE:_ that the default model is facebook/wav2vec2-base-960h. This is a pre-trained model that is trained on the librispeech corpus. If you want to use a different model, you can pass the `--model` argument (for example `--model "facebook/wav2vec2-large-960h-lv60-self"`). The model is downloaded from huggingface.co's servers if it does not exist locally. The large model is more accurate, but is also slower to run. I do not have stats on differences in WER, but [facebook](https://github.com/pytorch/fairseq/tree/master/examples/wav2vec) may have some posted.
 
-* * *
+---
 
 # Application
 
@@ -210,13 +206,13 @@ Comparing frequency of terms in one body of text vs. another
 
 ![ST P 1 term frequency I ML 2021 Docs I ML Prior Exams_072122_](https://user-images.githubusercontent.com/74869040/110546149-69e49980-812e-11eb-9c94-81fcb395b907.png)
 
-* * *
+---
 
 # Design Choices & Troubleshooting
 
 ## What python package dependencies does this repo have?
 
-Upon cloning the repo, run the command `pip install -r requirements.txt` in a terminal opened in the project directory. Requirements (upd. Dec 14, 2021) are:
+Upon cloning the repo, run the command `pip install -r requirements.txt` in a terminal opened in the project directory. Requirements (upd. Dec 23, 2021) are:
 
     librosa~=0.8.1
     wordninja~=2.0.0
@@ -224,7 +220,7 @@ Upon cloning the repo, run the command `pip install -r requirements.txt` in a te
     natsort~=7.1.1
     pandas~=1.3.0
     moviepy~=1.0.3
-    transformers~=4.8.2
+    transformers~=4.15.0
     numpy~=1.21.0
     pydub~=0.24.1
     symspellpy~=6.7.0
@@ -271,7 +267,7 @@ _`*` these statements reflect the assessment completed around project inception 
 
 # Example
 
-Transcription of Public Domain Speeches from President John F. Kennedy
+Transcription of Public Domain Speeches from President John F. Kennedy. This below was given at Rice University, and uses the model `facebook/wav2vec2-large-960h-lv60-self`.
 
 ## Result
 
@@ -290,12 +286,12 @@ Transcription of Public Domain Speeches from President John F. Kennedy
     created audio chunks for wav2vec2 - Dec-19-2021_-20
     No GPU being used by this machine :(
 
-                                                                                                                           No GPU being used :/   0%|                                                                       | 0/12 [00:00<?, ?it/s]
+    No GPU being used :/   0%|                                                                       | 0/12 [00:00<?, ?it/s]
 
 
     Gen RAM Free: 10.8 GB | Proc size: 3.1 GB | 8 CPUs  loaded at 22.7 % |
 
-                                                                                                                           No GPU being used :/  50%|███████████████████████████████▌                               | 6/12 [00:57<00:51,  8.65s/it]
+    No GPU being used :/  50%|███████████████████████████████▌                               | 6/12 [00:57<00:51,  8.65s/it]
 
 
     Gen RAM Free: 10.3 GB | Proc size: 3.2 GB | 8 CPUs  loaded at 67.8 % |
@@ -324,7 +320,7 @@ Transcription of Public Domain Speeches from President John F. Kennedy
      and:
     C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech\v2clntxt_transc_metadata
 
-* * *
+---
 
 # Future Work, Collaboration, & Citations
 
@@ -332,7 +328,7 @@ Transcription of Public Domain Speeches from President John F. Kennedy
 
 A _rough_ timeline of what has been going on in the repo:
 
--   Dec 2021 - greatly improved runtime of the script, and added more features
+-   Dec 2021 - greatly improved runtime of the script, and added more features (command line, docstring, etc.)
 -   Sept-Oct 2021: Fixing bugs, formatting code.
 -   July 12, 2021 - sync work from Colab notebooks: add CUDA support for pytorch in the `.py` versions, added Neuspell as a spell checker. General organization and formatting improvements.
 -   July 8, 2021 - python scripts cleaned and updated.
@@ -345,15 +341,12 @@ A _rough_ timeline of what has been going on in the repo:
 
     -   ~~this will include support for CUDA automatically when running the code (currently just on Colab)~~
 
-2.  convert groups of functions to a class object
-3.  publish class as a python package to streamline process / reduce overhead, making it easier to use + adopt.
-4.  Include additional features that are currently not public:
-
-    -   Summarization of video transcriptions
-    -   Paragraph Disambiguation in both transcription & summarization
-    -   report generation (see results in .PDF for notes, etc.)
-
-5.  py2exe (once code optimized)
+2.  ~~clean up the code, add more features, and make it more robust.~~
+3.  add script to convert `.txt` files to a clean PDF report, [example here](https://www.dropbox.com/s/fpqq2qw7txbkujq/ACE%20NLP%20Workshop%20-%20Session%20II%20-%20Dec%202%202021%20-%20full%20transcription%20-%20txt2pdf%2012.05.2021%20%20Standard.pdf?dl=1)
+4.  add summarization script
+5.  convert groups of functions to a class object. re-organize code to make it easier to read and understand.
+6.  publish class as a python package to streamline process / reduce overhead, making it easier to use + adopt.
+7.  publish as an executable file with GUI / web service as feasible.
 
 ## I've found x repo / script / concept that I think you should incorporate or collaborate with the author.
 
@@ -415,7 +408,6 @@ Send me a message / start a discussion! Always looking to improve.
     > Collection-independent Automatic Keyword Extractor. In: Pasi G., Piwowarski B., Azzopardi L., Hanbury A. (eds).
     > Advances in Information Retrieval. ECIR 2018 (Grenoble, France. March 26 – 29). Lecture Notes in Computer Science, vol
     > 10772, pp. 806 - 810. pdf
-
 
 ```
 

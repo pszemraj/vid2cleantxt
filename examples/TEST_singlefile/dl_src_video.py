@@ -4,6 +4,15 @@ dl_src_video.py - Download a single file from dropbox.
 link: https://www.dropbox.com/s/61ppfw0dwtw8dct/President%20John%20F.%20Kennedy%27s%20Peace%20Speech.mp4?dl=1
 
 Video originally downloaded from C-SPAN and is public domain.
+
+In case of dropbox server issues, you can find a copy of the audio here:
+
+@web_page{,
+   title = {Commencement Address at American University, Washington, D.C., 10 June 1963 | JFK Library},
+   url = {https://www.jfklibrary.org/asset-viewer/archives/JFKWHA/1963/JFKWHA-190-002/JFKWHA-190-002},
+}
+
+
 """
 import requests
 import os
