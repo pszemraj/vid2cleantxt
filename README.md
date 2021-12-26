@@ -54,7 +54,7 @@ Video, specifically audio, is an inefficient way to convey dense or technical in
 
 ## Example Output
 
-Example output text of a video transcription of [JFK's peace speech](https://youtu.be/0fkKnfk4k40):
+Example output text of a video transcription of JFK's speech on going to the moon:
 
 > Surely the opening vistas of space promise high costs and hardships as well as high reward so it is not surprising that some would have us stay where we are a little longer to rest to wait but this city of question this state of taxes this country of the united states was not built by those who waited and rested but if I were to say my fellow citizens. That we shall send to the moon two hundred and forty thousand miles away from the control station in Houston a giant rocket more than three hundred feet tall the length of this football field made of new metal alloys some of which have not yet been invented capable of standing heat and stresses several times more than have ever been experienced fitted together with a precision better than the. First watch carrying all the equipment needed for propulsion guidance control communications food and survival on an untried mission to an unknown celestial body and then return it safely to earth re entering the atmosphere at speeds of over twenty five thousand miles per hour causing heat about half that on the temperature of the sun almost as hot as it is here to day and do all this. And do all this and do it right and do it first before this dictate is out then we must be so I'm the one who's doing all the work so to get me to stay cool for a minute however I think we're going to do it and I think that we must pay what needs to be paid I don't think we ought to waste any. Money but I think we ought to do the job and this will be done in the decade of the sixty it may be done while some of you are still here at school at this college and university it will be done during the terms of office of some of the people who sit here on this platform but it will be done many years ago the great British explorer garage memory who was to die on mount everist was asked why did he want to climb it the said because it is there well space is there. And we're going to climb it and the moon and the planets are there and new hopes for knowledge and peace are there and therefore as we set sail we ask god's blessing on the most hazardous and dangerous and greatest adventure on which man has ever embarked thank you
 
@@ -86,7 +86,7 @@ By default,
 
 ## Quickstart (aka: how to get the script running)
 
-Essentially, clone the repo, and run `python vid2cleantxt/transcribe.py --input-dir "filepath-to-the-inputs"`. the main arg to pass is `--input-dir` for, well, the inputs. You can get details on all the command line args by running `python vid2cleantxt/transcribe.py`.
+Essentially, clone the repo, and run `python vid2cleantxt/transcribe.py --input-dir "filepath-to-the-inputs"`. the main arg to pass is `--input-dir` for, well, the inputs. You can get details on all the command line args by running `python vid2cleantxt/transcribe.py --help`.
 
 > **Note:** _the first time the code runs on your machine, it will download the pretrained transformers models_ which include wav2vec2 and a scibert model for spell correction. After the first run, it will be cached locally, and you will not need to sit through that again.
 
