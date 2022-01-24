@@ -93,20 +93,22 @@ Essentially, clone the repo, and run `python vid2cleantxt/transcribe.py --input-
 1.  fastest (in bash command line):
 
     1.  `git clone https://github.com/pszemraj/vid2cleantxt.git`
-    2.  `cd vid2cleantxt/`
-    3.  `pip install -r requirements.txt`
-    4.  `python vid2cleantxt/transcribe.py --input-dir "example_JFK_speech/TEST_singlefile"`
-        > in this example, all video and audio files in the repo example "example_JFK_speech/TEST_singlefile" would be transcribed.
+        - add `--depth=1` to above to clone just the current code & objects and **will be faster**
+    3.  `cd vid2cleantxt/`
+    4.  `pip install -r requirements.txt`
+    5.  `python vid2cleantxt/transcribe.py --input-dir "example_JFK_speech/TEST_singlefile"`
+        - in this example*, all video and audio files in the repo example "example_JFK_speech/TEST_singlefile" would be transcribed.
 
 2.  Clone with [github desktop](https://desktop.github.com/)
 
     1.  install requirements.txt either from your IDE prompt or via the command above
     2.  open terminal in the local folder via your IDE or manual
     3.  `python vid2cleantxt/transcribe.py --input-dir "example_JFK_speech/TEST_singlefile"` in said terminal
-
-    > in this example, all video and audio files in "example_JFK_speech/TEST_singlefile" would be transcribed.
+        - in this example*, all video and audio files in "example_JFK_speech/TEST_singlefile" would be transcribed.
 
 3.  If neither of those are convenient, see the next section on how to use Colab (which for most users, would be faster anyway)
+
+> \* the example videos need to be downloaded with the scripts in the relevant dirs, such as `python examples/TEST_singlefile/dl_src_video.py`
 
 ## Notebooks on Colab
 
@@ -116,14 +118,14 @@ Links to Colab Scripts:
 
 1.  Single-File Version (Implements GPU)
     -   Link [here](https://colab.research.google.com/drive/1WfJ1yQn-jtyZsoQXdzXx91FPbLo5t7Mg?usp=sharing)
-    -   This script downloads the video from a public link to one of the JFK videos stored on my Google Drive. As such, no
-        authentication / etc. is required and **this link is recommended for seeing how this pipeline works**.
-    -   The only steps required are checking / adjusting the runtime to a GPU, and _Run All_
+    -   This notebook downloads the video from a public link to one of the JFK videos stored on my Google Drive. As such, no
+        authentication / etc. is required and **is recommended for seeing how this pipeline works**.
+    -   The only steps required are adjusting the runtime to a GPU (if needed), and _Run All_
 2.  Multi-File Version (Implements GPU)
     -   Link [here](https://colab.research.google.com/drive/1qOUkiPMaUZgBTMfCFF-fCRTPCMg1997J?usp=sharing), _note file was updated and posted to the repo July 13, 2021._
-    -   This script connects to the user's google drive to convert a whole folder of videos using Google's Colab Python
+    -   This notebook connects to the user's google drive to convert a whole folder of videos using Google's `colab` Python
         package.
-    -   It **does require the video files to be hosted on the user's drive**, as well as authorization of Colab (it will prompt you and walk you through this)
+    -   _NOTE:_ **does require the video files to be hosted on the user's drive**, as well as authorization of Colab (it will prompt you for this)
 
 If you are new to Colab, it is probably best to read the [Colab Quickstart](https://colab.research.google.com/notebooks/intro.ipynb) first and the below, for info on how to do file I/O etc.
 
@@ -253,9 +255,9 @@ Despite the small amount of errors, the model is still able to recognize the spe
 
 ## How can I improve the performance of the model from a word-error-rate perspective?
 
-if you change the default model by passing `--model "facebook/wav2vec2-large-960h-lv60-self"`from the default `facebook/wav2vec2-base-960h` the model will be considerably more accurate - I defer to facebook for the official stats.
+if you change the default model by passing `--model "facebook/wav2vec2-large-960h-lv60-self"`from the default `facebook/wav2vec2-base-960h` the model will be considerably more accurate (see FAIR repo). In fact, **any wav2vec2 or wavLM model** from the [huggingface hub](https://huggingface.co/models?pipeline_tag=automatic-speech-recognition&sort=downloads) can be used, just pass the model ID string with `--model` when running the script.
 
-You can also train the model, but that requires that you already have a transcription of that person's speech already. As you may find, manual transcription is a bit of a pain and therefore transcripts are rarely provided - hence this repo.
+You can also train your own model, but that requires that you already have a transcription of that person's speech already. As you may find, manual transcription is a bit of a pain and therefore transcripts are rarely provided - hence this repo. If interested see [this notebook](https://github.com/huggingface/notebooks/blob/master/examples/speech_recognition.ipynb)
 
 ## Why use wav2vec2 instead of SpeechRecognition or other transcription methods?
 
