@@ -27,9 +27,7 @@ sys.path.append(dirname(dirname(os.path.abspath(__file__))))
 
 import logging
 
-logging.basicConfig(
-    level=logging.INFO, filename="LOGFILE_vid2cleantxt_transcriber.log"
-)
+logging.basicConfig(level=logging.INFO, filename="LOGFILE_vid2cleantxt_transcriber.log")
 
 import math
 import shutil
@@ -80,7 +78,7 @@ from v2ct_utils import (
 )
 
 
-def load_transcription_objects(hf_id:str):
+def load_transcription_objects(hf_id: str):
     """
     load_transcription_objects - load the transcription objects from huggingface
 
@@ -94,7 +92,6 @@ def load_transcription_objects(hf_id:str):
     model: transformers.Wav2Vec2ForCTC, the model object. For specialised models, this is a specialised object such as HubertForCTC
     """
 
-
     tokenizer = Wav2Vec2Processor.from_pretrained(
         hf_id
     )  # use wav2vec2processor for tokenization always
@@ -104,14 +101,15 @@ def load_transcription_objects(hf_id:str):
         model = WavLMForCTC.from_pretrained(hf_id)
     elif "hubert" in hf_id.lower():
         print(f"Loading hubert model - {hf_id}")
-        model = HubertForCTC.from_pretrained(hf_id) # for example --model "facebook/hubert-large-ls960-ft"
+        model = HubertForCTC.from_pretrained(
+            hf_id
+        )  # for example --model "facebook/hubert-large-ls960-ft"
     else:
         # for example --model "facebook/wav2vec2-large-960h-lv60-self"
         print(f"Loading wav2vec2 model - {hf_id}")
         model = Wav2Vec2ForCTC.from_pretrained(hf_id)
         # TODO: add option for other models (if relevant?)
     return tokenizer, model
-
 
 
 def wav2vec2_islarge(model_obj):
@@ -397,7 +395,8 @@ def get_parser():
         description="Transcribe a directory of videos using wav2vec2"
     )
     parser.add_argument(
-        "-i","--input-dir",
+        "-i",
+        "--input-dir",
         required=True,
         help="path to directory containing video files to be transcribed",
     )
@@ -417,7 +416,8 @@ def get_parser():
         # use case here is if there are so many files that run into CUDA memory issues resulting in a crash
     )
     parser.add_argument(
-        "-v", "--verbose",
+        "-v",
+        "--verbose",
         required=False,
         default=False,
         action="store_true",
@@ -425,7 +425,8 @@ def get_parser():
     )
 
     parser.add_argument(
-        "-m", "--model",
+        "-m",
+        "--model",
         required=False,
         default=None,
         help="huggingface wav2vec2 model name, ex 'facebook/wav2vec2-base-960h'",
@@ -434,7 +435,8 @@ def get_parser():
     )
 
     parser.add_argument(
-        "-cl", "--chunk-length",
+        "-cl",
+        "--chunk-length",
         required=False,
         default=15,  # pass lower value if running out of memory / GPU memory
         type=int,
@@ -472,7 +474,9 @@ if __name__ == "__main__":
     print(f"\nLoading models @ {get_timestamp(True)} - may take some time...")
     print("if RT seems excessive, try --verbose flag or checking logfile")
     # load the model facebook/hubert-large-ls960-ft
-    wav_model = "facebook/hubert-large-ls960-ft" if model_arg is None else model_arg # try "facebook/wav2vec2-base-960h" if crashes
+    wav_model = (
+        "facebook/hubert-large-ls960-ft" if model_arg is None else model_arg
+    )  # try "facebook/wav2vec2-base-960h" if crashes
     tokenizer, model = load_transcription_objects(wav_model)
 
     # load the spellchecker models. suppress outputs as there are way too many

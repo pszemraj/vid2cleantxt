@@ -607,9 +607,7 @@ def spellcorrect_pipeline(
             sentenced = sentenced.replace(key, value)  # fix punctuation
         fin_textlines.append(sentenced)
 
-    fin_textlines = [
-        line.strip() for line in fin_textlines if line.strip()
-    ]
+    fin_textlines = [line.strip() for line in fin_textlines if line.strip()]
     fin_textlines = (
         fin_textlines[0] if linebyline and len(fin_textlines) == 1 else fin_textlines
     )
