@@ -133,6 +133,8 @@ pythonenv*
 .dmypy.json
 dmypy.json
 
+# IDE
+.vscode
 
 # pytype static type analyzer
 .pytype/
