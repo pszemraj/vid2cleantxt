@@ -428,7 +428,7 @@ def get_parser():
         "-m", "--model",
         required=False,
         default=None,
-        help="huggingface wav2vec2 model name, ex 'facebook/wav2vec2-base-96~0h'",
+        help="huggingface wav2vec2 model name, ex 'facebook/wav2vec2-base-960h'",
         # "facebook/wav2vec2-large-960h-lv60-self" is the best model but VERY taxing on the GPU/CPU
         # for wavLM, "patrickvonplaten/wavlm-libri-clean-100h-large" or others
     )
@@ -471,8 +471,8 @@ if __name__ == "__main__":
 
     print(f"\nLoading models @ {get_timestamp(True)} - may take some time...")
     print("if RT seems excessive, try --verbose flag or checking logfile")
-    # load the model
-    wav_model = "facebook/wav2vec2-base-960h" if model_arg is None else model_arg
+    # load the model facebook/hubert-large-ls960-ft
+    wav_model = "facebook/hubert-large-ls960-ft" if model_arg is None else model_arg # try "facebook/wav2vec2-base-960h" if crashes
     tokenizer, model = load_transcription_objects(wav_model)
 
     # load the spellchecker models. suppress outputs as there are way too many
