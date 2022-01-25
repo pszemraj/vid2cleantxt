@@ -180,18 +180,20 @@ def prep_transc_pydub(
     verbose=False,
 ):
     """
-    prep_transc_src - prepares the source video files for transcription by creating audio files and metadata by splitting the video into chunks of specified length (in seconds). Chunks are created in the output directory, and have the same name as the video file, but with the extension .wav.
+    prep_transc_pydub - prepares audio files for transcription using pydub
 
     Parameters
     ----------
-    vid2beconv : str, the name of the video file to be converted (or audio file)
-    len_chunks : int, the length of the audio chunks to be created, by default 20 (seconds)
-    input_directory : str, the path to the video file, by default None, which means the current working directory
-    output_directory : str, the path to the output audio file, by default None, which means the current working directory
-    verbose : bool, optional
-    use_mp : bool, optional, whether to use multiprocessing, by default True
+    _vid2beconv : str, the name of the video file to be converted
+    in_dir : str or Path, the path to the video file directory
+    out_dir : str or Path, the path to the output audio file directory
+    len_chunks : int, optional, by default 15, the length of the audio chunks in seconds
+    verbose : bool, optional, by default False
+        [description], by default False
+
     Returns
     -------
+    list, the list of audio filepaths created
     """
 
     load_path = join(in_dir, _vid2beconv) if in_dir is not None else _vid2beconv
@@ -214,7 +216,7 @@ def prep_transc_pydub(
         pbar.update(1)
     pbar.close()
 
-    print(f"\ncreated audio chunks for wav2vec2 - {get_timestamp()}")
+    print(f"\ncreated audio chunks - {get_timestamp()}")
     if verbose:
         print(f" files saved to {out_dir}")
 
