@@ -80,6 +80,40 @@ from v2ct_utils import (
 )
 
 
+def load_transcription_objects(hf_id:str):
+    """
+    load_transcription_objects - load the transcription objects from huggingface
+
+    Parameters
+    ----------
+    hf_id : str, the id of the model to load on huggingface, for example: "facebook/wav2vec2-base-960h" or "facebook/hubert-large-ls960-ft"
+
+    Returns
+    -------
+    tokenizer : transformers.Wav2Vec2Processor, the tokenizer object
+    model: transformers.Wav2Vec2ForCTC, the model object. For specialised models, this is a specialised object such as HubertForCTC
+    """
+
+
+    tokenizer = Wav2Vec2Processor.from_pretrained(
+        hf_id
+    )  # use wav2vec2processor for tokenization always
+    if "wavlm" in hf_id.lower():
+        # for example --model "patrickvonplaten/wavlm-libri-clean-100h-large"
+        print(f"Loading wavlm model - {hf_id}")
+        model = WavLMForCTC.from_pretrained(hf_id)
+    elif "hubert" in hf_id.lower():
+        print(f"Loading hubert model - {hf_id}")
+        model = HubertForCTC.from_pretrained(hf_id) # for example --model "facebook/hubert-large-ls960-ft"
+    else:
+        # for example --model "facebook/wav2vec2-large-960h-lv60-self"
+        print(f"Loading wav2vec2 model - {hf_id}")
+        model = Wav2Vec2ForCTC.from_pretrained(hf_id)
+        # TODO: add option for other models (if relevant?)
+    return tokenizer, model
+
+
+
 def wav2vec2_islarge(model_obj):
     """
     wav2vec2_check_size - compares the size of the passed model object, and whether
@@ -439,21 +473,7 @@ if __name__ == "__main__":
     print("if RT seems excessive, try --verbose flag or checking logfile")
     # load the model
     wav_model = "facebook/wav2vec2-base-960h" if model_arg is None else model_arg
-    tokenizer = Wav2Vec2Processor.from_pretrained(
-        wav_model
-    )  # use wav2vec2processor for tokenization always
-    if "wavlm" in wav_model.lower():
-        # for example --model "patrickvonplaten/wavlm-libri-clean-100h-large"
-        print(f"Loading wavlm model - {wav_model}")
-        model = WavLMForCTC.from_pretrained(wav_model)
-    elif "hubert" in wav_model.lower():
-        print(f"Loading hubert model - {wav_model}")
-        model = HubertForCTC.from_pretrained(wav_model) # for example --model "facebook/hubert-large-ls960-ft"
-    else:
-        # for example --model "facebook/wav2vec2-large-960h-lv60-self"
-        print(f"Loading wav2vec2 model - {wav_model}")
-        model = Wav2Vec2ForCTC.from_pretrained(wav_model)
-        # TODO: add option for other models (if relevant?)
+    tokenizer, model = load_transcription_objects(wav_model)
 
     # load the spellchecker models. suppress outputs as there are way too many
     orig_out = sys.__stdout__
