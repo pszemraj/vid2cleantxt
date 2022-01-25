@@ -356,7 +356,6 @@ def postprocess_transc(
 def get_parser():
     """
     get_parser - a helper function for the argparse module
-
     Returns: argparse.ArgumentParser object
     """
 
@@ -364,7 +363,7 @@ def get_parser():
         description="Transcribe a directory of videos using wav2vec2"
     )
     parser.add_argument(
-        "--input-dir",
+        "-i","--input-dir",
         required=True,
         help="path to directory containing video files to be transcribed",
     )
@@ -384,7 +383,7 @@ def get_parser():
         # use case here is if there are so many files that run into CUDA memory issues resulting in a crash
     )
     parser.add_argument(
-        "--verbose",
+        "-v", "--verbose",
         required=False,
         default=False,
         action="store_true",
@@ -392,7 +391,7 @@ def get_parser():
     )
 
     parser.add_argument(
-        "--model",
+        "-m", "--model",
         required=False,
         default=None,
         help="huggingface wav2vec2 model name, ex 'facebook/wav2vec2-base-96~0h'",
@@ -401,7 +400,7 @@ def get_parser():
     )
 
     parser.add_argument(
-        "--chunk-length",
+        "-cl", "--chunk-length",
         required=False,
         default=15,  # pass lower value if running out of memory / GPU memory
         type=int,
