@@ -42,6 +42,7 @@ import torch
 from tqdm import tqdm
 import transformers
 from transformers import (
+    HubertForCTC,
     Wav2Vec2Processor,
     Wav2Vec2ForCTC,
     WavLMModel,
@@ -446,6 +447,9 @@ if __name__ == "__main__":
         # for example --model "patrickvonplaten/wavlm-libri-clean-100h-large"
         print(f"Loading wavlm model - {wav_model}")
         model = WavLMForCTC.from_pretrained(wav_model)
+    elif "hubert" in wav_model.lower():
+        print(f"Loading hubert model - {wav_model}")
+        model = HubertForCTC.from_pretrained(wav_model) # for example --model "facebook/hubert-large-ls960-ft"
     else:
         # for example --model "facebook/wav2vec2-large-960h-lv60-self"
         print(f"Loading wav2vec2 model - {wav_model}")
