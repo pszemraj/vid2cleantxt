@@ -35,16 +35,10 @@ from vid2cleantxt.v2ct_utils import (
 )
 from pydub import AudioSegment
 
-# ------------------------------------------------------------------------
-
 
 def get_av_fmts():
     """
     get_audio_video_fmts - returns the audio and video formats supported by the system
-
-    Returns
-    -------
-    supported_fmts : list, all formats supported by vid2cleantxt
     """
     audio_fmt = [".wav", ".mp3", ".m4a", ".flac"]
     video_fmt = [".mp4", ".mov", ".avi", ".mkv", ".ogg", ".webm"]
@@ -58,7 +52,7 @@ def setup_out_dirs(
     m_folder_name="v2clntxt_transc_metadata",
 ):
     """
-    creates output directories for audio2text project
+    setup_out_dirs - creates output directories for audio2text project, if they do not exist
     """
 
     t_path_full = join(directory, t_folder_name)
@@ -73,15 +67,11 @@ def setup_out_dirs(
 
 def check_if_audio(filename):
     """
-    check_if_audio - checks if a file is an audio file
+    check_if_audio - check if a file is an audio file (True/False)
 
     Parameters
     ----------
     filename : str, the name of the file to be checked
-
-    Returns
-    -------
-    bool
     """
     return (
         filename.endswith(".wav")
@@ -92,11 +82,7 @@ def check_if_audio(filename):
 
 def create_metadata_df():
     """
-    create_metadata_df - creates a dataframe to store metadata for each video file transcribed
-
-    Returns
-    -------
-    metadata_df : pd.DataFrame
+    create_metadata_df - creates an empty dataframe to store metadata
     """
     md_colnames = [
         "orig_file",
@@ -189,7 +175,6 @@ def prep_transc_pydub(
     out_dir : str or Path, the path to the output audio file directory
     len_chunks : int, optional, by default 15, the length of the audio chunks in seconds
     verbose : bool, optional, by default False
-        [description], by default False
 
     Returns
     -------
@@ -206,8 +191,7 @@ def prep_transc_pydub(
     pbar = tqdm(total=n_chunks, desc="Creating .wav audio clips")
     preamble = trim_fname(_vid2beconv)
     chunk_fnames = []
-    # split sound in 5-second slices and export
-    slicer = 1000 * len_chunks  # in milliseconds
+    slicer = 1000 * len_chunks  # in milliseconds. slicer = length of each chunk
     for i, chunk in enumerate(sound[::slicer]):
         chunk_name = f"{preamble}_clipaudio_{i}.wav"
         with open(join(out_dir, chunk_name), "wb") as f:
@@ -625,7 +609,7 @@ def spellcorrect_pipeline(
 
     fin_textlines = [
         line.strip() for line in fin_textlines if line.strip()
-    ]  # remove empty lines
+    ]
     fin_textlines = (
         fin_textlines[0] if linebyline and len(fin_textlines) == 1 else fin_textlines
     )
@@ -639,7 +623,6 @@ def spellcorrect_pipeline(
         fin_textlines = [
             line + ".\n" for line in fin_textlines
         ]  # add periods to the end of each line
-    # save the corrected text, my boys
     loc_FIN = "results_SC_pipeline"
     create_folder(join(filepath, loc_FIN))
     final_outname = f"{trim_fname(filename)}_NSC_SBD.txt"
