@@ -86,27 +86,21 @@ By default,
 
 ## Quickstart (aka: how to get the script running)
 
-Essentially, clone the repo, and run `python vid2cleantxt/transcribe.py --input-dir "filepath-to-the-inputs"`. the main arg to pass is `--input-dir` for, well, the inputs. You can get details on all the command line args by running `python vid2cleantxt/transcribe.py --help`.
+Essentially, clone the repo, and run `python vid2cleantxt/transcribe.py --input-dir "filepath-to-the-inputs"`
+
+-   You can get details on all the command line args by running `python vid2cleantxt/transcribe.py --help`.
 
 > **Note:** _the first time the code runs on your machine, it will download the pretrained transformers models_ which include wav2vec2 and a scibert model for spell correction. After the first run, it will be cached locally, and you will not need to sit through that again.
 
-1.  fastest (in bash command line):
+1.  `git clone https://github.com/pszemraj/vid2cleantxt.git`
+    -   add `--depth=1` to above to clone just the current code & objects and **will be faster**
+2.  `cd vid2cleantxt/`
+3.  `pip install -r requirements.txt`
+4.  `python vid2cleantxt/transcribe.py --input-dir "example_JFK_speech/TEST_singlefile"`
+    -   in this example\*, all video and audio files in the repo example "example_JFK_speech/TEST_singlefile" would be transcribed.
 
-    1.  `git clone https://github.com/pszemraj/vid2cleantxt.git`
-        - add `--depth=1` to above to clone just the current code & objects and **will be faster**
-    3.  `cd vid2cleantxt/`
-    4.  `pip install -r requirements.txt`
-    5.  `python vid2cleantxt/transcribe.py --input-dir "example_JFK_speech/TEST_singlefile"`
-        - in this example*, all video and audio files in the repo example "example_JFK_speech/TEST_singlefile" would be transcribed.
-
-2.  Clone with [github desktop](https://desktop.github.com/)
-
-    1.  install requirements.txt either from your IDE prompt or via the command above
-    2.  open terminal in the local folder via your IDE or manual
-    3.  `python vid2cleantxt/transcribe.py --input-dir "example_JFK_speech/TEST_singlefile"` in said terminal
-        - in this example*, all video and audio files in "example_JFK_speech/TEST_singlefile" would be transcribed.
-
-3.  If neither of those are convenient, see the next section on how to use Colab (which for most users, would be faster anyway)
+-   if you are new, you can clone with [github desktop](https://desktop.github.com/)
+-   if neither option works for you, check out the Colab notebooks distributed with this repo.
 
 > \* the example videos need to be downloaded with the scripts in the relevant dirs, such as `python examples/TEST_singlefile/dl_src_video.py`
 
