@@ -96,66 +96,6 @@ def create_metadata_df():
     return pd.DataFrame(columns=md_colnames)
 
 
-def create_audiofile(
-    _vidname,
-    start_time=0,
-    end_time=6969,
-    in_path=None,
-    out_path="",
-    new_filename="",
-):
-    """
-    create_audiofile - takes a video file and creates an audiofile with various parameters. It is currently not used in the main pipeline (i.e., vid2cleantxt)
-    TODO:: remove this function from the repo
-
-    Parameters
-    ----------
-    _vidname : [type], required, the name of the video file to be converted
-    start_time : int, optional, the start time of the video file, by default 0
-    end_time : int, optional, the end time of the video file, by default 6969
-    in_path : str, optional, the path to the video file, by default None
-    out_path : str, optional, the path to the output audio file, by default ""
-    new_filename : str, optional, the name of the output audio file, by default ""
-
-    Returns
-    -------
-    audio_conv_results : dict, the results of the conversion
-    """
-    my_clip = (
-        mp.VideoFileClip(_vidname)
-        if in_path is None
-        else mp.VideoFileClip(join(in_path, _vidname))
-    )
-
-    if end_time == 6969:
-        # if end_time is not specified, use the duration of the video
-        modified_clip = my_clip.subclip(t_start=int(start_time * 60))
-    else:
-        # the user has specified a start and end time
-        modified_clip = my_clip.subclip(
-            t_start=int(start_time * 60), t_end=int(end_time * 60)
-        )
-
-    converted_filename = (
-        new_filename
-        if new_filename != ""
-        else f"vid_{trim_fname(_vidname)}_conv_{get_timestamp()}.wav"
-    )
-    if out_path == "":
-        # if no output path is specified, use the current working directory
-        modified_clip.audio.write_audiofile(converted_filename)
-    else:
-        modified_clip.audio.write_audiofile(join(out_path, converted_filename))
-
-    audio_conv_results = {
-        "output_filename": converted_filename,
-        "output_folder": out_path,
-        "clip_length": modified_clip.duration,
-    }
-
-    return audio_conv_results
-
-
 def prep_transc_pydub(
     _vid2beconv,
     in_dir,
