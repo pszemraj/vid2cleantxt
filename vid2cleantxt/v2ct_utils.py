@@ -13,8 +13,7 @@ import shutil
 from datetime import datetime
 from io import StringIO
 from os import listdir
-from os.path import basename
-from os.path import dirname, isfile, join
+from os.path import dirname, isfile, join, basename
 
 import GPUtil as GPU
 import humanize

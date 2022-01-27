@@ -3,7 +3,6 @@
     general helper functions are in v2ct_utils.py
 """
 import os
-from posixpath import basename
 import sys
 from os.path import dirname, join
 
@@ -15,7 +14,6 @@ import math
 import pprint as pp
 import re
 import sys
-import time
 from datetime import datetime
 
 import moviepy.editor as mp

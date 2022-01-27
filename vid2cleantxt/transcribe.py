@@ -37,14 +37,12 @@ import librosa
 import pandas as pd
 import argparse
 import torch
-from tqdm import tqdm
+from tqdm.auto import tqdm
 import transformers
 from transformers import (
     HubertForCTC,
     Wav2Vec2Processor,
     Wav2Vec2ForCTC,
-    WavLMModel,
-    WavLMConfig,
     WavLMForCTC,
 )
 import warnings
