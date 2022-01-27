@@ -183,7 +183,7 @@ Some examples from my own usage are illustrated below from both packages.
 
 ### Text Summarization
 
-Several options are available on the [HuggingFace website](https://huggingface.co/models?pipeline_tag=summarization). I have personally found [Google's pegasus](https://huggingface.co/google/pegasus-xsum) to be most effective for "lecture-esque" video conversion.
+Several options are available on the [HuggingFace website](https://huggingface.co/models?pipeline_tag=summarization). In an effort to create a better, more general model for summarization, I have fine-tuned [this model](https://huggingface.co/pszemraj/bigbird-pegasus-large-K-booksum) on a [book summary dataset](https://arxiv.org/abs/2105.08209) which I find provides the best results for "lecture-esque" video conversion. I wrote a little bit about this and compare it to other models _WARNING: satire/sarcasm inside_ [here](https://www.dropbox.com/s/fsz9u4yk3hf9fak/A%20new%20benchmark%20for%20the%20generalizability%20of%20summarization%20models.pdf?dl=0).
 
 I personally use several similar methods in combination with the transcription script, however it isn't in a place to be officially posted yet. It will be posted to a public repo on this account when ready. For now, you can check out [this Colab notebook](https://colab.research.google.com/drive/1BSIsYHH0w5pdVxqo_nK5vHgMeBiJKKGm?usp=sharing) using the same example text that is output when the JFK speeches are transcribed.
 
