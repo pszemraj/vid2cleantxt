@@ -116,10 +116,9 @@ Links to Colab Scripts:
         authentication / etc. is required and **is recommended for seeing how this pipeline works**.
     -   The only steps required are adjusting the runtime to a GPU (if needed), and _Run All_
 2.  Multi-File Version (Implements GPU)
-    -   Link [here](https://colab.research.google.com/drive/1qOUkiPMaUZgBTMfCFF-fCRTPCMg1997J?usp=sharing), _note file was updated and posted to the repo July 13, 2021._
-    -   This notebook connects to the user's google drive to convert a whole folder of videos using Google's `colab` Python
-        package.
-    -   _NOTE:_ **does require the video files to be hosted on the user's drive**, as well as authorization of Colab (it will prompt you for this)
+    -   Link [here](https://colab.research.google.com/gist/pszemraj/a88ff352258f596d11027689653124ed/vid2cleantext-multi.ipynb), updated _Jan 27th 2022_. The example here is MIT OpenCourseWare Lecture Videos (see `examples/` for citations).
+    -   This notebook connects to the user's google drive to convert a whole folder of videos. The input can be either Colab or URL to a `.zip` file of media. Outputs are stored in the user's Google Drive and optionally downloaded.
+    -   _NOTE:_ this notebook does require Drive authorization. Google's instructions for this have improved as of late, and it will pop up a window for confirmation etc.
 
 If you are new to Colab, it is probably best to read the [Colab Quickstart](https://colab.research.google.com/notebooks/intro.ipynb) first and the below, for info on how to do file I/O etc.
 
