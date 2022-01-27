@@ -386,7 +386,7 @@ def init_neuspell(verbose=False):
     -------
     checker : neuspell.SpellChecker object
     """
-    # TODO: check if options for different languages with Neuspell
+    # TODO: add alternatives for non-English
     if verbose:
         checker = neuspell.SclstmbertChecker()
         checker.from_pretrained()

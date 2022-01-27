@@ -106,7 +106,6 @@ def load_transcription_objects(hf_id: str):
         # for example --model "facebook/wav2vec2-large-960h-lv60-self"
         print(f"Loading wav2vec2 model - {hf_id}")
         model = Wav2Vec2ForCTC.from_pretrained(hf_id)
-        # TODO: add option for other models (if relevant?)
     return tokenizer, model
 
 
@@ -428,7 +427,7 @@ def get_parser():
         required=False,
         default=None,
         help="huggingface wav2vec2 model name, ex 'facebook/wav2vec2-base-960h'",
-        # "facebook/wav2vec2-large-960h-lv60-self" is the best model but VERY taxing on the GPU/CPU
+        # "facebook/wav2vec2-large-960h-lv60-self" is one of the best models but taxing on the GPU/CPU
         # for wavLM, "patrickvonplaten/wavlm-libri-clean-100h-large" or others
     )
 
@@ -461,7 +460,7 @@ if __name__ == "__main__":
     args = get_parser().parse_args()
     input_src = str(args.input_dir)
     directory = os.path.abspath(input_src)
-    # TODO: add output directory
+    # TODO: add output directory from user arg
     is_verbose = args.verbose
     move_comp = args.move_input_vids
     chunk_length = int(args.chunk_length)
