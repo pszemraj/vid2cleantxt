@@ -278,6 +278,7 @@ _`*` these statements reflect the assessment completed around project inception 
 
 A _rough_ timeline of what has been going on in the repo:
 
+-   Jan 2022 - add huBERT support, abstract the boilerplate out of Colab Notebooks. Starting work on the PDF generation w/ results.
 -   Dec 2021 - greatly improved runtime of the script, and added more features (command line, docstring, etc.)
 -   Sept-Oct 2021: Fixing bugs, formatting code.
 -   July 12, 2021 - sync work from Colab notebooks: add CUDA support for pytorch in the `.py` versions, added Neuspell as a spell checker. General organization and formatting improvements.
@@ -300,7 +301,7 @@ A _rough_ timeline of what has been going on in the repo:
 
 ## I've found x repo / script / concept that I think you should incorporate or collaborate with the author.
 
-Send me a message / start a discussion! Always looking to improve.
+Send me a message / start a discussion! Always looking to improve. Or create an issue, that works too.
 
 ## Citations
 
