@@ -311,6 +311,23 @@ Send me a message / start a discussion! Always looking to improve. Or create an 
 
 -   repo [link](https://github.com/pytorch/fairseq)
 
+**HuBERT (fairseq)**
+
+@article{Hsu2021,
+   author = {Wei Ning Hsu and Benjamin Bolte and Yao Hung Hubert Tsai and Kushal Lakhotia and Ruslan Salakhutdinov and Abdelrahman Mohamed},
+   doi = {10.1109/TASLP.2021.3122291},
+   issn = {23299304},
+   journal = {IEEE/ACM Transactions on Audio Speech and Language Processing},
+   keywords = {BERT,Self-supervised learning},
+   month = {6},
+   pages = {3451-3460},
+   publisher = {Institute of Electrical and Electronics Engineers Inc.},
+   title = {HuBERT: Self-Supervised Speech Representation Learning by Masked Prediction of Hidden Units},
+   volume = {29},
+   url = {https://arxiv.org/abs/2106.07447v1},
+   year = {2021},
+}
+
 **MoviePy**
 
 -   [link](https://github.com/Zulko/moviepy) to repo as no citation info given
