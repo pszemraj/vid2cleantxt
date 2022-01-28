@@ -133,6 +133,8 @@ pythonenv*
 .dmypy.json
 dmypy.json
 
+# IDE
+.vscode
 
 # pytype static type analyzer
 .pytype/
@@ -155,3 +157,9 @@ scratch
 notebooks
 *audio_chunks*
 *test2*
+
+# media files
+*.mp4
+*.wav
+*.mov
+*.mp3

@@ -27,9 +27,7 @@ sys.path.append(dirname(dirname(os.path.abspath(__file__))))
 
 import logging
 
-logging.basicConfig(
-    level=logging.INFO, filename="LOGFILE_vid2cleantxt_transcriber.log"
-)
+logging.basicConfig(level=logging.INFO, filename="LOGFILE_vid2cleantxt_transcriber.log")
 
 import math
 import shutil
@@ -39,13 +37,12 @@ import librosa
 import pandas as pd
 import argparse
 import torch
-from tqdm import tqdm
+from tqdm.auto import tqdm
 import transformers
 from transformers import (
+    HubertForCTC,
     Wav2Vec2Processor,
     Wav2Vec2ForCTC,
-    WavLMModel,
-    WavLMConfig,
     WavLMForCTC,
 )
 import warnings
@@ -77,6 +74,39 @@ from v2ct_utils import (
     torch_validate_cuda,
     get_timestamp,
 )
+
+
+def load_transcription_objects(hf_id: str):
+    """
+    load_transcription_objects - load the transcription objects from huggingface
+
+    Parameters
+    ----------
+    hf_id : str, the id of the model to load on huggingface, for example: "facebook/wav2vec2-base-960h" or "facebook/hubert-large-ls960-ft"
+
+    Returns
+    -------
+    tokenizer : transformers.Wav2Vec2Processor, the tokenizer object
+    model: transformers.Wav2Vec2ForCTC, the model object. For specialised models, this is a specialised object such as HubertForCTC
+    """
+
+    tokenizer = Wav2Vec2Processor.from_pretrained(
+        hf_id
+    )  # use wav2vec2processor for tokenization always
+    if "wavlm" in hf_id.lower():
+        # for example --model "patrickvonplaten/wavlm-libri-clean-100h-large"
+        print(f"Loading wavlm model - {hf_id}")
+        model = WavLMForCTC.from_pretrained(hf_id)
+    elif "hubert" in hf_id.lower():
+        print(f"Loading hubert model - {hf_id}")
+        model = HubertForCTC.from_pretrained(
+            hf_id
+        )  # for example --model "facebook/hubert-large-ls960-ft"
+    else:
+        # for example --model "facebook/wav2vec2-large-960h-lv60-self"
+        print(f"Loading wav2vec2 model - {hf_id}")
+        model = Wav2Vec2ForCTC.from_pretrained(hf_id)
+    return tokenizer, model
 
 
 def wav2vec2_islarge(model_obj):
@@ -355,7 +385,6 @@ def postprocess_transc(
 def get_parser():
     """
     get_parser - a helper function for the argparse module
-
     Returns: argparse.ArgumentParser object
     """
 
@@ -363,6 +392,7 @@ def get_parser():
         description="Transcribe a directory of videos using wav2vec2"
     )
     parser.add_argument(
+        "-i",
         "--input-dir",
         required=True,
         help="path to directory containing video files to be transcribed",
@@ -383,6 +413,7 @@ def get_parser():
         # use case here is if there are so many files that run into CUDA memory issues resulting in a crash
     )
     parser.add_argument(
+        "-v",
         "--verbose",
         required=False,
         default=False,
@@ -391,15 +422,17 @@ def get_parser():
     )
 
     parser.add_argument(
+        "-m",
         "--model",
         required=False,
         default=None,
-        help="huggingface wav2vec2 model name, ex 'facebook/wav2vec2-base-96~0h'",
-        # "facebook/wav2vec2-large-960h-lv60-self" is the best model but VERY taxing on the GPU/CPU
+        help="huggingface wav2vec2 model name, ex 'facebook/wav2vec2-base-960h'",
+        # "facebook/wav2vec2-large-960h-lv60-self" is one of the best models but taxing on the GPU/CPU
         # for wavLM, "patrickvonplaten/wavlm-libri-clean-100h-large" or others
     )
 
     parser.add_argument(
+        "-cl",
         "--chunk-length",
         required=False,
         default=15,  # pass lower value if running out of memory / GPU memory
@@ -427,7 +460,7 @@ if __name__ == "__main__":
     args = get_parser().parse_args()
     input_src = str(args.input_dir)
     directory = os.path.abspath(input_src)
-    # TODO: add output directory
+    # TODO: add output directory from user arg
     is_verbose = args.verbose
     move_comp = args.move_input_vids
     chunk_length = int(args.chunk_length)
@@ -437,20 +470,11 @@ if __name__ == "__main__":
 
     print(f"\nLoading models @ {get_timestamp(True)} - may take some time...")
     print("if RT seems excessive, try --verbose flag or checking logfile")
-    # load the model
-    wav_model = "facebook/wav2vec2-base-960h" if model_arg is None else model_arg
-    tokenizer = Wav2Vec2Processor.from_pretrained(
-        wav_model
-    )  # use wav2vec2processor for tokenization always
-    if "wavlm" in wav_model.lower():
-        # for example --model "patrickvonplaten/wavlm-libri-clean-100h-large"
-        print(f"Loading wavlm model - {wav_model}")
-        model = WavLMForCTC.from_pretrained(wav_model)
-    else:
-        # for example --model "facebook/wav2vec2-large-960h-lv60-self"
-        print(f"Loading wav2vec2 model - {wav_model}")
-        model = Wav2Vec2ForCTC.from_pretrained(wav_model)
-        # TODO: add option for other models (if relevant?)
+    # load the model facebook/hubert-large-ls960-ft
+    wav_model = (
+        "facebook/hubert-large-ls960-ft" if model_arg is None else model_arg
+    )  # try "facebook/wav2vec2-base-960h" if crashes
+    tokenizer, model = load_transcription_objects(wav_model)
 
     # load the spellchecker models. suppress outputs as there are way too many
     orig_out = sys.__stdout__

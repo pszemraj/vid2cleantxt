@@ -3,7 +3,6 @@
     general helper functions are in v2ct_utils.py
 """
 import os
-from posixpath import basename
 import sys
 from os.path import dirname, join
 
@@ -15,7 +14,6 @@ import math
 import pprint as pp
 import re
 import sys
-import time
 from datetime import datetime
 
 import moviepy.editor as mp
@@ -35,16 +33,10 @@ from vid2cleantxt.v2ct_utils import (
 )
 from pydub import AudioSegment
 
-# ------------------------------------------------------------------------
-
 
 def get_av_fmts():
     """
     get_audio_video_fmts - returns the audio and video formats supported by the system
-
-    Returns
-    -------
-    supported_fmts : list, all formats supported by vid2cleantxt
     """
     audio_fmt = [".wav", ".mp3", ".m4a", ".flac"]
     video_fmt = [".mp4", ".mov", ".avi", ".mkv", ".ogg", ".webm"]
@@ -58,7 +50,7 @@ def setup_out_dirs(
     m_folder_name="v2clntxt_transc_metadata",
 ):
     """
-    creates output directories for audio2text project
+    setup_out_dirs - creates output directories for audio2text project, if they do not exist
     """
 
     t_path_full = join(directory, t_folder_name)
@@ -73,15 +65,11 @@ def setup_out_dirs(
 
 def check_if_audio(filename):
     """
-    check_if_audio - checks if a file is an audio file
+    check_if_audio - check if a file is an audio file (True/False)
 
     Parameters
     ----------
     filename : str, the name of the file to be checked
-
-    Returns
-    -------
-    bool
     """
     return (
         filename.endswith(".wav")
@@ -92,11 +80,7 @@ def check_if_audio(filename):
 
 def create_metadata_df():
     """
-    create_metadata_df - creates a dataframe to store metadata for each video file transcribed
-
-    Returns
-    -------
-    metadata_df : pd.DataFrame
+    create_metadata_df - creates an empty dataframe to store metadata
     """
     md_colnames = [
         "orig_file",
@@ -112,66 +96,6 @@ def create_metadata_df():
     return pd.DataFrame(columns=md_colnames)
 
 
-def create_audiofile(
-    _vidname,
-    start_time=0,
-    end_time=6969,
-    in_path=None,
-    out_path="",
-    new_filename="",
-):
-    """
-    create_audiofile - takes a video file and creates an audiofile with various parameters. It is currently not used in the main pipeline (i.e., vid2cleantxt)
-    TODO:: remove this function from the repo
-
-    Parameters
-    ----------
-    _vidname : [type], required, the name of the video file to be converted
-    start_time : int, optional, the start time of the video file, by default 0
-    end_time : int, optional, the end time of the video file, by default 6969
-    in_path : str, optional, the path to the video file, by default None
-    out_path : str, optional, the path to the output audio file, by default ""
-    new_filename : str, optional, the name of the output audio file, by default ""
-
-    Returns
-    -------
-    audio_conv_results : dict, the results of the conversion
-    """
-    my_clip = (
-        mp.VideoFileClip(_vidname)
-        if in_path is None
-        else mp.VideoFileClip(join(in_path, _vidname))
-    )
-
-    if end_time == 6969:
-        # if end_time is not specified, use the duration of the video
-        modified_clip = my_clip.subclip(t_start=int(start_time * 60))
-    else:
-        # the user has specified a start and end time
-        modified_clip = my_clip.subclip(
-            t_start=int(start_time * 60), t_end=int(end_time * 60)
-        )
-
-    converted_filename = (
-        new_filename
-        if new_filename != ""
-        else f"vid_{trim_fname(_vidname)}_conv_{get_timestamp()}.wav"
-    )
-    if out_path == "":
-        # if no output path is specified, use the current working directory
-        modified_clip.audio.write_audiofile(converted_filename)
-    else:
-        modified_clip.audio.write_audiofile(join(out_path, converted_filename))
-
-    audio_conv_results = {
-        "output_filename": converted_filename,
-        "output_folder": out_path,
-        "clip_length": modified_clip.duration,
-    }
-
-    return audio_conv_results
-
-
 def prep_transc_pydub(
     _vid2beconv,
     in_dir,
@@ -180,18 +104,19 @@ def prep_transc_pydub(
     verbose=False,
 ):
     """
-    prep_transc_src - prepares the source video files for transcription by creating audio files and metadata by splitting the video into chunks of specified length (in seconds). Chunks are created in the output directory, and have the same name as the video file, but with the extension .wav.
+    prep_transc_pydub - prepares audio files for transcription using pydub
 
     Parameters
     ----------
-    vid2beconv : str, the name of the video file to be converted (or audio file)
-    len_chunks : int, the length of the audio chunks to be created, by default 20 (seconds)
-    input_directory : str, the path to the video file, by default None, which means the current working directory
-    output_directory : str, the path to the output audio file, by default None, which means the current working directory
-    verbose : bool, optional
-    use_mp : bool, optional, whether to use multiprocessing, by default True
+    _vid2beconv : str, the name of the video file to be converted
+    in_dir : str or Path, the path to the video file directory
+    out_dir : str or Path, the path to the output audio file directory
+    len_chunks : int, optional, by default 15, the length of the audio chunks in seconds
+    verbose : bool, optional, by default False
+
     Returns
     -------
+    list, the list of audio filepaths created
     """
 
     load_path = join(in_dir, _vid2beconv) if in_dir is not None else _vid2beconv
@@ -204,8 +129,7 @@ def prep_transc_pydub(
     pbar = tqdm(total=n_chunks, desc="Creating .wav audio clips")
     preamble = trim_fname(_vid2beconv)
     chunk_fnames = []
-    # split sound in 5-second slices and export
-    slicer = 1000 * len_chunks  # in milliseconds
+    slicer = 1000 * len_chunks  # in milliseconds. slicer = length of each chunk
     for i, chunk in enumerate(sound[::slicer]):
         chunk_name = f"{preamble}_clipaudio_{i}.wav"
         with open(join(out_dir, chunk_name), "wb") as f:
@@ -214,7 +138,7 @@ def prep_transc_pydub(
         pbar.update(1)
     pbar.close()
 
-    print(f"\ncreated audio chunks for wav2vec2 - {get_timestamp()}")
+    print(f"\ncreated audio chunks - {get_timestamp()}")
     if verbose:
         print(f" files saved to {out_dir}")
 
@@ -462,7 +386,7 @@ def init_neuspell(verbose=False):
     -------
     checker : neuspell.SpellChecker object
     """
-    # TODO: check if options for different languages with Neuspell
+    # TODO: add alternatives for non-English
     if verbose:
         checker = neuspell.SclstmbertChecker()
         checker.from_pretrained()
@@ -621,9 +545,7 @@ def spellcorrect_pipeline(
             sentenced = sentenced.replace(key, value)  # fix punctuation
         fin_textlines.append(sentenced)
 
-    fin_textlines = [
-        line.strip() for line in fin_textlines if line.strip()
-    ]  # remove empty lines
+    fin_textlines = [line.strip() for line in fin_textlines if line.strip()]
     fin_textlines = (
         fin_textlines[0] if linebyline and len(fin_textlines) == 1 else fin_textlines
     )
@@ -637,7 +559,6 @@ def spellcorrect_pipeline(
         fin_textlines = [
             line + ".\n" for line in fin_textlines
         ]  # add periods to the end of each line
-    # save the corrected text, my boys
     loc_FIN = "results_SC_pipeline"
     create_folder(join(filepath, loc_FIN))
     final_outname = f"{trim_fname(filename)}_NSC_SBD.txt"

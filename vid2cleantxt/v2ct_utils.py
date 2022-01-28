@@ -13,8 +13,7 @@ import shutil
 from datetime import datetime
 from io import StringIO
 from os import listdir
-from os.path import basename
-from os.path import dirname, isfile, join
+from os.path import dirname, isfile, join, basename
 
 import GPUtil as GPU
 import humanize
@@ -155,6 +154,7 @@ def create_folder(new_path):
 
 class NullIO(StringIO):
     """NullIO - used to redirect system output for things that print a lot to console"""
+
     def write(self, txt):
         pass
 
@@ -189,7 +189,10 @@ def move2completed(from_dir, filename, new_folder="completed", verbose=False):
         print(e)
 
 
-def cleantxt_wrap(ugly_text, lang="en", ):
+def cleantxt_wrap(
+    ugly_text,
+    lang="en",
+):
     """
     cleantxt_wrap - a wrapper for the clean() function from the cleantext module
 

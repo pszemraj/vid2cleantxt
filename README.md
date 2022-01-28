@@ -4,7 +4,7 @@
 
 **vid2cleantxt**: a [transformers-based](https://huggingface.co/facebook/wav2vec2-large-960h-lv60-self) pipeline for turning heavily speech-based video files into clean, readable text from the audio.
 
-TL;DR check out [this Colab script](https://colab.research.google.com/drive/1WfJ1yQn-jtyZsoQXdzXx91FPbLo5t7Mg?usp=sharing) to see a transcription and keyword extraction of a speech by John F. Kennedy by simply running all cells.
+TL;DR check out [this Colab script](https://colab.research.google.com/gist/pszemraj/4183c4b39bf718b54de9dbf2df499cd9/vid2cleantext-single-demo.ipynb) to see a transcription and keyword extraction of a speech by John F. Kennedy by simply running all cells.
 
 ---
 
@@ -54,11 +54,18 @@ Video, specifically audio, is an inefficient way to convey dense or technical in
 
 ## Example Output
 
-Example output text of a video transcription of JFK's speech on going to the moon:
+Example output text of a video transcription of [JFK's speech on going to the moon](https://www.c-span.org/classroom/document/?7986):
 
-> Surely the opening vistas of space promise high costs and hardships as well as high reward so it is not surprising that some would have us stay where we are a little longer to rest to wait but this city of question this state of taxes this country of the united states was not built by those who waited and rested but if I were to say my fellow citizens. That we shall send to the moon two hundred and forty thousand miles away from the control station in Houston a giant rocket more than three hundred feet tall the length of this football field made of new metal alloys some of which have not yet been invented capable of standing heat and stresses several times more than have ever been experienced fitted together with a precision better than the. First watch carrying all the equipment needed for propulsion guidance control communications food and survival on an untried mission to an unknown celestial body and then return it safely to earth re entering the atmosphere at speeds of over twenty five thousand miles per hour causing heat about half that on the temperature of the sun almost as hot as it is here to day and do all this. And do all this and do it right and do it first before this dictate is out then we must be so I'm the one who's doing all the work so to get me to stay cool for a minute however I think we're going to do it and I think that we must pay what needs to be paid I don't think we ought to waste any. Money but I think we ought to do the job and this will be done in the decade of the sixty it may be done while some of you are still here at school at this college and university it will be done during the terms of office of some of the people who sit here on this platform but it will be done many years ago the great British explorer garage memory who was to die on mount everist was asked why did he want to climb it the said because it is there well space is there. And we're going to climb it and the moon and the planets are there and new hopes for knowledge and peace are there and therefore as we set sail we ask god's blessing on the most hazardous and dangerous and greatest adventure on which man has ever embarked thank you
 
-See the examples folder for more detail / full transcript.
+https://user-images.githubusercontent.com/74869040/151491511-7486c34b-d1ed-4619-9902-914996e85125.mp4
+
+
+**vid2cleantxt output:**
+
+
+> Now look into space to the moon and to the planets beyond and we have vowed that we shall not see it governed by a hostile flag of conquest but. By a banner of freedom and peace we have vowed that we shall not see space filled with weapons of man's destruction but with instruments of knowledge and understanding yet the vow. S of this nation can only be fulfilled if we in this nation are first and therefore we intend to be first. In short our leadership in science and industry our hopes for peace and security our obligations to ourselves as well as others all require. Us to make this effort to solve these mysteries to solve them for the good of all men and to become the world's leading space fearing nationwide set sail on this new sea. Because there is new knowledge to be gained and new rights to be won and they must be won and used for the progress of all before for space science like nuclear science and all techniques. Logo has no conscience of its own whether it will become a force for good or ill depends on man and only if the united states occupies a position of pre eminence. Can we help decide whether this new ocean will be a sea of peace or a new terrifying theatre of war I do not say that we should or will go on. ... (truncated for brevity)
+
+See the [demo notebook](https://colab.research.google.com/gist/pszemraj/4183c4b39bf718b54de9dbf2df499cd9/vid2cleantext-single-demo.ipynb) for the full text output.
 
 ## Pipeline Intro
 
@@ -86,27 +93,21 @@ By default,
 
 ## Quickstart (aka: how to get the script running)
 
-Essentially, clone the repo, and run `python vid2cleantxt/transcribe.py --input-dir "filepath-to-the-inputs"`. the main arg to pass is `--input-dir` for, well, the inputs. You can get details on all the command line args by running `python vid2cleantxt/transcribe.py --help`.
+Essentially, clone the repo, and run `python vid2cleantxt/transcribe.py --input-dir "filepath-to-the-inputs"`
+
+-   You can get details on all the command line args by running `python vid2cleantxt/transcribe.py --help`.
 
 > **Note:** _the first time the code runs on your machine, it will download the pretrained transformers models_ which include wav2vec2 and a scibert model for spell correction. After the first run, it will be cached locally, and you will not need to sit through that again.
 
-1.  fastest (in bash command line):
+1.  `git clone https://github.com/pszemraj/vid2cleantxt.git`
+    -   add `--depth=1` to above to clone just the current code & objects and **will be faster**
+2.  `cd vid2cleantxt/`
+3.  `pip install -r requirements.txt`
+4.  `python vid2cleantxt/transcribe.py --input-dir "example_JFK_speech/TEST_singlefile"`
+    -   in this example\*, all video and audio files in the repo example "example_JFK_speech/TEST_singlefile" would be transcribed.
 
-    1.  `git clone https://github.com/pszemraj/vid2cleantxt.git`
-        - add `--depth=1` to above to clone just the current code & objects and **will be faster**
-    3.  `cd vid2cleantxt/`
-    4.  `pip install -r requirements.txt`
-    5.  `python vid2cleantxt/transcribe.py --input-dir "example_JFK_speech/TEST_singlefile"`
-        - in this example*, all video and audio files in the repo example "example_JFK_speech/TEST_singlefile" would be transcribed.
-
-2.  Clone with [github desktop](https://desktop.github.com/)
-
-    1.  install requirements.txt either from your IDE prompt or via the command above
-    2.  open terminal in the local folder via your IDE or manual
-    3.  `python vid2cleantxt/transcribe.py --input-dir "example_JFK_speech/TEST_singlefile"` in said terminal
-        - in this example*, all video and audio files in "example_JFK_speech/TEST_singlefile" would be transcribed.
-
-3.  If neither of those are convenient, see the next section on how to use Colab (which for most users, would be faster anyway)
+-   if you are new, you can clone with [github desktop](https://desktop.github.com/)
+-   if neither option works for you, check out the Colab notebooks distributed with this repo.
 
 > \* the example videos need to be downloaded with the scripts in the relevant dirs, such as `python examples/TEST_singlefile/dl_src_video.py`
 
@@ -117,15 +118,13 @@ Notebook versions are available on Google Colab, because they offer free GPUs wh
 Links to Colab Scripts:
 
 1.  Single-File Version (Implements GPU)
-    -   Link [here](https://colab.research.google.com/drive/1WfJ1yQn-jtyZsoQXdzXx91FPbLo5t7Mg?usp=sharing)
-    -   This notebook downloads the video from a public link to one of the JFK videos stored on my Google Drive. As such, no
-        authentication / etc. is required and **is recommended for seeing how this pipeline works**.
-    -   The only steps required are adjusting the runtime to a GPU (if needed), and _Run All_
+    -   Link [here](https://colab.research.google.com/gist/pszemraj/4183c4b39bf718b54de9dbf2df499cd9/vid2cleantext-single-demo.ipynb), updated _Jan 28th 2022_.
+    -   This notebook downloads a video of JFK's "Moon Speech" (originally downloaded from C-SPAN) and transcribes it, printing and/or optionally downloading the output. No authentication etc required.
+    -   This **is the recommended link for seeing how this pipeline works**. Only work involved is running all cells.
 2.  Multi-File Version (Implements GPU)
-    -   Link [here](https://colab.research.google.com/drive/1qOUkiPMaUZgBTMfCFF-fCRTPCMg1997J?usp=sharing), _note file was updated and posted to the repo July 13, 2021._
-    -   This notebook connects to the user's google drive to convert a whole folder of videos using Google's `colab` Python
-        package.
-    -   _NOTE:_ **does require the video files to be hosted on the user's drive**, as well as authorization of Colab (it will prompt you for this)
+    -   Link [here](https://colab.research.google.com/gist/pszemraj/a88ff352258f596d11027689653124ed/vid2cleantext-multi.ipynb), updated _Jan 27th 2022_. The example here is MIT OpenCourseWare Lecture Videos (see `examples/` for citations).
+    -   This notebook connects to the user's google drive to convert a whole folder of videos. The input can be either Colab or URL to a `.zip` file of media. Outputs are stored in the user's Google Drive and optionally downloaded.
+    -   _NOTE:_ this notebook does require Drive authorization. Google's instructions for this have improved as of late, and it will pop up a window for confirmation etc.
 
 If you are new to Colab, it is probably best to read the [Colab Quickstart](https://colab.research.google.com/notebooks/intro.ipynb) first and the below, for info on how to do file I/O etc.
 
@@ -190,7 +189,7 @@ Some examples from my own usage are illustrated below from both packages.
 
 ### Text Summarization
 
-Several options are available on the [HuggingFace website](https://huggingface.co/models?pipeline_tag=summarization). I have personally found [Google's pegasus](https://huggingface.co/google/pegasus-xsum) to be most effective for "lecture-esque" video conversion.
+Several options are available on the [HuggingFace website](https://huggingface.co/models?pipeline_tag=summarization). In an effort to create a better, more general model for summarization, I have fine-tuned [this model](https://huggingface.co/pszemraj/bigbird-pegasus-large-K-booksum) on a [book summary dataset](https://arxiv.org/abs/2105.08209) which I find provides the best results for "lecture-esque" video conversion. I wrote a little bit about this and compare it to other models _WARNING: satire/sarcasm inside_ [here](https://www.dropbox.com/s/fsz9u4yk3hf9fak/A%20new%20benchmark%20for%20the%20generalizability%20of%20summarization%20models.pdf?dl=0).
 
 I personally use several similar methods in combination with the transcription script, however it isn't in a place to be officially posted yet. It will be posted to a public repo on this account when ready. For now, you can check out [this Colab notebook](https://colab.research.google.com/drive/1BSIsYHH0w5pdVxqo_nK5vHgMeBiJKKGm?usp=sharing) using the same example text that is output when the JFK speeches are transcribed.
 
@@ -243,6 +242,7 @@ Upon cloning the repo, run the command `pip install -r requirements.txt` in a te
 
 -   _Note: the github link in the reqs above downloads the spaCy model `en_core_web_sm` as part of the setup/installation process so you don't have to manually type `python -m spacy download en_core_web_sm` into the terminal to be able to run the code. More on this is described on spaCy's website [here](https://spacy.io/usage/models#production)_
 
+If you encounter warnings/errors that mention ffmpeg, please download the latest version of FFMPEG from their website [here](https://www.ffmpeg.org/download.html) and ensure it is added to PATH.
 ## My computer crashes once it starts running the wav2vec2 model:
 
 Try passing a lower `--chunk-len <INT>` when calling `vid2cleantxt/transcribe.py`. Until you get to really small intervals (say &lt; 8 seconds) each audio chunk can be treated as approximately independent as they are different sentences.
@@ -267,62 +267,10 @@ Also, because it's an API you can't train it even if you wanted to, you have to 
 
 _`*` these statements reflect the assessment completed around project inception about early 2021._
 
-# Example
+# Examples
 
-Transcription of Public Domain Speeches from President John F. Kennedy. This below was given at Rice University, and uses the model `facebook/wav2vec2-large-960h-lv60-self`.
-
-## Result
-
-> Surely the opening vistas of space promise high costs and hardships as well as high reward so it is not surprising that some would have us stay where we are a little long. To rest to wait but this city of question this state of taxes this country of the united states was not built by those who waited and rested but if I were to say my fellow citizens. That we shall send to the moon two hundred and forty thousand miles away from the control station in Houston a giant rocket more than three hundred feet tall the length of this football field. Made of new metal alloys some of which have not yet been invented capable of standing heat and stresses several times more than have ever been experienced fitted together with a precision better than the. Itself watch carrying all the equipment needed for propulsion guidance control communications food and survival on an untried mission to an unknown celestial body and then. Turn it safely to earth re entering the atmosphere at speeds of over twenty five thousand miles per hour causing heat about half that on the temperature of the sun almost as hot as it is here to day and do all this. And do all this and do it right and do it first before this dictate is out then we must be for. I'm the one who's doing all the work so well to get it to stay cool for a minute however I think we're going to do it and I think that we must pay what needs to be paid I don't think we ought to waste any. Money but I think we ought to do the job and this will be done in the decade of the sixty it may be done while some of you are still here at school at this college and university it will be done during the terms of office of some of the people who sit here on this platform. It will be gone many years ago the great British explorer george military who was to die on mount everist was asked why did he want to climb it he said because it is there well space is there. And we're going to climb it and the moon and the planets are there and new hopes for knowledge and peace are there and therefore as we set sail we ask god's blessing on the most hazardous and dangerous and. Greatest adventure on which man has ever embarked again.
-
-## Console output
-
-    (v2ct) C:\Users\peter\Dropbox\programming_projects\vid2cleantxt>python vid2cleantxt\transcribe.py --input-dir "C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech" --model "facebook/wav2vec2-large-960h-lv60-self"
-    data folder is set to `C:\Users\peter\.conda\envs\v2ct\lib\site-packages\neuspell\../data` script
-    Loading models @ Dec-19-2021_-20-51-56 - may take a while...
-    If RT seems excessive, try --verbose flag or checking logfile
-
-    Found 1 audio or video files in C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech
-    Creating .wav audio clips: 100%|███████████████████████████████████████████████████████| 12/12 [00:00<00:00, 84.82it/s]
-    Creating .wav audio clips:   8%|████▋                                                   | 1/12 [00:00<00:01,  9.11it/s]
-    created audio chunks for wav2vec2 - Dec-19-2021_-20
-    No GPU being used by this machine :(
-
-    No GPU being used :/   0%|                                                                       | 0/12 [00:00<?, ?it/s]
-
-
-    Gen RAM Free: 10.8 GB | Proc size: 3.1 GB | 8 CPUs  loaded at 22.7 % |
-
-    No GPU being used :/  50%|███████████████████████████████▌                               | 6/12 [00:57<00:51,  8.65s/it]
-
-
-    Gen RAM Free: 10.3 GB | Proc size: 3.2 GB | 8 CPUs  loaded at 67.8 % |
-
-    Transcribing video: 100%|██████████████████████████████████████████████████████████████| 12/12 [01:43<00:00,  8.67s/it]
-    Saved transcript and metadata to C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech\v2clntxt_transcriptions and C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech\v2clntxt_transc_metadata
-    transcribing vids: 100%|████████████████████████████████████████████████████████████████| 1/1 [01:45<00:00, 105.41s/it]
-    SC_pipeline - transcribed audio:   0%|                                                           | 0/1 [00:00<?, ?it/s]
-    Top 10 Key Phrases from YAKE, with max n-gram length 3
-    ['forty thousand miles',
-     'promise high costs',
-     'hundred feet tall',
-     'guidance control communications',
-     'unknown celestial body',
-     'station in Houston',
-     'high reward',
-     'causing heat',
-     'surely the opening',
-     'waited and rested']
-    SC_pipeline - transcribed audio: 100%|███████████████████████████████████████████████████| 1/1 [00:06<00:00,  6.09s/it]
-
-
-    Finished at: Dec-19-2021_-20. Total RT was 2.2819159250000003 mins
-    relevant files for run are in:
-    C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech\v2clntxt_transcriptions
-     and:
-    C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech\v2clntxt_transc_metadata
-
----
+- two examples are evailable in the `examples/` directory. One example is a single video (another speech) and the other is multiple videos (MIT OpenCourseWare). Citations are in the respective folders.
+- Note that the videos first need to be downloaded video the respective scripts in each folder first, i.e. run: `python examples/TEST_singlefile/dl_src_video.py`
 
 # Future Work, Collaboration, & Citations
 
@@ -330,6 +278,7 @@ Transcription of Public Domain Speeches from President John F. Kennedy. This bel
 
 A _rough_ timeline of what has been going on in the repo:
 
+-   Jan 2022 - add huBERT support, abstract the boilerplate out of Colab Notebooks. Starting work on the PDF generation w/ results.
 -   Dec 2021 - greatly improved runtime of the script, and added more features (command line, docstring, etc.)
 -   Sept-Oct 2021: Fixing bugs, formatting code.
 -   July 12, 2021 - sync work from Colab notebooks: add CUDA support for pytorch in the `.py` versions, added Neuspell as a spell checker. General organization and formatting improvements.
@@ -352,7 +301,7 @@ A _rough_ timeline of what has been going on in the repo:
 
 ## I've found x repo / script / concept that I think you should incorporate or collaborate with the author.
 
-Send me a message / start a discussion! Always looking to improve.
+Send me a message / start a discussion! Always looking to improve. Or create an issue, that works too.
 
 ## Citations
 
@@ -361,6 +310,23 @@ Send me a message / start a discussion! Always looking to improve.
 > Myle Ott, Sergey Edunov, Alexei Baevski, Angela Fan, Sam Gross, Nathan Ng, David Grangier, and Michael Auli. fairseq: A fast, extensible toolkit for sequence modeling. In Proceedings of NAACL-HLT 2019: Demonstrations, 2019.
 
 -   repo [link](https://github.com/pytorch/fairseq)
+
+**HuBERT (fairseq)**
+
+@article{Hsu2021,
+   author = {Wei Ning Hsu and Benjamin Bolte and Yao Hung Hubert Tsai and Kushal Lakhotia and Ruslan Salakhutdinov and Abdelrahman Mohamed},
+   doi = {10.1109/TASLP.2021.3122291},
+   issn = {23299304},
+   journal = {IEEE/ACM Transactions on Audio Speech and Language Processing},
+   keywords = {BERT,Self-supervised learning},
+   month = {6},
+   pages = {3451-3460},
+   publisher = {Institute of Electrical and Electronics Engineers Inc.},
+   title = {HuBERT: Self-Supervised Speech Representation Learning by Masked Prediction of Hidden Units},
+   volume = {29},
+   url = {https://arxiv.org/abs/2106.07447v1},
+   year = {2021},
+}
 
 **MoviePy**
 
@@ -413,4 +379,8 @@ Send me a message / start a discussion! Always looking to improve.
 
 ```
 
-```
+### Video Citations
+
+<div class="csl-entry"><i>President Kennedy’s 1962 Speech on the US Space Program | C-SPAN Classroom</i>. (n.d.). Retrieved January 28, 2022, from https://www.c-span.org/classroom/document/?7986</div>
+
+- _Note that example videos are cited in respective `Examples/` directories_
