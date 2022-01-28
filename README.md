@@ -60,6 +60,9 @@ Example output text of a video transcription of [JFK's speech on going to the mo
 https://user-images.githubusercontent.com/74869040/151491511-7486c34b-d1ed-4619-9902-914996e85125.mp4
 
 
+**vid2cleantxt output:**
+
+
 > Now look into space to the moon and to the planets beyond and we have vowed that we shall not see it governed by a hostile flag of conquest but. By a banner of freedom and peace we have vowed that we shall not see space filled with weapons of man's destruction but with instruments of knowledge and understanding yet the vow. S of this nation can only be fulfilled if we in this nation are first and therefore we intend to be first. In short our leadership in science and industry our hopes for peace and security our obligations to ourselves as well as others all require. Us to make this effort to solve these mysteries to solve them for the good of all men and to become the world's leading space fearing nationwide set sail on this new sea. Because there is new knowledge to be gained and new rights to be won and they must be won and used for the progress of all before for space science like nuclear science and all techniques. Logo has no conscience of its own whether it will become a force for good or ill depends on man and only if the united states occupies a position of pre eminence. Can we help decide whether this new ocean will be a sea of peace or a new terrifying theatre of war I do not say that we should or will go on. (... truncated for brevity)
 
 See the [demo notebook](https://colab.research.google.com/gist/pszemraj/4183c4b39bf718b54de9dbf2df499cd9/vid2cleantext-single-demo.ipynb) for the full text output.
@@ -264,62 +267,10 @@ Also, because it's an API you can't train it even if you wanted to, you have to 
 
 _`*` these statements reflect the assessment completed around project inception about early 2021._
 
-# Example
+# Examples
 
-Transcription of Public Domain Speeches from President John F. Kennedy. This below was given at Rice University, and uses the model `facebook/wav2vec2-large-960h-lv60-self`.
-
-## Result
-
-> Surely the opening vistas of space promise high costs and hardships as well as high reward so it is not surprising that some would have us stay where we are a little long. To rest to wait but this city of question this state of taxes this country of the united states was not built by those who waited and rested but if I were to say my fellow citizens. That we shall send to the moon two hundred and forty thousand miles away from the control station in Houston a giant rocket more than three hundred feet tall the length of this football field. Made of new metal alloys some of which have not yet been invented capable of standing heat and stresses several times more than have ever been experienced fitted together with a precision better than the. Itself watch carrying all the equipment needed for propulsion guidance control communications food and survival on an untried mission to an unknown celestial body and then. Turn it safely to earth re entering the atmosphere at speeds of over twenty five thousand miles per hour causing heat about half that on the temperature of the sun almost as hot as it is here to day and do all this. And do all this and do it right and do it first before this dictate is out then we must be for. I'm the one who's doing all the work so well to get it to stay cool for a minute however I think we're going to do it and I think that we must pay what needs to be paid I don't think we ought to waste any. Money but I think we ought to do the job and this will be done in the decade of the sixty it may be done while some of you are still here at school at this college and university it will be done during the terms of office of some of the people who sit here on this platform. It will be gone many years ago the great British explorer george military who was to die on mount everist was asked why did he want to climb it he said because it is there well space is there. And we're going to climb it and the moon and the planets are there and new hopes for knowledge and peace are there and therefore as we set sail we ask god's blessing on the most hazardous and dangerous and. Greatest adventure on which man has ever embarked again.
-
-## Console output
-
-    (v2ct) C:\Users\peter\Dropbox\programming_projects\vid2cleantxt>python vid2cleantxt\transcribe.py --input-dir "C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech" --model "facebook/wav2vec2-large-960h-lv60-self"
-    data folder is set to `C:\Users\peter\.conda\envs\v2ct\lib\site-packages\neuspell\../data` script
-    Loading models @ Dec-19-2021_-20-51-56 - may take a while...
-    If RT seems excessive, try --verbose flag or checking logfile
-
-    Found 1 audio or video files in C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech
-    Creating .wav audio clips: 100%|███████████████████████████████████████████████████████| 12/12 [00:00<00:00, 84.82it/s]
-    Creating .wav audio clips:   8%|████▋                                                   | 1/12 [00:00<00:01,  9.11it/s]
-    created audio chunks for wav2vec2 - Dec-19-2021_-20
-    No GPU being used by this machine :(
-
-    No GPU being used :/   0%|                                                                       | 0/12 [00:00<?, ?it/s]
-
-
-    Gen RAM Free: 10.8 GB | Proc size: 3.1 GB | 8 CPUs  loaded at 22.7 % |
-
-    No GPU being used :/  50%|███████████████████████████████▌                               | 6/12 [00:57<00:51,  8.65s/it]
-
-
-    Gen RAM Free: 10.3 GB | Proc size: 3.2 GB | 8 CPUs  loaded at 67.8 % |
-
-    Transcribing video: 100%|██████████████████████████████████████████████████████████████| 12/12 [01:43<00:00,  8.67s/it]
-    Saved transcript and metadata to C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech\v2clntxt_transcriptions and C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech\v2clntxt_transc_metadata
-    transcribing vids: 100%|████████████████████████████████████████████████████████████████| 1/1 [01:45<00:00, 105.41s/it]
-    SC_pipeline - transcribed audio:   0%|                                                           | 0/1 [00:00<?, ?it/s]
-    Top 10 Key Phrases from YAKE, with max n-gram length 3
-    ['forty thousand miles',
-     'promise high costs',
-     'hundred feet tall',
-     'guidance control communications',
-     'unknown celestial body',
-     'station in Houston',
-     'high reward',
-     'causing heat',
-     'surely the opening',
-     'waited and rested']
-    SC_pipeline - transcribed audio: 100%|███████████████████████████████████████████████████| 1/1 [00:06<00:00,  6.09s/it]
-
-
-    Finished at: Dec-19-2021_-20. Total RT was 2.2819159250000003 mins
-    relevant files for run are in:
-    C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech\v2clntxt_transcriptions
-     and:
-    C:\Users\peter\Dropbox\programming_projects\vid2cleantxt\scratch\moon-speech\v2clntxt_transc_metadata
-
----
+- two examples are evailable in the `examples/` directory. One example is a single video (another speech) and the other is multiple videos (MIT OpenCourseWare). Citations are in the respective folders.
+- Note that the videos first need to be downloaded video the respective scripts in each folder first, i.e. run: `python examples/TEST_singlefile/dl_src_video.py`
 
 # Future Work, Collaboration, & Citations
 
