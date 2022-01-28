@@ -4,7 +4,7 @@
 
 **vid2cleantxt**: a [transformers-based](https://huggingface.co/facebook/wav2vec2-large-960h-lv60-self) pipeline for turning heavily speech-based video files into clean, readable text from the audio.
 
-TL;DR check out [this Colab script](https://colab.research.google.com/drive/1WfJ1yQn-jtyZsoQXdzXx91FPbLo5t7Mg?usp=sharing) to see a transcription and keyword extraction of a speech by John F. Kennedy by simply running all cells.
+TL;DR check out [this Colab script](https://colab.research.google.com/gist/pszemraj/4183c4b39bf718b54de9dbf2df499cd9/vid2cleantext-single-demo.ipynb) to see a transcription and keyword extraction of a speech by John F. Kennedy by simply running all cells.
 
 ---
 
@@ -54,11 +54,11 @@ Video, specifically audio, is an inefficient way to convey dense or technical in
 
 ## Example Output
 
-Example output text of a video transcription of JFK's speech on going to the moon:
+Example output text of a video transcription of [JFK's speech on going to the moon](https://www.c-span.org/classroom/document/?7986):
 
-> Surely the opening vistas of space promise high costs and hardships as well as high reward so it is not surprising that some would have us stay where we are a little longer to rest to wait but this city of question this state of taxes this country of the united states was not built by those who waited and rested but if I were to say my fellow citizens. That we shall send to the moon two hundred and forty thousand miles away from the control station in Houston a giant rocket more than three hundred feet tall the length of this football field made of new metal alloys some of which have not yet been invented capable of standing heat and stresses several times more than have ever been experienced fitted together with a precision better than the. First watch carrying all the equipment needed for propulsion guidance control communications food and survival on an untried mission to an unknown celestial body and then return it safely to earth re entering the atmosphere at speeds of over twenty five thousand miles per hour causing heat about half that on the temperature of the sun almost as hot as it is here to day and do all this. And do all this and do it right and do it first before this dictate is out then we must be so I'm the one who's doing all the work so to get me to stay cool for a minute however I think we're going to do it and I think that we must pay what needs to be paid I don't think we ought to waste any. Money but I think we ought to do the job and this will be done in the decade of the sixty it may be done while some of you are still here at school at this college and university it will be done during the terms of office of some of the people who sit here on this platform but it will be done many years ago the great British explorer garage memory who was to die on mount everist was asked why did he want to climb it the said because it is there well space is there. And we're going to climb it and the moon and the planets are there and new hopes for knowledge and peace are there and therefore as we set sail we ask god's blessing on the most hazardous and dangerous and greatest adventure on which man has ever embarked thank you
+> Now look into space to the moon and to the planets beyond and we have vowed that we shall not see it governed by a hostile flag of conquest but. By a banner of freedom and peace we have vowed that we shall not see space filled with weapons of man's destruction but with instruments of knowledge and understanding yet the vow. S of this nation can only be fulfilled if we in this nation are first and therefore we intend to be first. In short our leadership in science and industry our hopes for peace and security our obligations to ourselves as well as others all require. Us to make this effort to solve these mysteries to solve them for the good of all men and to become the world's leading space fearing nationwide set sail on this new sea. Because there is new knowledge to be gained and new rights to be won and they must be won and used for the progress of all before for space science like nuclear science and all techniques. Logo has no conscience of its own whether it will become a force for good or ill depends on man and only if the united states occupies a position of pre eminence. Can we help decide whether this new ocean will be a sea of peace or a new terrifying theatre of war I do not say that we should or will go on. (... truncated for brevity)
 
-See the examples folder for more detail / full transcript.
+See the [demo notebook](https://colab.research.google.com/gist/pszemraj/4183c4b39bf718b54de9dbf2df499cd9/vid2cleantext-single-demo.ipynb) for the full text output.
 
 ## Pipeline Intro
 
@@ -111,10 +111,9 @@ Notebook versions are available on Google Colab, because they offer free GPUs wh
 Links to Colab Scripts:
 
 1.  Single-File Version (Implements GPU)
-    -   Link [here](https://colab.research.google.com/drive/1WfJ1yQn-jtyZsoQXdzXx91FPbLo5t7Mg?usp=sharing)
-    -   This notebook downloads the video from a public link to one of the JFK videos stored on my Google Drive. As such, no
-        authentication / etc. is required and **is recommended for seeing how this pipeline works**.
-    -   The only steps required are adjusting the runtime to a GPU (if needed), and _Run All_
+    -   Link [here](https://colab.research.google.com/gist/pszemraj/4183c4b39bf718b54de9dbf2df499cd9/vid2cleantext-single-demo.ipynb), updated _Jan 28th 2022_.
+    -   This notebook downloads a video of JFK's "Moon Speech" (originally downloaded from C-SPAN) and transcribes it, printing and/or optionally downloading the output. No authentication etc required.
+    -   This **is the recommended link for seeing how this pipeline works**. Only work involved is running all cells.
 2.  Multi-File Version (Implements GPU)
     -   Link [here](https://colab.research.google.com/gist/pszemraj/a88ff352258f596d11027689653124ed/vid2cleantext-multi.ipynb), updated _Jan 27th 2022_. The example here is MIT OpenCourseWare Lecture Videos (see `examples/` for citations).
     -   This notebook connects to the user's google drive to convert a whole folder of videos. The input can be either Colab or URL to a `.zip` file of media. Outputs are stored in the user's Google Drive and optionally downloaded.
