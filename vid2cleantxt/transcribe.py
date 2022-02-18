@@ -450,22 +450,8 @@ def get_parser():
 
     return parser
 
-
-# TODO: change to pathlib from os.path
-
-if __name__ == "__main__":
-
-    st = time.perf_counter()
-    # parse the command line arguments
-    args = get_parser().parse_args()
-    input_src = str(args.input_dir)
+def transcribe_dir(input_src, is_verbose=False, move_comp=False, chunk_length=15, model_arg=None, join_text=False):
     directory = os.path.abspath(input_src)
-    # TODO: add output directory from user arg
-    is_verbose = args.verbose
-    move_comp = args.move_input_vids
-    chunk_length = int(args.chunk_length)
-    model_arg = args.model
-    join_text = args.join_text
     linebyline = not join_text
 
     print(f"\nLoading models @ {get_timestamp(True)} - may take some time...")
@@ -529,3 +515,21 @@ if __name__ == "__main__":
     print(
         f"relevant files for run are in: \n{out_p_tscript} \n and: \n{out_p_metadata}"
     )
+
+
+# TODO: change to pathlib from os.path
+
+if __name__ == "__main__":
+
+    st = time.perf_counter()
+    # parse the command line arguments
+    args = get_parser().parse_args()
+    input_src = str(args.input_dir)
+    # TODO: add output directory from user arg
+    is_verbose = args.verbose
+    move_comp = args.move_input_vids
+    chunk_length = int(args.chunk_length)
+    model_arg = args.model
+    join_text = args.join_text
+
+    transcribe_dir(input_src, is_verbose, move_comp, chunk_length, model_arg, join_text)
