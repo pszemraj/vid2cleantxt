@@ -508,7 +508,11 @@ def spellcorrect_pipeline(
         textlines = file.readlines()  # return a list
 
     # step 1: spellcheck using neuspell
-    sc_textlines = neuspell_freetext(textlines, ns_checker=ns_checker, verbose=verbose)
+    try:
+        sc_textlines = neuspell_freetext(textlines, ns_checker=ns_checker, verbose=verbose)
+    except Exception as e:
+        print(f"issue using Neuspell, {e}, using SymSpell")
+        sc_textlines = symspell_freetext(textlines)
 
     loc_SC = "neuspell_results"
     create_folder(join(filepath, loc_SC))

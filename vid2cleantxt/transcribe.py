@@ -52,7 +52,7 @@ warnings.filterwarnings("ignore", message="Some weights of")
 warnings.filterwarnings("ignore", message="initializing BertModel")
 transformers.utils.logging.set_verbosity(40)
 
-from audio2text_functions import (
+from vid2cleantxt.audio2text_functions import (
     trim_fname,
     corr,
     create_metadata_df,
@@ -64,7 +64,7 @@ from audio2text_functions import (
     get_av_fmts,
     prep_transc_pydub,
 )
-from v2ct_utils import (
+from vid2cleantxt.v2ct_utils import (
     check_runhardware,
     create_folder,
     digest_txt_directory,
@@ -479,8 +479,11 @@ if __name__ == "__main__":
     # load the spellchecker models. suppress outputs as there are way too many
     orig_out = sys.__stdout__
     sys.stdout = NullIO()
-    checker = init_neuspell()
-    sym_spell = init_symspell()
+    try: 
+        checker = init_neuspell()
+    except Exception as e:
+        print(f"issue using Neuspell, {e}, using SymSpell")
+        sym_spell = init_symspell()
     sys.stdout = orig_out  # return to default of print-to-console
 
     # load vid2cleantxt inputs
