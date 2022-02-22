@@ -369,7 +369,7 @@ def postprocess_transc(
             num_kw=25,
             max_ngrams=3,
             save_db=False,
-            verbose=is_verbose,
+            verbose=verbose,
         )
 
         kw_all_vids = pd.concat([kw_all_vids, qk_df], axis=1)
