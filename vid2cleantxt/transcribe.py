@@ -451,6 +451,8 @@ def get_parser():
     return parser
 
 def transcribe_dir(input_src, is_verbose=False, move_comp=False, chunk_length=15, model_arg=None, join_text=False):
+    st = time.perf_counter()
+    
     directory = os.path.abspath(input_src)
     linebyline = not join_text
 
@@ -522,7 +524,6 @@ def transcribe_dir(input_src, is_verbose=False, move_comp=False, chunk_length=15
 
 if __name__ == "__main__":
 
-    st = time.perf_counter()
     # parse the command line arguments
     args = get_parser().parse_args()
     input_src = str(args.input_dir)
