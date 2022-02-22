@@ -116,8 +116,9 @@ Essentially, clone the repo, and run `python vid2cleantxt/transcribe.py --input-
 
 ## Use as package
 1.  `pip install .`
-2.  `import vid2cleantxt`
-3.  `vid2cleantxt.transcribe.transcribe_dir("examples/TEST_singlefile")`
+2.  `spacy download en_core_web_sm`
+3.  `import vid2cleantxt`
+4.  `vid2cleantxt.transcribe.transcribe_dir("examples/TEST_singlefile")`
 
 ## Notebooks on Colab
 
