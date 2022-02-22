@@ -353,7 +353,7 @@ def postprocess_transc(
         desc="SC_pipeline - transcribed audio",
     ):
         PL_out = spellcorrect_pipeline(
-            out_p_tscript,
+            tscript_dir,
             this_transc,
             verbose=False,
             ns_checker=checker,
@@ -377,7 +377,7 @@ def postprocess_transc(
     # save overall transcription file
     kwdb_fname = f"YAKE - all keywords for run at {get_timestamp()}.csv"
     kw_all_vids.to_csv(
-        join(out_p_tscript, kwdb_fname),
+        join(tscript_dir, kwdb_fname),
         index=True,
     )
 
