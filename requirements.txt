@@ -1,3 +1,4 @@
+setuptools~=60.9.3
 librosa~=0.8.1
 wordninja~=2.0.0
 psutil~=5.8.0
