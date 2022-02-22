@@ -316,7 +316,7 @@ def transcribe_video_wav2vec(
 
 
 def postprocess_transc(
-    tscript_dir, mdata_dir, merge_files=False, linebyline=True, verbose=False
+    checker, tscript_dir, mdata_dir, merge_files=False, linebyline=True, verbose=False
 ):
     """
     postprocess_transc - postprocess the transcribed text by consolidating the text and metadata, and spell checking + sentence splitting
@@ -469,7 +469,7 @@ def transcribe_dir(input_src, is_verbose=False, move_comp=False, chunk_length=15
         checker = init_neuspell()
     except Exception as e:
         print(f"issue using Neuspell, {e}, using SymSpell")
-        sym_spell = init_symspell()
+        checker = init_symspell()
     sys.stdout = orig_out  # return to default of print-to-console
 
     # load vid2cleantxt inputs
@@ -502,6 +502,7 @@ def transcribe_dir(input_src, is_verbose=False, move_comp=False, chunk_length=15
     out_p_tscript = storage_locs.get("t_out")
     out_p_metadata = storage_locs.get("m_out")
     postprocess_transc(
+        checker,
         tscript_dir=out_p_tscript,
         mdata_dir=out_p_metadata,
         merge_files=False,
