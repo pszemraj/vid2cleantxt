@@ -106,6 +106,7 @@ def load_transcription_objects(hf_id: str):
         # for example --model "facebook/wav2vec2-large-960h-lv60-self"
         print(f"Loading wav2vec2 model - {hf_id}")
         model = Wav2Vec2ForCTC.from_pretrained(hf_id)
+    logging.info(f"Loaded model {hf_id} from huggingface")
     return tokenizer, model
 
 
@@ -172,9 +173,10 @@ def save_transc_results(
     out_p_tscript = storage_locs.get("t_out")
     out_p_metadata = storage_locs.get("m_out")
     header = f"{trim_fname(vid_name)}_vid2txt_{get_timestamp()}"  # create header for output file
+    _t_out = join(out_p_tscript, f"{header}_full.txt")
     # save the text
     with open(
-        join(out_p_tscript, f"{header}_full.txt"),
+        _t_out,
         "w",
         encoding="utf-8",
         errors="ignore",
@@ -316,7 +318,7 @@ def transcribe_video_wav2vec(
 
 
 def postprocess_transc(
-    tscript_dir, mdata_dir, merge_files=False, linebyline=True, verbose=False
+    tscript_dir, mdata_dir, merge_files=False, linebyline=True, verbose=False, spell_correct_method:str="symspell", checker=None
 ):
     """
     postprocess_transc - postprocess the transcribed text by consolidating the text and metadata, and spell checking + sentence splitting
@@ -328,6 +330,8 @@ def postprocess_transc(
     merge_files : bool, optional, by default False, if True, create a new file that contains all text and metadata merged together
     verbose : bool, optional
     """
+    if checker is None:
+        checker = init_neuspell() if spell_correct_method.lower() == "neuspell" else init_symspell()
     if verbose:
         print("Starting to postprocess transcription @ {}".format(get_timestamp()))
 
@@ -476,7 +480,7 @@ if __name__ == "__main__":
     join_text = args.join_text
     linebyline = not join_text
     base_spelling = args.basic_spelling
-
+    logging.info(f"Starting transcription pipeline @ {get_timestamp(True)}" + "\n")
     print(f"\nLoading models @ {get_timestamp(True)} - may take some time...")
     print("if RT seems excessive, try --verbose flag or checking logfile")
     # load the model facebook/hubert-large-ls960-ft
@@ -486,20 +490,20 @@ if __name__ == "__main__":
     tokenizer, model = load_transcription_objects(wav_model)
 
     # load the spellchecker models. suppress outputs as there are way too many
-    orig_out = sys.__stdout__
-    sys.stdout = NullIO()
     if base_spelling:
         checker = init_symspell()
     else:
         try:
+            orig_out = sys.__stdout__
+            sys.stdout = NullIO()
             checker = init_neuspell()
+            sys.stdout = orig_out  # return to default of print-to-console
         except Exception as e:
             print("Failed loading NeuSpell spellchecker, reverting to basic spellchecker")
             logging.warning(f"Failed loading NeuSpell spellchecker, reverting to basic spellchecker")
             logging.warning(f"{e}")
             base_spelling = True
             checker = init_symspell()
-    sys.stdout = orig_out  # return to default of print-to-console
 
     # load vid2cleantxt inputs
     approved_files = []
@@ -536,11 +540,12 @@ if __name__ == "__main__":
         merge_files=False,
         verbose=is_verbose,
         linebyline=linebyline,
+        spell_correct_method="symspell" if base_spelling else "neuspell",
+        checker=checker,
     )
 
+    logging.info(f"Finished transcription pipeline @ {get_timestamp(True)}" + "\n")
+    logging.info(f"Total time: {round((time.perf_counter() - st)/60, 3)} mins")
     print(
-        f"\n\nFinished at: {get_timestamp()}. Total RT was {round((time.perf_counter() - st)/60, 3)} mins"
-    )
-    print(
-        f"relevant files for run are in: \n{out_p_tscript} \n and: \n{out_p_metadata}"
+        f"Complete. Relevant files for run are in: \n{out_p_tscript} \n and: \n{out_p_metadata}"
     )
