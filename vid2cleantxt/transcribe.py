@@ -331,8 +331,12 @@ def postprocess_transc(
     tscript_dir : str, path to the directory containing the transcribed text files
     mdata_dir : str, path to the directory containing the metadata files
     merge_files : bool, optional, by default False, if True, create a new file that contains all text and metadata merged together
+    linebyline : bool, optional, by default True, if True, split the text into sentences
+    spell_correct_method : str, optional, by default "symspell", the method to use for spell checking. Options are "symspell", "neuspell"
+    checker : spellchecker.SpellChecker, optional, by default None, the spell checker object to use for spell checking. If None, it will be created.
     verbose : bool, optional
     """
+    logging.info(f"Starting postprocessing of transcribed text @ {get_timestamp()} with params {locals()}")
     if checker is None:
         checker = init_neuspell() if spell_correct_method.lower() == "neuspell" else init_symspell()
     if verbose:
@@ -516,14 +520,14 @@ if __name__ == "__main__":
 
     print(f"\nFound {len(approved_files)} audio or video files in {directory}")
 
-    storage_locs = setup_out_dirs(directory)  # create and get output folders
 
+    # transcribe video and get results
+    storage_locs = setup_out_dirs(directory)  # create and get output folders
     for filename in tqdm(
         approved_files,
         total=len(approved_files),
         desc="transcribing vids",
     ):
-        # transcribe video and get results
         t_results = transcribe_video_wav2vec(
             ts_model=model,
             ts_tokenizer=tokenizer,
