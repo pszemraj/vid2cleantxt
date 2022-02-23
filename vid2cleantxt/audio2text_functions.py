@@ -6,8 +6,6 @@ import os
 import sys
 from os.path import dirname, join
 
-import numpy as np
-
 sys.path.append(dirname(dirname(os.path.abspath(__file__))))
 
 import math
@@ -16,22 +14,18 @@ import re
 import sys
 from datetime import datetime
 
-import moviepy.editor as mp
 import neuspell
 import pandas as pd
 import pkg_resources
 import pysbd
 import yake
+from natsort import natsorted
+from pydub import AudioSegment
 from symspellpy import SymSpell
 from tqdm.auto import tqdm
-from natsort import natsorted
-from vid2cleantxt.v2ct_utils import (
-    trim_fname,
-    create_folder,
-    NullIO,
-    get_timestamp,
-)
-from pydub import AudioSegment
+
+from vid2cleantxt.v2ct_utils import (NullIO, create_folder, get_timestamp,
+                                     trim_fname)
 
 
 def get_av_fmts():

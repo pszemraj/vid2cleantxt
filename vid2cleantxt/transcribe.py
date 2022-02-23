@@ -17,8 +17,8 @@ Tips for runtime:
 """
 
 import argparse
-import os
 import gc
+import os
 import sys
 from os.path import dirname, join
 
@@ -29,51 +29,33 @@ import logging
 
 logging.basicConfig(level=logging.INFO, filename="LOGFILE_vid2cleantxt_transcriber.log")
 
+import argparse
 import math
 import shutil
 import time
+import warnings
 
 import librosa
 import pandas as pd
-import argparse
 import torch
-from tqdm.auto import tqdm
 import transformers
-from transformers import (
-    HubertForCTC,
-    Wav2Vec2Processor,
-    Wav2Vec2ForCTC,
-    WavLMForCTC,
-)
-import warnings
+from tqdm.auto import tqdm
+from transformers import (HubertForCTC, Wav2Vec2ForCTC, Wav2Vec2Processor,
+                          WavLMForCTC)
 
 #  filter out warnings that pretend transfer learning does not exist
 warnings.filterwarnings("ignore", message="Some weights of")
 warnings.filterwarnings("ignore", message="initializing BertModel")
 transformers.utils.logging.set_verbosity(40)
 
-from audio2text_functions import (
-    trim_fname,
-    corr,
-    create_metadata_df,
-    init_neuspell,
-    init_symspell,
-    quick_keys,
-    spellcorrect_pipeline,
-    setup_out_dirs,
-    get_av_fmts,
-    prep_transc_pydub,
-)
-from v2ct_utils import (
-    check_runhardware,
-    create_folder,
-    digest_txt_directory,
-    find_ext_local,
-    move2completed,
-    NullIO,
-    torch_validate_cuda,
-    get_timestamp,
-)
+from audio2text_functions import (corr, create_metadata_df, get_av_fmts,
+                                  init_neuspell, init_symspell,
+                                  prep_transc_pydub, quick_keys,
+                                  setup_out_dirs, spellcorrect_pipeline,
+                                  trim_fname)
+from v2ct_utils import (NullIO, check_runhardware, create_folder,
+                        digest_txt_directory, find_ext_local, get_timestamp,
+                        move2completed, torch_validate_cuda)
 
 
 def load_transcription_objects(hf_id: str):
@@ -208,7 +190,7 @@ def transcribe_video_wav2vec(
 
     Parameters
     ----------
-    ts_model : torch.nn.Module, the transformer model that was loaded (must be a wav2vec2 model)
+    ts_model : transformers model, the transformer model that was loaded (must be a wav2vec2 model)
     ts_tokenizer : transformers.AutoTokenizer, the tokenizer that was loaded (must be a wav2vec2 tokenizer)
     directory : str, path to the directory containing the video file
     vid_clip_name : str, name of the video clip
