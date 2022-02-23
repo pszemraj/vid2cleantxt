@@ -3,8 +3,8 @@
 """
 vid2cleantxt by Peter Szemraj
 
-Pipeline for Zero-shot transcription of a lecture video file to text using facebook's wav2vec2 model
-this is the primary pipeline for the project
+Pipeline fortranscription of a speech-based video file to text using facebook's wav2vec2 model (or Hubert model)
+this is the primary script for the project
 
 You can access the arguments for this script by running the following command:
     *\vid2cleantxt\transcribe.py -h (windows)
@@ -12,7 +12,7 @@ You can access the arguments for this script by running the following command:
 
 Tips for runtime:
 
-- use the default "facebook/wav2vec2-base-960h" to start out with
+- use the default "facebook/wav2vec2-base-960h" to start out with (the default model is "facebook/hubert-large-ls960-ft")
 - if model fails to work or errors out, try reducing the chunk length with --chunk-length <int>
 """
 
