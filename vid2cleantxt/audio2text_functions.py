@@ -386,7 +386,6 @@ def init_neuspell(verbose=False):
     -------
     checker : neuspell.SpellChecker object
     """
-    # TODO: add alternatives for non-English
     if verbose:
         checker = neuspell.SclstmbertChecker()
         checker.from_pretrained()
@@ -484,7 +483,7 @@ def SBD_freetext(text, verbose=False, lang="en"):
 
     return seg_and_capital
 
-
+# TODO: add alternatives for non-English
 def spellcorrect_pipeline(
     filepath, filename:str, method:str="neuspell", spell_checker=None, linebyline=True, verbose=False
 ):
