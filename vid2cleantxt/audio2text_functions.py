@@ -483,9 +483,15 @@ def SBD_freetext(text, verbose=False, lang="en"):
 
     return seg_and_capital
 
+
 # TODO: add alternatives for non-English
 def spellcorrect_pipeline(
-    filepath, filename:str, method:str="neuspell", spell_checker=None, linebyline=True, verbose=False
+    filepath,
+    filename: str,
+    method: str = "neuspell",
+    spell_checker=None,
+    linebyline=True,
+    verbose=False,
 ):
     """
     spellcorrect_pipeline - takes a filepath and filename and returns a corrected version of the text. It uses both the PySBD and Neuspell algorithms to correct the text. Note that the Neuspell algorithm is more accurate than the SymSpell algorithm, but it is slower - it is recommended to use the SymSpell algorithm if you are dealing with a large corpus of text or see runtime issues.
@@ -504,7 +510,9 @@ def spellcorrect_pipeline(
     pipelineoutput : dict, the corrected text and other data
     """
     accepted_methods = ["neuspell", "symspell"]
-    assert method in accepted_methods, "method must be one of {}".format(accepted_methods)
+    assert method in accepted_methods, "method must be one of {}".format(
+        accepted_methods
+    )
     with open(join(filepath, filename), "r", encoding="utf-8", errors="ignore") as file:
         textlines = file.readlines()  # return a list
     # lowercase the textlines
@@ -517,14 +525,16 @@ def spellcorrect_pipeline(
     else:
         # symspell fallback
         corrected_text = symspell_freetext(
-            textlines, verbose=verbose, speller=spell_checker,
+            textlines,
+            verbose=verbose,
+            speller=spell_checker,
         )
     loc_SC = f"{method}_corrected"
     create_folder(join(filepath, loc_SC))
 
     sc_outname = f"{trim_fname(filename)}_NSC_results.txt"
     _corr_out = join(filepath, loc_SC, sc_outname)
-    with open(        _corr_out, "w", encoding="utf-8", errors="replace"    ) as fo:
+    with open(_corr_out, "w", encoding="utf-8", errors="replace") as fo:
         fo.writelines(corrected_text)  # save spell-corrected text
     # step 2: sentence boundary detection & misc punctuation removal
     misc_fixes = {

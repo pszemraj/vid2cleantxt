@@ -321,7 +321,13 @@ def transcribe_video_wav2vec(
 
 
 def postprocess_transc(
-    tscript_dir, mdata_dir, merge_files=False, linebyline=True, verbose=False, spell_correct_method:str="symspell", checker=None
+    tscript_dir,
+    mdata_dir,
+    merge_files=False,
+    linebyline=True,
+    verbose=False,
+    spell_correct_method: str = "symspell",
+    checker=None,
 ):
     """
     postprocess_transc - postprocess the transcribed text by consolidating the text and metadata, and spell checking + sentence splitting
@@ -336,9 +342,15 @@ def postprocess_transc(
     checker : spellchecker.SpellChecker, optional, by default None, the spell checker object to use for spell checking. If None, it will be created.
     verbose : bool, optional
     """
-    logging.info(f"Starting postprocessing of transcribed text @ {get_timestamp()} with params {locals()}")
+    logging.info(
+        f"Starting postprocessing of transcribed text @ {get_timestamp()} with params {locals()}"
+    )
     if checker is None:
-        checker = init_neuspell() if spell_correct_method.lower() == "neuspell" else init_symspell()
+        checker = (
+            init_neuspell()
+            if spell_correct_method.lower() == "neuspell"
+            else init_symspell()
+        )
     if verbose:
         print("Starting to postprocess transcription @ {}".format(get_timestamp()))
 
@@ -507,8 +519,12 @@ if __name__ == "__main__":
             checker = init_neuspell()
 
         except Exception as e:
-            print("Failed loading NeuSpell spellchecker, reverting to basic spellchecker")
-            logging.warning(f"Failed loading NeuSpell spellchecker, reverting to basic spellchecker")
+            print(
+                "Failed loading NeuSpell spellchecker, reverting to basic spellchecker"
+            )
+            logging.warning(
+                f"Failed loading NeuSpell spellchecker, reverting to basic spellchecker"
+            )
             logging.warning(f"{e}")
             base_spelling = True
             checker = init_symspell()
@@ -519,7 +535,6 @@ if __name__ == "__main__":
         approved_files.extend(find_ext_local(directory, req_ext=ext, full_path=False))
 
     print(f"\nFound {len(approved_files)} audio or video files in {directory}")
-
 
     # transcribe video and get results
     storage_locs = setup_out_dirs(directory)  # create and get output folders
