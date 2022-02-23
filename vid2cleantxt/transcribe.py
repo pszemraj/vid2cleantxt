@@ -448,6 +448,14 @@ def get_parser():
         help="Save the transcribed text as a single line of text instead of one line per sentence",
     )
 
+    parser.add_argument(
+        "--basic-spelling",
+        required=False,
+        default=False,
+        action="store_true",
+        help="Use the basic spelling correction pipeline with symSpell",
+    )
+
     return parser
 
 
@@ -467,6 +475,7 @@ if __name__ == "__main__":
     model_arg = args.model
     join_text = args.join_text
     linebyline = not join_text
+    base_spelling = args.basic_spelling
 
     print(f"\nLoading models @ {get_timestamp(True)} - may take some time...")
     print("if RT seems excessive, try --verbose flag or checking logfile")
@@ -479,8 +488,17 @@ if __name__ == "__main__":
     # load the spellchecker models. suppress outputs as there are way too many
     orig_out = sys.__stdout__
     sys.stdout = NullIO()
-    checker = init_neuspell()
-    sym_spell = init_symspell()
+    if base_spelling:
+        checker = init_symspell()
+    else:
+        try:
+            checker = init_neuspell()
+        except Exception as e:
+            print("Failed loading NeuSpell spellchecker, reverting to basic spellchecker")
+            logging.warning(f"Failed loading NeuSpell spellchecker, reverting to basic spellchecker")
+            logging.warning(f"{e}")
+            base_spelling = True
+            checker = init_symspell()
     sys.stdout = orig_out  # return to default of print-to-console
 
     # load vid2cleantxt inputs
