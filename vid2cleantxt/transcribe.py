@@ -130,7 +130,10 @@ def wav2vec2_islarge(model_obj):
         "base": 94396320,
         "large": 315471520,  # recorded by  loading the model in known environment
     }
-    if not isinstance(model_obj, Wav2Vec2ForCTC):
+    if isinstance(model_obj, HubertForCTC):
+        logging.info("HubertForCTC is not a wav2vec2 model so not checking size")
+        return False
+    elif not isinstance(model_obj, Wav2Vec2ForCTC):
         warnings.warn(
             message="Model is not a wav2vec2 model - this function is for wav2vec2 models only",
             category=None,
@@ -360,6 +363,7 @@ def postprocess_transc(
             out_p_tscript,
             this_transc,
             verbose=False,
+            method=spell_correct_method,
             spell_checker=checker,
             linebyline=linebyline,
         )
@@ -490,21 +494,21 @@ if __name__ == "__main__":
     tokenizer, model = load_transcription_objects(wav_model)
 
     # load the spellchecker models. suppress outputs as there are way too many
+    orig_out = sys.__stdout__
+    sys.stdout = NullIO()
     if base_spelling:
         checker = init_symspell()
     else:
         try:
-            orig_out = sys.__stdout__
-            sys.stdout = NullIO()
             checker = init_neuspell()
-            sys.stdout = orig_out  # return to default of print-to-console
+
         except Exception as e:
             print("Failed loading NeuSpell spellchecker, reverting to basic spellchecker")
             logging.warning(f"Failed loading NeuSpell spellchecker, reverting to basic spellchecker")
             logging.warning(f"{e}")
             base_spelling = True
             checker = init_symspell()
-
+    sys.stdout = orig_out  # return to default of print-to-console
     # load vid2cleantxt inputs
     approved_files = []
     for ext in get_av_fmts():  # now include audio formats and video formats
