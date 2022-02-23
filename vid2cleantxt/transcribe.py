@@ -221,7 +221,7 @@ def transcribe_video_wav2vec(
     transc_results : dict, the transcribed text and metadata
 
     """
-
+    logging.info(f"Starting to transcribe {clip_name} @ {get_timestamp()}")
     if verbose:
         print(f"Starting to transcribe {clip_name} @ {get_timestamp()}")
     # create audio chunk folder
@@ -315,8 +315,8 @@ def transcribe_video_wav2vec(
     }
 
     if verbose:
-        print(f"finished transcription of {clip_name} base folder on {get_timestamp()}")
-
+        print(f"finished transcription of {clip_name} - {get_timestamp()}")
+    logging.info(f"finished transcription of {clip_name} - {get_timestamp()}")
     return transc_res
 
 
