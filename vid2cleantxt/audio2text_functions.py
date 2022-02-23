@@ -507,7 +507,8 @@ def spellcorrect_pipeline(
     assert method in accepted_methods, "method must be one of {}".format(accepted_methods)
     with open(join(filepath, filename), "r", encoding="utf-8", errors="ignore") as file:
         textlines = file.readlines()  # return a list
-
+    # lowercase the textlines
+    textlines = [line.lower() for line in textlines]
     # step 1: spellcheck using specified method
     if method.lower() == "neuspell":
         corrected_text = neuspell_freetext(
