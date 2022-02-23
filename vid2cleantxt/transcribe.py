@@ -356,7 +356,7 @@ def postprocess_transc(
             out_p_tscript,
             this_transc,
             verbose=False,
-            ns_checker=checker,
+            spell_checker=checker,
             linebyline=linebyline,
         )
         # get locations of where corrected files were saved
