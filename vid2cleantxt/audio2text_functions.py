@@ -6,8 +6,6 @@ import os
 import sys
 from os.path import dirname, join
 
-import numpy as np
-
 sys.path.append(dirname(dirname(os.path.abspath(__file__))))
 
 import math
@@ -16,22 +14,18 @@ import re
 import sys
 from datetime import datetime
 
-import moviepy.editor as mp
 import neuspell
 import pandas as pd
 import pkg_resources
 import pysbd
 import yake
+from natsort import natsorted
+from pydub import AudioSegment
 from symspellpy import SymSpell
 from tqdm.auto import tqdm
-from natsort import natsorted
-from vid2cleantxt.v2ct_utils import (
-    trim_fname,
-    create_folder,
-    NullIO,
-    get_timestamp,
-)
-from pydub import AudioSegment
+
+from vid2cleantxt.v2ct_utils import (NullIO, create_folder, get_timestamp,
+                                     trim_fname)
 
 
 def get_av_fmts():
@@ -386,7 +380,6 @@ def init_neuspell(verbose=False):
     -------
     checker : neuspell.SpellChecker object
     """
-    # TODO: add alternatives for non-English
     if verbose:
         checker = neuspell.SclstmbertChecker()
         checker.from_pretrained()
@@ -485,8 +478,14 @@ def SBD_freetext(text, verbose=False, lang="en"):
     return seg_and_capital
 
 
+# TODO: add alternatives for non-English
 def spellcorrect_pipeline(
-    filepath, filename, ns_checker=None, linebyline=True, verbose=False
+    filepath,
+    filename: str,
+    method: str = "neuspell",
+    spell_checker=None,
+    linebyline=True,
+    verbose=False,
 ):
     """
     spellcorrect_pipeline - takes a filepath and filename and returns a corrected version of the text. It uses both the PySBD and Neuspell algorithms to correct the text. Note that the Neuspell algorithm is more accurate than the SymSpell algorithm, but it is slower - it is recommended to use the SymSpell algorithm if you are dealing with a large corpus of text or see runtime issues.
@@ -495,7 +494,8 @@ def spellcorrect_pipeline(
     ----------
     filepath : [type], optional,    the filepath to the file to be corrected
     filename : [type], optional,    the filename of the file to be corrected
-    ns_checker : [type], optional, the neuspell object to be used for spellchecking, by default None
+    method : str, optional, by default "neuspell", the method to use for spell checking. Options are "neuspell" or "symspell"
+    spell_checker : [type], optional, by default None, if None, will initialize a new object for the spell checker
     linebyline : bool, optional,    whether to save the corrected text as a list of lines or a single string in the output file, by default True
     verbose : bool, optional,      whether to print out the progress of the spellchecking process, by default False
 
@@ -503,26 +503,35 @@ def spellcorrect_pipeline(
     -------
     pipelineoutput : dict, the corrected text and other data
     """
-
+    accepted_methods = ["neuspell", "symspell"]
+    assert method in accepted_methods, "method must be one of {}".format(
+        accepted_methods
+    )
     with open(join(filepath, filename), "r", encoding="utf-8", errors="ignore") as file:
         textlines = file.readlines()  # return a list
 
-    # step 1: spellcheck using neuspell
-    try:
-        sc_textlines = neuspell_freetext(textlines, ns_checker=ns_checker, verbose=verbose)
-    except Exception as e:
-        print(f"issue using Neuspell, {e}, using SymSpell")
-        sc_textlines = symspell_freetext(textlines)
+    # lowercase the textlines
+    textlines = [line.lower() for line in textlines]
+    # step 1: spellcheck using specified method
+    if method.lower() == "neuspell":
+        corrected_text = neuspell_freetext(
+            textlines, ns_checker=spell_checker, verbose=verbose
+        )
+    else:
+        # symspell fallback
+        corrected_text = symspell_freetext(
+            textlines,
+            verbose=verbose,
+            speller=spell_checker,
+        )
+    loc_SC = f"{method}_corrected"
 
-    loc_SC = "neuspell_results"
     create_folder(join(filepath, loc_SC))
 
     sc_outname = f"{trim_fname(filename)}_NSC_results.txt"
-
-    with open(
-        join(filepath, loc_SC, sc_outname), "w", encoding="utf-8", errors="replace"
-    ) as fo:
-        fo.writelines(sc_textlines)  # save spell-corrected text
+    _corr_out = join(filepath, loc_SC, sc_outname)
+    with open(_corr_out, "w", encoding="utf-8", errors="replace") as fo:
+        fo.writelines(corrected_text)  # save spell-corrected text
     # step 2: sentence boundary detection & misc punctuation removal
     misc_fixes = {
         " ' ": "'",
@@ -530,11 +539,11 @@ def spellcorrect_pipeline(
         " . ": ".",
     }  # dictionary of miscellaneous fixes, mostly for punctuation
 
-    sc_textlines = (
-        [sc_textlines] if not isinstance(sc_textlines, list) else sc_textlines
+    corrected_text = (
+        corrected_text if isinstance(corrected_text, list) else [corrected_text]
     )
-    fin_textlines = []
-    for line in sc_textlines:
+    punc_txtlines = []
+    for line in corrected_text:
         line = (
             " ".join(line) if isinstance(line, list) else line
         )  # check for list of lists/strings
@@ -547,33 +556,33 @@ def spellcorrect_pipeline(
         ), f"sentenced, with type {type(sentenced)}  and valye {sentenced} is not a string.. fix it"
         for key, value in misc_fixes.items():
             sentenced = sentenced.replace(key, value)  # fix punctuation
-        fin_textlines.append(sentenced)
+        punc_txtlines.append(sentenced)
 
-    fin_textlines = [line.strip() for line in fin_textlines if line.strip()]
-    fin_textlines = (
-        fin_textlines[0] if linebyline and len(fin_textlines) == 1 else fin_textlines
+    punc_txtlines = [line.strip() for line in punc_txtlines if line.strip()]
+    punc_txtlines = (
+        punc_txtlines[0] if linebyline and len(punc_txtlines) == 1 else punc_txtlines
     )
-    if linebyline and isinstance(fin_textlines, str):
+    if linebyline and isinstance(punc_txtlines, str):
         # if the corrected text is a single string, convert it to a list of lines
-        fin_textlines = (
-            fin_textlines.split(". ")
-            if isinstance(fin_textlines, str)
-            else fin_textlines
+        punc_txtlines = (
+            punc_txtlines.split(". ")
+            if isinstance(punc_txtlines, str)
+            else punc_txtlines
         )
-        fin_textlines = [
-            line + ".\n" for line in fin_textlines
+        punc_txtlines = [
+            line + ".\n" for line in punc_txtlines
         ]  # add periods to the end of each line
     loc_FIN = "results_SC_pipeline"
     create_folder(join(filepath, loc_FIN))
     final_outname = f"{trim_fname(filename)}_NSC_SBD.txt"
     SBD_out_path = join(filepath, loc_FIN, final_outname)
     with open(SBD_out_path, "w", encoding="utf-8", errors="replace") as fo2:
-        fo2.writelines(fin_textlines)
+        fo2.writelines(punc_txtlines)
 
     pipelineout = {
         "origi_tscript_text": " ".join(textlines),
-        "spellcorrected_text": " ".join(sc_textlines),
-        "final_text": " ".join(fin_textlines),
+        "spellcorrected_text": " ".join(corrected_text),
+        "final_text": " ".join(punc_txtlines),
         "spell_corrected_dir": join(filepath, loc_SC),
         "sc_filename": sc_outname,
         "SBD_dir": join(filepath, loc_FIN),
