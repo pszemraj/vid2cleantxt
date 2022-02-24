@@ -3,8 +3,8 @@
 """
 vid2cleantxt by Peter Szemraj
 
-Pipeline for Zero-shot transcription of a lecture video file to text using facebook's wav2vec2 model
-this is the primary pipeline for the project
+Pipeline fortranscription of a speech-based video file to text using facebook's wav2vec2 model (or Hubert model)
+this is the primary script for the project
 
 You can access the arguments for this script by running the following command:
     *\vid2cleantxt\transcribe.py -h (windows)
@@ -12,13 +12,13 @@ You can access the arguments for this script by running the following command:
 
 Tips for runtime:
 
-- use the default "facebook/wav2vec2-base-960h" to start out with
+- use the default "facebook/wav2vec2-base-960h" to start out with (the default model is "facebook/hubert-large-ls960-ft")
 - if model fails to work or errors out, try reducing the chunk length with --chunk-length <int>
 """
 
 import argparse
-import os
 import gc
+import os
 import sys
 from os.path import dirname, join
 
@@ -29,51 +29,33 @@ import logging
 
 logging.basicConfig(level=logging.INFO, filename="LOGFILE_vid2cleantxt_transcriber.log")
 
+import argparse
 import math
 import shutil
 import time
+import warnings
 
 import librosa
 import pandas as pd
-import argparse
 import torch
-from tqdm.auto import tqdm
 import transformers
-from transformers import (
-    HubertForCTC,
-    Wav2Vec2Processor,
-    Wav2Vec2ForCTC,
-    WavLMForCTC,
-)
-import warnings
+from tqdm.auto import tqdm
+from transformers import (HubertForCTC, Wav2Vec2ForCTC, Wav2Vec2Processor,
+                          WavLMForCTC)
 
 #  filter out warnings that pretend transfer learning does not exist
 warnings.filterwarnings("ignore", message="Some weights of")
 warnings.filterwarnings("ignore", message="initializing BertModel")
 transformers.utils.logging.set_verbosity(40)
 
-from audio2text_functions import (
-    trim_fname,
-    corr,
-    create_metadata_df,
-    init_neuspell,
-    init_symspell,
-    quick_keys,
-    spellcorrect_pipeline,
-    setup_out_dirs,
-    get_av_fmts,
-    prep_transc_pydub,
-)
-from v2ct_utils import (
-    check_runhardware,
-    create_folder,
-    digest_txt_directory,
-    find_ext_local,
-    move2completed,
-    NullIO,
-    torch_validate_cuda,
-    get_timestamp,
-)
+from audio2text_functions import (corr, create_metadata_df, get_av_fmts,
+                                  init_neuspell, init_symspell,
+                                  prep_transc_pydub, quick_keys,
+                                  setup_out_dirs, spellcorrect_pipeline,
+                                  trim_fname)
+from v2ct_utils import (NullIO, check_runhardware, create_folder,
+                        digest_txt_directory, find_ext_local, get_timestamp,
+                        move2completed, torch_validate_cuda)
 
 
 def load_transcription_objects(hf_id: str):
@@ -106,6 +88,7 @@ def load_transcription_objects(hf_id: str):
         # for example --model "facebook/wav2vec2-large-960h-lv60-self"
         print(f"Loading wav2vec2 model - {hf_id}")
         model = Wav2Vec2ForCTC.from_pretrained(hf_id)
+    logging.info(f"Loaded model {hf_id} from huggingface")
     return tokenizer, model
 
 
@@ -129,7 +112,10 @@ def wav2vec2_islarge(model_obj):
         "base": 94396320,
         "large": 315471520,  # recorded by  loading the model in known environment
     }
-    if not isinstance(model_obj, Wav2Vec2ForCTC):
+    if isinstance(model_obj, HubertForCTC):
+        logging.info("HubertForCTC is not a wav2vec2 model so not checking size")
+        return False
+    elif not isinstance(model_obj, Wav2Vec2ForCTC):
         warnings.warn(
             message="Model is not a wav2vec2 model - this function is for wav2vec2 models only",
             category=None,
@@ -172,9 +158,10 @@ def save_transc_results(
     out_p_tscript = storage_locs.get("t_out")
     out_p_metadata = storage_locs.get("m_out")
     header = f"{trim_fname(vid_name)}_vid2txt_{get_timestamp()}"  # create header for output file
+    _t_out = join(out_p_tscript, f"{header}_full.txt")
     # save the text
     with open(
-        join(out_p_tscript, f"{header}_full.txt"),
+        _t_out,
         "w",
         encoding="utf-8",
         errors="ignore",
@@ -203,7 +190,7 @@ def transcribe_video_wav2vec(
 
     Parameters
     ----------
-    ts_model : torch.nn.Module, the transformer model that was loaded (must be a wav2vec2 model)
+    ts_model : transformers model, the transformer model that was loaded (must be a wav2vec2 model)
     ts_tokenizer : transformers.AutoTokenizer, the tokenizer that was loaded (must be a wav2vec2 tokenizer)
     directory : str, path to the directory containing the video file
     vid_clip_name : str, name of the video clip
@@ -216,7 +203,7 @@ def transcribe_video_wav2vec(
     transc_results : dict, the transcribed text and metadata
 
     """
-
+    logging.info(f"Starting to transcribe {clip_name} @ {get_timestamp()}")
     if verbose:
         print(f"Starting to transcribe {clip_name} @ {get_timestamp()}")
     # create audio chunk folder
@@ -310,13 +297,19 @@ def transcribe_video_wav2vec(
     }
 
     if verbose:
-        print(f"finished transcription of {clip_name} base folder on {get_timestamp()}")
-
+        print(f"finished transcription of {clip_name} - {get_timestamp()}")
+    logging.info(f"finished transcription of {clip_name} - {get_timestamp()}")
     return transc_res
 
 
 def postprocess_transc(
-    tscript_dir, mdata_dir, merge_files=False, linebyline=True, verbose=False
+    tscript_dir,
+    mdata_dir,
+    merge_files=False,
+    linebyline=True,
+    verbose=False,
+    spell_correct_method: str = "symspell",
+    checker=None,
 ):
     """
     postprocess_transc - postprocess the transcribed text by consolidating the text and metadata, and spell checking + sentence splitting
@@ -326,8 +319,20 @@ def postprocess_transc(
     tscript_dir : str, path to the directory containing the transcribed text files
     mdata_dir : str, path to the directory containing the metadata files
     merge_files : bool, optional, by default False, if True, create a new file that contains all text and metadata merged together
+    linebyline : bool, optional, by default True, if True, split the text into sentences
+    spell_correct_method : str, optional, by default "symspell", the method to use for spell checking. Options are "symspell", "neuspell"
+    checker : spellchecker.SpellChecker, optional, by default None, the spell checker object to use for spell checking. If None, it will be created.
     verbose : bool, optional
     """
+    logging.info(
+        f"Starting postprocessing of transcribed text @ {get_timestamp()} with params {locals()}"
+    )
+    if checker is None:
+        checker = (
+            init_neuspell()
+            if spell_correct_method.lower() == "neuspell"
+            else init_symspell()
+        )
     if verbose:
         print("Starting to postprocess transcription @ {}".format(get_timestamp()))
 
@@ -356,7 +361,8 @@ def postprocess_transc(
             out_p_tscript,
             this_transc,
             verbose=False,
-            ns_checker=checker,
+            method=spell_correct_method,
+            spell_checker=checker,
             linebyline=linebyline,
         )
         # get locations of where corrected files were saved
@@ -448,6 +454,14 @@ def get_parser():
         help="Save the transcribed text as a single line of text instead of one line per sentence",
     )
 
+    parser.add_argument(
+        "--basic-spelling",
+        required=False,
+        default=False,
+        action="store_true",
+        help="Use the basic spelling correction pipeline with symSpell",
+    )
+
     return parser
 
 
@@ -467,7 +481,8 @@ if __name__ == "__main__":
     model_arg = args.model
     join_text = args.join_text
     linebyline = not join_text
-
+    base_spelling = args.basic_spelling
+    logging.info(f"Starting transcription pipeline @ {get_timestamp(True)}" + "\n")
     print(f"\nLoading models @ {get_timestamp(True)} - may take some time...")
     print("if RT seems excessive, try --verbose flag or checking logfile")
     # load the model facebook/hubert-large-ls960-ft
@@ -479,10 +494,23 @@ if __name__ == "__main__":
     # load the spellchecker models. suppress outputs as there are way too many
     orig_out = sys.__stdout__
     sys.stdout = NullIO()
-    checker = init_neuspell()
-    sym_spell = init_symspell()
-    sys.stdout = orig_out  # return to default of print-to-console
+    if base_spelling:
+        checker = init_symspell()
+    else:
+        try:
+            checker = init_neuspell()
 
+        except Exception as e:
+            print(
+                "Failed loading NeuSpell spellchecker, reverting to basic spellchecker"
+            )
+            logging.warning(
+                f"Failed loading NeuSpell spellchecker, reverting to basic spellchecker"
+            )
+            logging.warning(f"{e}")
+            base_spelling = True
+            checker = init_symspell()
+    sys.stdout = orig_out  # return to default of print-to-console
     # load vid2cleantxt inputs
     approved_files = []
     for ext in get_av_fmts():  # now include audio formats and video formats
@@ -490,14 +518,13 @@ if __name__ == "__main__":
 
     print(f"\nFound {len(approved_files)} audio or video files in {directory}")
 
+    # transcribe video and get results
     storage_locs = setup_out_dirs(directory)  # create and get output folders
-
     for filename in tqdm(
         approved_files,
         total=len(approved_files),
         desc="transcribing vids",
     ):
-        # transcribe video and get results
         t_results = transcribe_video_wav2vec(
             ts_model=model,
             ts_tokenizer=tokenizer,
@@ -518,11 +545,12 @@ if __name__ == "__main__":
         merge_files=False,
         verbose=is_verbose,
         linebyline=linebyline,
+        spell_correct_method="symspell" if base_spelling else "neuspell",
+        checker=checker,
     )
 
+    logging.info(f"Finished transcription pipeline @ {get_timestamp(True)}" + "\n")
+    logging.info(f"Total time: {round((time.perf_counter() - st)/60, 3)} mins")
     print(
-        f"\n\nFinished at: {get_timestamp()}. Total RT was {round((time.perf_counter() - st)/60, 3)} mins"
-    )
-    print(
-        f"relevant files for run are in: \n{out_p_tscript} \n and: \n{out_p_metadata}"
+        f"Complete. Relevant files for run are in: \n{out_p_tscript} \n and: \n{out_p_metadata}"
     )
