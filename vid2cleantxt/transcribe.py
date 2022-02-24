@@ -48,15 +48,28 @@ warnings.filterwarnings("ignore", message="Some weights of")
 warnings.filterwarnings("ignore", message="initializing BertModel")
 transformers.utils.logging.set_verbosity(40)
 
-from audio2text_functions import (corr, create_metadata_df, get_av_fmts,
-                                  init_neuspell, init_symspell,
-                                  prep_transc_pydub, quick_keys,
-                                  setup_out_dirs, spellcorrect_pipeline,
-                                  trim_fname)
-from v2ct_utils import (NullIO, check_runhardware, create_folder,
-                        digest_txt_directory, find_ext_local, get_timestamp,
-                        move2completed, torch_validate_cuda)
-
+from vid2cleantxt.audio2text_functions import (
+    trim_fname,
+    corr,
+    create_metadata_df,
+    init_neuspell,
+    init_symspell,
+    quick_keys,
+    spellcorrect_pipeline,
+    setup_out_dirs,
+    get_av_fmts,
+    prep_transc_pydub,
+)
+from vid2cleantxt.v2ct_utils import (
+    check_runhardware,
+    create_folder,
+    digest_txt_directory,
+    find_ext_local,
+    move2completed,
+    NullIO,
+    torch_validate_cuda,
+    get_timestamp,
+)
 
 def load_transcription_objects(hf_id: str):
     """
@@ -358,7 +371,7 @@ def postprocess_transc(
         desc="SC_pipeline - transcribed audio",
     ):
         PL_out = spellcorrect_pipeline(
-            out_p_tscript,
+            tscript_dir,
             this_transc,
             verbose=False,
             method=spell_correct_method,
@@ -375,7 +388,7 @@ def postprocess_transc(
             num_kw=25,
             max_ngrams=3,
             save_db=False,
-            verbose=is_verbose,
+            verbose=verbose,
         )
 
         kw_all_vids = pd.concat([kw_all_vids, qk_df], axis=1)
@@ -383,7 +396,7 @@ def postprocess_transc(
     # save overall transcription file
     kwdb_fname = f"YAKE - all keywords for run at {get_timestamp()}.csv"
     kw_all_vids.to_csv(
-        join(out_p_tscript, kwdb_fname),
+        join(tscript_dir, kwdb_fname),
         index=True,
     )
 
@@ -464,24 +477,12 @@ def get_parser():
 
     return parser
 
-
-# TODO: change to pathlib from os.path
-
-if __name__ == "__main__":
-
+def transcribe_dir(input_src, basic_spelling=False, is_verbose=False, move_comp=False, chunk_length=15, model_arg=None, join_text=False):
     st = time.perf_counter()
-    # parse the command line arguments
-    args = get_parser().parse_args()
-    input_src = str(args.input_dir)
+    
     directory = os.path.abspath(input_src)
-    # TODO: add output directory from user arg
-    is_verbose = args.verbose
-    move_comp = args.move_input_vids
-    chunk_length = int(args.chunk_length)
-    model_arg = args.model
-    join_text = args.join_text
     linebyline = not join_text
-    base_spelling = args.basic_spelling
+    base_spelling = basic_spelling
     logging.info(f"Starting transcription pipeline @ {get_timestamp(True)}" + "\n")
     print(f"\nLoading models @ {get_timestamp(True)} - may take some time...")
     print("if RT seems excessive, try --verbose flag or checking logfile")
@@ -510,6 +511,7 @@ if __name__ == "__main__":
             logging.warning(f"{e}")
             base_spelling = True
             checker = init_symspell()
+
     sys.stdout = orig_out  # return to default of print-to-console
     # load vid2cleantxt inputs
     approved_files = []
@@ -540,6 +542,7 @@ if __name__ == "__main__":
     out_p_tscript = storage_locs.get("t_out")
     out_p_metadata = storage_locs.get("m_out")
     postprocess_transc(
+        checker,
         tscript_dir=out_p_tscript,
         mdata_dir=out_p_metadata,
         merge_files=False,
@@ -554,3 +557,21 @@ if __name__ == "__main__":
     print(
         f"Complete. Relevant files for run are in: \n{out_p_tscript} \n and: \n{out_p_metadata}"
     )
+
+
+# TODO: change to pathlib from os.path
+
+if __name__ == "__main__":
+
+    # parse the command line arguments
+    args = get_parser().parse_args()
+    input_src = str(args.input_dir)
+    # TODO: add output directory from user arg
+    is_verbose = args.verbose
+    move_comp = args.move_input_vids
+    chunk_length = int(args.chunk_length)
+    model_arg = args.model
+    join_text = args.join_text
+    basic_spelling = args.basic_spelling
+
+    transcribe_dir(input_src, basic_spelling, is_verbose, move_comp, chunk_length, model_arg, join_text)
