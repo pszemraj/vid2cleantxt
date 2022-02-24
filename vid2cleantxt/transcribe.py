@@ -542,7 +542,6 @@ def transcribe_dir(input_src, basic_spelling=False, is_verbose=False, move_comp=
     out_p_tscript = storage_locs.get("t_out")
     out_p_metadata = storage_locs.get("m_out")
     postprocess_transc(
-        checker,
         tscript_dir=out_p_tscript,
         mdata_dir=out_p_metadata,
         merge_files=False,
