@@ -1,4 +1,20 @@
 
+# common repo-related filetypes
+
+*.pdf
+*.xlsx
+*.csv
+
+# force-add notebooks and examples
+*colab_notebooks/
+*examples/
+*helper/
+
+# eggs
+*/eggs/
+*.egg
+
+
 ### JupyterNotebooks ###
 # gitignore template for Jupyter Notebooks
 # website: http://jupyter.org/
