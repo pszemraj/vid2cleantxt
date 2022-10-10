@@ -204,7 +204,7 @@ def transcribe_video_wav2vec(
     chunk_dur: int,
     verbose=False,
     temp_dir: str = "audio_chunks",
-):
+)-> dict:
     """
     transcribe_video_wav2vec - transcribes a video clip using the wav2vec2 model. Note that results will be saved to the output directory, src_dir
 
@@ -346,7 +346,7 @@ def postprocess_transc(
 
     Returns
     -------
-    None
+    str, filepath to the "complete" output directory
     """
     logging.info(
         f"Starting postprocessing of transcribed text @ {get_timestamp()} with params {locals()}"
@@ -413,9 +413,9 @@ def postprocess_transc(
 
 
 def transcribe_dir(
-    input_src: str,
+    input_dir: str,
     chunk_length: int = 15,
-    model_arg: str = None,
+    model_id: str = None,
     basic_spelling=False,
     move_comp=False,
     join_text=False,
@@ -426,16 +426,18 @@ def transcribe_dir(
 
     :param str input_src: the path to the directory containing the videos to transcribe
     :param int chunk_length: the length of the chunks to split the audio into, in seconds. Default is 15 seconds
+    :param str model_id: the model id to use for the transcription. Default is None, which will use the default model facebook/hubert-large-ls960-ft
     :param bool basic_spelling: if True, use basic spelling correction instead of neural spell correction
     :param bool move_comp: if True, move the completed files to a new folder
-    :param _type_ model_arg: the model to use for transcription. If None, it will use the default model
     :param bool join_text: if True, join all lines of text into one long string
     :param bool verbose: if True, print out more information
+
+    -------
     :return str, str: the path to the directory of transcribed text files, and the path to the directory of metadata files
     """
     st = time.perf_counter()
 
-    directory = os.path.abspath(input_src)
+    directory = os.path.abspath(input_dir)
     linebyline = not join_text
     base_spelling = basic_spelling
     logging.info(f"Starting transcription pipeline @ {get_timestamp(True)}" + "\n")
@@ -443,7 +445,7 @@ def transcribe_dir(
     print("if RT seems excessive, try --verbose flag or checking logfile")
 
     wav_model = (
-        "facebook/hubert-large-ls960-ft" if model_arg is None else model_arg
+        "facebook/hubert-large-ls960-ft" if model_id is None else model_id
     )  # load the model
     tokenizer, model = load_transcription_objects(wav_model)
 
@@ -596,15 +598,15 @@ if __name__ == "__main__":
     # TODO: add output directory from user arg
     move_comp = args.move_input_vids
     chunk_length = int(args.chunk_length)
-    model_arg = args.model
+    model_id = str(args.model)
     join_text = args.join_text
     basic_spelling = args.basic_spelling
     is_verbose = args.verbose
 
     output_text, output_metadata = transcribe_dir(
-        input_src = input_src,
+        input_dir = input_src,
         chunk_length = chunk_length,
-        model_arg = model_arg,
+        model_id = model_id,
         move_comp = move_comp,
         join_text = join_text,
         basic_spelling = basic_spelling,
