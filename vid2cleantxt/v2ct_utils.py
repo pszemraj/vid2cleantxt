@@ -3,9 +3,9 @@
 
     Note: Functions for the actual processing of the files are in audio2text_functions.py
 """
+import logging
 import os
 import sys
-import logging
 from os.path import dirname, join
 
 sys.path.append(dirname(dirname(os.path.abspath(__file__))))
@@ -21,10 +21,12 @@ from os.path import basename, dirname, isfile, join
 import GPUtil as GPU
 import humanize
 import psutil
+import spacy
 import torch
 import wordninja
 from cleantext import clean
 from natsort import natsorted
+from spacy.cli import download
 
 import spacy
 from spacy.cli import download
@@ -171,6 +173,19 @@ def create_folder(new_path):
     os.makedirs(new_path, exist_ok=True)
 
 
+
+def load_spacy_models():
+    """downloads spaCy models if not installed on local machine."""
+    try:
+        nlp = spacy.load("en")
+    except OSError as e:
+        print(
+            "INFO: Downloading language model for the spaCy POS tagger\n"
+            "(don't worry, this will only happen once)",
+        )
+        logging.info(f"downloading the spacy model en_core_web_sm due to:\t{e}")
+        download("en_core_web_sm")
+        nlp = spacy.load("en_core_web_sm")
 class NullIO(StringIO):
     """NullIO - used to redirect system output for things that print a lot to console"""
 
