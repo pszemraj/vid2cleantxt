@@ -2,7 +2,9 @@
 
 ![vid2cleantext simple](https://user-images.githubusercontent.com/74869040/131500291-ed0a9d7f-8be7-4f4b-9acf-c360cfd46f1f.png)
 
-**vid2cleantxt**: a [transformers-based](https://huggingface.co/facebook/wav2vec2-large-960h-lv60-self) pipeline for turning heavily speech-based video files into clean, readable text from the audio. [Link to Quickstart](#quickstart).
+[Jump to Quickstart](#quickstart)
+
+**vid2cleantxt**: a [transformers-based](https://huggingface.co/facebook/wav2vec2-large-960h-lv60-self) pipeline for turning heavily speech-based video files into clean, readable text from the audio. Robust speech transcription is now possible like never before with [OpenAI's whisper model](https://openai.com/blog/whisper/).
 
 TL;DR check out [this Colab notebook](https://colab.research.google.com/gist/pszemraj/9678129fe0b552e114e3576606446dee/vid2cleantxt-minimal-example.ipynb) for a transcription and keyword extraction of a speech by John F. Kennedy by simply running all cells.
 
@@ -118,8 +120,8 @@ import vid2cleantxt
 
 text_output_dir, metadata_output_dir = vid2cleantxt.transcribe.transcribe_dir(
     input_dir="path/to/video/files",
-    model_id="facebook/hubert-large-ls960-ft",
-    chunk_length=15,
+    model_id="openai/whisper-base.en",
+    chunk_length=30,
 )
 
 # do things with text files in text_output_dir
@@ -153,7 +155,7 @@ pip install -e .
 
 ```bash
 python examples/TEST_folder_edition/dl_src_videos.py
-python vid2cleantxt/transcribe.py --input-dir ./examples/TEST_folder_edition/ --chunk-length 10
+python vid2cleantxt/transcribe.py --input-dir ./examples/TEST_folder_edition/
 find ./examples/TEST_folder_edition/v2clntxt_transcriptions/results_SC_pipeline -name "*.txt" -exec cat {} +
 ```
 
@@ -243,7 +245,7 @@ Total Memory 20 GB
 Operating System  Windows 10 64-bit
 ```
 
-> _NOTE:_ that the default model is `facebook/hubert-large-ls960-ft`. See the [model card](https://huggingface.co/facebook/hubert-large-ls960-ft) for details.
+> _NOTE:_ that the default model is `openai/whisper-base.en`. See the [model card](https://huggingface.co/openai/whisper-base.en) for details.
 
 ### Now I have a bunch of long text files. How are these useful?
 
@@ -340,9 +342,11 @@ Despite the small number of errors, the model can still recognize the speaker an
 
 ### How can I improve the performance of the model from a word-error-rate perspective?
 
-> COMING SHORTLY: openai's [whisper](https://openai.com/blog/whisper/) model will be added soon; it is incredible for this application.
+> As of Oct 2022: there's really shouldn't be much to complain about given what we had before whisper. That said, there may be some butgs or issues with the new model. Please report them in the issues section :)
 
-The neural ASR model that transcribes the audio is typically the most crucial element to choose/tune. You can use **any wav2vec2 or wavLM model** from the [huggingface hub](https://huggingface.co/models?pipeline_tag=automatic-speech-recognition&sort=downloads); pass the model ID string with `--model` in CLI and `model_id="my-cool-model"` in python.
+The neural ASR model that transcribes the audio is typically the most crucial element to choose/tune. You can use **any whisper, wav2vec2, or wavLM model** from the [huggingface hub](https://huggingface.co/models?pipeline_tag=automatic-speech-recognition&sort=downloads); pass the model ID string with `--model` in CLI and `model_id="my-cool-model"` in python.
+
+. _Note: It's recommended to experiment with the different variants of whisper first, as thhey are the most performant for the vast majority of "long speech" transcription use cases._
 
 You can also train your own model, but that requires you to have a transcription of that person's speech. As you may find, manual transcription is a bit of a pain; therefore, transcripts are rarely provided - hence this repo. If interested see [this notebook](https://github.com/huggingface/notebooks/blob/master/examples/speech_recognition.ipynb)
 
@@ -373,6 +377,7 @@ _`*` these statements reflect the assessment completed around project inception 
 
 A _rough_ timeline of what has been going on in the repo:
 
+- Oct 2022 Part 2 - Initial integration of [whisper](https://openai.com/blog/whisper/) model!!
 - Oct 2022 - Redesign as Python package instead of an assortment of python scripts/notebooks that share a repository and do similar things.
 - Feb 2022 - Add backup functions for spell correction in case of NeuSpell failure (which, is a known issue at the time of writing).
 - Jan 2022 - add huBERT support, abstract the boilerplate out of Colab Notebooks. Starting work on the PDF generation w/ results.
@@ -385,7 +390,7 @@ A _rough_ timeline of what has been going on in the repo:
 
 ### Future Work
 
-0. add OpenAI's [whisper](https://github.com/openai/whisper) through integration with the transformers lib.
+0. ~~add OpenAI's [whisper](https://github.com/openai/whisper) through integration with the transformers lib.~~
 1. Unfortunately, trying to use the [Neuspell](https://github.com/neuspell/neuspell) package is still not possible as the default package etc, has still not been fixed. I will add a permanent workaround to load/use with vid2cleantxt.
 2. ~~syncing improvements currently in the existing **Google Colab** notebooks (links) above, such as [NeuSpell](https://github.com/neuspell/neuspell)~~
 
@@ -395,6 +400,7 @@ A _rough_ timeline of what has been going on in the repo:
 4. add a script to convert `.txt` files to a clean PDF report, [example here](https://www.dropbox.com/s/fpqq2qw7txbkujq/ACE%20NLP%20Workshop%20-%20Session%20II%20-%20Dec%202%202021%20-%20full%20transcription%20-%20txt2pdf%2012.05.2021%20%20Standard.pdf?dl=1)
 5. add summarization script/module
 6. further expand the functionality of the `vid2cleantxt` module
+7. Add support for transcribing the other languages in the whisper model (e.g., French, German, Spanish, etc.). This will require synchronized API changes to ensure that English spell correction is only applied to English transcripts, etc.
 
 ### I've found x repo / script / concept that I think you should incorporate or collaborate with the author
 
