@@ -467,10 +467,10 @@ def transcribe_dir(
     print(f"\nLoading models @ {get_timestamp(True)} - may take some time...")
     print("if RT seems excessive, try --verbose flag or checking logfile")
 
-    wav_model = (
+    model = (
         "facebook/hubert-large-ls960-ft" if model_id is None else model_id
     )  # load the model
-    tokenizer, model = load_transcription_objects(wav_model)
+    processor, model = load_transcription_objects(model)
 
     # load the spellchecker models. suppressing outputs
     orig_out = sys.__stdout__
@@ -508,7 +508,7 @@ def transcribe_dir(
     ):
         t_results = transcribe_video_wav2vec(
             ts_model=model,
-            ts_tokenizer=tokenizer,
+            ts_tokenizer=processor,
             src_dir=directory,
             clip_name=filename,
             chunk_dur=chunk_length,
