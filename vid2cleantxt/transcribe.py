@@ -217,6 +217,115 @@ def save_transc_results(
     )
 
 
+def transcribe_video_whisper(
+    model,
+    processor,
+    src_dir,
+    clip_name: str,
+    chunk_dur: int,
+    verbose=False,
+    temp_dir: str = "audio_chunks",
+) -> dict:
+    """
+    transcribe_video_wav2vec - transcribes a video clip using the wav2vec2 model. Note that results will be saved to the output directory, src_dir
+
+    Parameters
+    ----------
+    ts_model : transformers model, the transformer model that was loaded (must be a wav2vec2 model)
+    ts_tokenizer : transformers.AutoTokenizer, the tokenizer that was loaded (must be a wav2vec2 tokenizer)
+    directory : str, path to the directory containing the video file
+    vid_clip_name : str, name of the video clip
+    chunk_dur : int, duration of audio chunks (in seconds) that the transformer model will be fed
+    verbose : bool, optional
+    temp_dir : str, optional, the name of the temporary directory to store the audio chunks
+
+    Returns
+    -------
+    transc_results : dict, the transcribed text and metadata
+
+    """
+    logging.info(f"Starting to transcribe {clip_name} @ {get_timestamp()}")
+    if verbose:
+        print(f"Starting to transcribe {clip_name} @ {get_timestamp()}")
+    ac_storedir = join(src_dir, temp_dir)
+    create_folder(ac_storedir)
+    chunk_directory = prep_transc_pydub(
+        clip_name, src_dir, ac_storedir, chunk_dur, verbose=verbose
+    )
+    torch_validate_cuda()
+    gc.collect()  # free up memory
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"  # set device
+    full_transc = []
+    GPU_update_incr = (
+        math.ceil(len(chunk_directory) / 2) if len(chunk_directory) > 1 else 1
+    )
+    pbar = tqdm(total=len(chunk_directory), desc="Transcribing video")
+    model = model.to(device)
+    for i, audio_chunk in enumerate(chunk_directory):
+
+        # note that large-960h-lv60 has an attention mask of length of the input sequence, the base model does not
+        if (i % GPU_update_incr == 0) and (GPU_update_incr != 0):
+            # provide update on GPU usage
+            check_runhardware()
+            gc.collect()
+        audio_input, clip_sr = librosa.load(
+            join(ac_storedir, audio_chunk), sr=16000
+        )  # 16000 is the sampling rate of the wav2vec model
+        # convert audio to tensor
+        input_features = processor(audio_input, sampling_rate=clip_sr, truncation=True,  return_tensors="pt").input_features
+        predicted_ids = model.generate(input_features)
+        this_transc = processor.batch_decode(predicted_ids,
+                                            max_length=512,
+                                            clean_up_tokenization_spaces=True,
+                                            skip_special_tokens=True)[0]
+        this_transc = (
+            "".join(this_transc) if isinstance(this_transc, list) else this_transc
+        )
+        # double-check if "" should be joined on  or " "
+        full_transc.append(f"{this_transc}\n")
+        pbar.update(1)
+        # empty memory so you don't overload the GPU
+        if device == "cuda:0":
+            torch.cuda.empty_cache()  # empty memory on GPU
+
+    pbar.close()
+    if verbose:
+        print(f"Finished transcribing {clip_name} @ {get_timestamp()}")
+
+    md_df = create_metadata_df()  # makes a blank df with column names
+    full_text = corr(" ".join(full_transc))
+    md_df.loc[len(md_df), :] = [
+        clip_name,
+        len(chunk_directory),
+        chunk_dur,
+        (len(chunk_directory) * chunk_dur) / 60,  # minutes, the duration of the video
+        get_timestamp(),
+        full_text,
+        len(full_text),
+        len(full_text.split(" ")),
+    ]
+    md_df.transpose(
+        copy=False,
+    )
+    save_transc_results(
+        out_dir=src_dir,
+        vid_name=clip_name,
+        ttext=full_text,
+        mdata=md_df,
+        verbose=verbose,
+    )  # save the results here
+
+    shutil.rmtree(ac_storedir, ignore_errors=True)  # remove audio chunks folder
+    transc_res = {
+        "audio_transcription": full_transc,
+        "metadata": md_df,
+    }
+
+    if verbose:
+        print(f"finished transcription of {clip_name} - {get_timestamp()}")
+    logging.info(f"finished transcription of {clip_name} - {get_timestamp()}")
+    return transc_res
+
 def transcribe_video_wav2vec(
     ts_model,
     ts_tokenizer,
