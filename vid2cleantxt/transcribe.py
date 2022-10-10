@@ -47,9 +47,6 @@ warnings.filterwarnings("ignore", message="Some weights of")
 warnings.filterwarnings("ignore", message="initializing BertModel")
 transformers.utils.logging.set_verbosity(40)
 
-from vid2cleantxt.v2ct_utils import load_spacy_models
-load_spacy_models()
-
 from vid2cleantxt.audio2text_functions import (
     corr,
     create_metadata_df,
