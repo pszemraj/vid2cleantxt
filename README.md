@@ -52,7 +52,7 @@ TL;DR check out [this Colab notebook](https://colab.research.google.com/gist/psz
 
 ## Motivation
 
-Video, specifically audio, is an inefficient way to convey dense or technical information. The viewer has to sit through the whole thing, while only part of the video may be relevant to them. If you don't understand a statement or concept, you have to search through the video, or re-watch it. This project attempts to help solve that problem by converting long video files into text that can be easily searched and summarized.
+Video, specifically audio, is inefficient in conveying dense or technical information. The viewer has to sit through the whole thing, while only part of the video may be relevant to them. If you don't understand a statement or concept, you must search through the video or re-watch it. This project attempts to help solve that problem by converting long video files into text that can be easily searched and summarized.
 
 ## Overview
 
@@ -66,7 +66,7 @@ Example output text of a video transcription of [JFK's speech on going to the mo
 
 > Now look into space to the moon and to the planets beyond and we have vowed that we shall not see it governed by a hostile flag of conquest but. By a banner of freedom and peace we have vowed that we shall not see space filled with weapons of man's destruction but with instruments of knowledge and understanding yet the vow. S of this nation can only be fulfilled if we in this nation are first and therefore we intend to be first. In short our leadership in science and industry our hopes for peace and security our obligations to ourselves as well as others all require. Us to make this effort to solve these mysteries to solve them for the good of all men and to become the world's leading space fearing nationwide set sail on this new sea. Because there is new knowledge to be gained and new rights to be won and they must be won and used for the progress of all before for space science like nuclear science and all techniques. Logo has no conscience of its own whether it will become a force for good or ill depends on man and only if the united states occupies a position of pre eminence. Can we help decide whether this new ocean will be a sea of peace or a new terrifying theatre of war I do not say that we should or will go on. ... (truncated for brevity)
 
-See the [demo notebook](https://colab.research.google.com/gist/pszemraj/9678129fe0b552e114e3576606446dee/vid2cleantxt-minimal-example.ipynb) for the full text output.
+See the [demo notebook](https://colab.research.google.com/gist/pszemraj/9678129fe0b552e114e3576606446dee/vid2cleantxt-minimal-example.ipynb) for the full-text output.
 
 ### Pipeline Intro
 
@@ -74,16 +74,16 @@ See the [demo notebook](https://colab.research.google.com/gist/pszemraj/9678129f
 
 1. The `transcribe.py` script uses `audio2text_functions.py` to convert video files to `.wav` format audio chunks of duration X\* seconds
 2. transcribe all X audio chunks through a pretrained `wav2vec2` model
-3. Write all results of the list into a text file, stores various runtime metrics into a separate text list, and deletes the `.wav` audio chunk directory after completed using them.
-4. (Optional) create two new text files: one with all transcriptions appended, and one with all metadata appended.
+3. Write all list results into a text file, store various runtime metrics into a separate text list, and delete the `.wav` audio chunk directory after using them.
+4. (Optional) create two new text files: one with all transcriptions appended and one with all metadata appended.
 5. FOR each transcription text file:
-    - Passes the 'base' transcription text through a spell checker (_Neuspell_) and auto-correct spelling. Saves as new text file.
-    - Uses _pySBD_ to infer sentence boundaries on the spell-corrected text and add periods in to delineate sentences. Saves as new file.
-    - Runs basic keyword extraction (via _YAKE_) on spell-corrected file. All keywords per file are stored in one data frame for comparison, and exported to `.xlsx` format
+    - Passes the 'base' transcription text through a spell checker (_Neuspell_) and auto-correct spelling. Saves as a new text file.
+    - Uses _pySBD_ to infer sentence boundaries on the spell-corrected text and add periods to delineate sentences. Saves as a new file.
+    - Runs essential keyword extraction (via _YAKE_) on spell-corrected file. All keywords per file are stored in one data frame for comparison and exported to the `.xlsx` format
 
 _\*\* (where X is some duration that does not overload your computer/runtime)_
 
-given `INPUT_DIRECTORY`:
+Given `INPUT_DIRECTORY`:
 
 - _final_ transcriptions in`.txt` will be in `INPUT_DIRECTORY/v2clntxt_transcriptions/results_SC_pipeline/`
 - metadata about transcription process will be in `INPUT_DIRECTORY/v2clntxt_transc_metadata`
@@ -97,7 +97,7 @@ Install, then you can use `vid2cleantxt` in two ways:
 1. CLI via transcribe.py`script from the command line (`python vid2cleantxt/transcribe.py --input-dir "path/to/video/files" --output-dir "path/to/output/dir"\`)
 2. As a python package, import `vid2cleantxt` and use the `transcribe` module to transcribe videos (`vid2cleantxt.transcribe.transcribe_dir()`)
 
-If you either don't have want to use it locally or don't have a GPU, you may be interested in the [demo notebook](https://colab.research.google.com/gist/pszemraj/9678129fe0b552e114e3576606446dee/vid2cleantxt-minimal-example.ipynb) on Google Colab.
+If you don't want to use it locally or don't have a GPU, you may be interested in the [demo notebook](https://colab.research.google.com/gist/pszemraj/9678129fe0b552e114e3576606446dee/vid2cleantxt-minimal-example.ipynb) on Google Colab.
 
 ### Installation
 
@@ -144,8 +144,8 @@ pip install -e .
 
 #### install details & gotchas
 
-- This should be automatically completed upon install/import, but a spacy model may need to be downloaded for post-processing transcribed audio. This can be completed with `spacy download en_core_web_sm`
-- `FFMPEG` is required as a base system dependency to do anything with video/audio. This should be already installed on your system, otherwise see [the ffmpeg site](https://ffmpeg.org/).
+- This should be automatically completed upon installation/import, but a spacy model may need to be downloaded for post-processing transcribed audio. This can be completed with `spacy download en_core_web_sm`
+- `FFMPEG` is required as a base system dependency to do anything with video/audio. This should be already installed on your system; otherwise see [the FFmpeg site](https://ffmpeg.org/).
 
 ### example usage
 
@@ -159,7 +159,7 @@ find ./examples/TEST_folder_edition/v2clntxt_transcriptions/results_SC_pipeline 
 
 Run `python vid2cleantxt/transcribe.py --help` for more details on the CLI.
 
-**Python API:** following will transcribe an input directory of user-specified videos using `wav2vec2-base`, a smaller but faster model than default.
+**Python API:** following will transcribe an input directory of user-specified videos using `wav2vec2-base`, a smaller but faster model than the default.
 
 ```python
 import vid2cleantxt
@@ -173,7 +173,7 @@ text_output_dir, metadata_output_dir = vid2cleantxt.transcribe.transcribe_dir(
 )
 ```
 
-transcribed files can then be interacted with for whatever purpose (see [Visualization and Analysis](#visualization-and-analysis) and below for ideas).
+Transcribed files can then be interacted with for whatever purpose (see [Visualization and Analysis](#visualization-and-analysis) and below for ideas).
 
 ```python
 from pathlib import Path
@@ -200,15 +200,15 @@ print(inspect.getdoc(vid2cleantxt.transcribe.transcribe_dir))
 
 ## Notebooks on Colab
 
-Notebook versions are available on Google Colab as they offer free GPUs which makes vid2cleantxt _much_ faster.
+Notebook versions are available on Google Colab as they offer accessible GPUs which makes vid2cleantxt _much_ faster.
 
-As `vid2cleantxt` is now available as a package with python API, there is no longer a need for long, complicated notebooks. See [this notebook](https://colab.research.google.com/gist/pszemraj/9678129fe0b552e114e3576606446dee/vid2cleantxt-minimal-example.ipynb) for a fairly simple example - copy it to your drive and adjust as needed.
+As `vid2cleantxt` is now available as a package with python API, there is no longer a need for long, complicated notebooks. See [this notebook](https://colab.research.google.com/gist/pszemraj/9678129fe0b552e114e3576606446dee/vid2cleantxt-minimal-example.ipynb) for a relatively simple example - copy it to your drive and adjust as needed.
 
 ⚠️ The notebooks in `./colab_notebooks` are now deprecated and **not recommended to be used**. ⚠️ TODO: remove in a future PR.
 
 **Resources for those new to Colab**
 
-If you like the benefits Colab/cloud notebooks offer but haven't used them before, it's recommended to read the [Colab Quickstart](https://colab.research.google.com/notebooks/intro.ipynb) and some of the below resources as things like file I/O are different than your PC.
+If you like the benefits Colab/cloud notebooks offer but haven't used them before, it's recommended to read the [Colab Quickstart](https://colab.research.google.com/notebooks/intro.ipynb), and some of the below resources as things like file I/O are different than your PC.
 
 - [Google's FAQ](https://research.google.com/colaboratory/faq.html)
 - [Google's Demo Notebook on I/O](https://colab.research.google.com/notebooks/io.ipynb)
@@ -222,7 +222,7 @@ If you like the benefits Colab/cloud notebooks offer but haven't used them befor
 
 On Google Colab with a 16 GB GPU (available to free Colab accounts): **approximately 8 minutes to transcribe ~90 minutes of audio**. CUDA is supported - if you have an NVIDIA graphics card, you may see runtimes closer to that estimate on your local machine.
 
-On my machine (CPU only due to Windows + AMD GPU) it takes approximately 30-70% of the total duration of input video files. You can also take a look at the "console printout" text files in `example_JFK_speech/TEST_singlefile`.
+On my machine (CPU only due to Windows + AMD GPU), it takes approximately 30-70% of the total duration of input video files. You can also look at the "console printout" text files in `example_JFK_speech/TEST_singlefile`.
 
 - with model = `facebook/wav2vec2-base-960h` approx 30% of original video RT
 - with model = `facebook/hubert-xlarge-ls960-ft` (\_perhaps the best pre-whisper model anecdotally) approx 70-80% of original video RT
@@ -247,9 +247,9 @@ On my machine (CPU only due to Windows + AMD GPU) it takes approximately 30-70% 
 
 short answer: `noam_chomsky.jpeg`
 
-more comprehensive answer:
+More comprehensive answer:
 
-Text data can be visualized, summarized, or reduced in many ways with natural language processing and machine learning algorithms. For example, you can use TextHero or ScatterText to compare audio transcriptions with written documents, or use topic models or statistical models to extract key topics from each file. Comparing text data in this way can help you understand how similar they are, or identify key differences.
+With natural language processing and machine learning algorithms, text data can be visualized, summarized, or reduced in many ways. For example, you can use TextHero or ScatterText to compare audio transcriptions with written documents or use topic models or statistical models to extract key topics from each file. Comparing text data can help you understand how similar they are or identify vital differences.
 
 #### Visualization and Analysis
 
@@ -258,7 +258,7 @@ Text data can be visualized, summarized, or reduced in many ways with natural la
 2. [Scattertext](https://github.com/JasonKessler/scattertext) - allows for comparisons of one corpus of text to another via various methods and visualizes them.
     - Use case here: I want to see how the speeches by _this speaker_ compare to speeches by _speaker B_ in terms of topics, word frequency… so on
 
-Some examples from my own usage are illustrated below from both packages.
+Some examples from my usage are illustrated below from both packages.
 
 #### Text Extraction / Manipulation
 
@@ -269,9 +269,9 @@ Some examples from my own usage are illustrated below from both packages.
 
 ### Text Summarization
 
-Several options are available on the [HuggingFace website](https://huggingface.co/models?pipeline_tag=summarization). In an effort to create a better, more general model for summarization, I have fine-tuned [this model](https://huggingface.co/pszemraj/bigbird-pegasus-large-K-booksum) on a [book summary dataset](https://arxiv.org/abs/2105.08209) which I find provides the best results for "lecture-esque" video conversion. I wrote a little bit about this and compare it to other models _WARNING: satire/sarcasm inside_ [here](https://www.dropbox.com/s/fsz9u4yk3hf9fak/A%20new%20benchmark%20for%20the%20generalizability%20of%20summarization%20models.pdf?dl=0).
+Several options are available on the [HuggingFace website](https://huggingface.co/models?pipeline_tag=summarization). To create a better, more general model for summarization, I have fine-tuned [this model](https://huggingface.co/pszemraj/bigbird-pegasus-large-K-booksum) on a [book summary dataset](https://arxiv.org/abs/2105.08209) which I find provides the best results for "lecture-esque" video conversion. I wrote a little about this and compared it to other models _WARNING: satire/sarcasm inside_ [here](https://www.dropbox.com/s/fsz9u4yk3hf9fak/A%20new%20benchmark%20for%20the%20generalizability%20of%20summarization%20models.pdf?dl=0).
 
-I personally use several similar methods in combination with the transcription script, however it isn't in a place to be officially posted yet. It will be posted to a public repo on this account when ready. For now, you can check out [this Colab notebook](https://colab.research.google.com/drive/1BSIsYHH0w5pdVxqo_nK5vHgMeBiJKKGm?usp=sharing) using the same example text that is output when the JFK speeches are transcribed.
+I use several similar methods in combination with the transcription script. However, it isn't in a place to be officially posted yet. It will be posted to a public repo on this account when ready. You can now check out [this Colab notebook](https://colab.research.google.com/drive/1BSIsYHH0w5pdVxqo_nK5vHgMeBiJKKGm?usp=sharing) using the same example text that is output when the JFK speeches are transcribed.
 
 #### TextHero example use case
 
@@ -283,7 +283,7 @@ Clustering vectorized text files into k-means groups:
 
 ## ScatterText example use case
 
-Comparing frequency of terms in one body of text vs. another
+Comparing the frequency of terms in one body of text vs. another
 
 ![ST P 1 term frequency I ML 2021 Docs I ML Prior Exams_072122_](https://user-images.githubusercontent.com/74869040/110546149-69e49980-812e-11eb-9c94-81fcb395b907.png)
 
@@ -320,35 +320,35 @@ Upon cloning the repo, run the command `pip install -e .` (or`pip install -r req
     wrapt
     yake>=0.4.8
 
-If you encounter warnings/errors that mention ffmpeg, please download the latest version of FFMPEG from their website [here](https://www.ffmpeg.org/download.html) and ensure it is added to PATH.
+If you encounter warnings/errors that mention FFmpeg, please download the latest version of FFMPEG from their website [here](https://www.ffmpeg.org/download.html) and ensure it is added to PATH.
 
 ### My computer crashes once it starts running the wav2vec2 model
 
-Try passing a lower `--chunk-len <INT>` when calling `vid2cleantxt/transcribe.py`. Until you get to really small intervals (say &lt; 8 seconds) each audio chunk can be treated as approximately independent as they are different sentences.
+Try passing a lower `--chunk-len <INT>` when calling `vid2cleantxt/transcribe.py` until you get to minimal intervals (say &lt; 8 seconds). Each audio chunk can be treated as approximately independent as they are different sentences.
 
 YOu can also try a smaller wav2vec2 model, pass `-m facebook/wav2vec2-base-960h` in CLI or `model_id="facebook/wav2vec2-base-960h"` in python.
 
 ### The transcription is not perfect, and therefore I am mad
 
-Perfect transcripts are not always possible, especially when the audio is not clean. For example, the audio is recorded with a microphone that is not always perfectly tuned to the speaker can cause the model to have issues. Additionally, the default models are not trained on specific speakers and therefore the model will not be able to recognize the speaker / their accent.
+Perfect transcripts are not always possible, especially when the audio is not clean. For example, audio recorded with a microphone that is not always perfectly tuned to the speaker can cause the model to have issues. Additionally, the default models are not trained on specific speakers, and therefore the model will not be able to recognize the speaker / their accent.
 
-Despite the small amount of errors, the model is still able to recognize the speaker and their accent and capture a vast majority of the text. This should still save you a lot of time and effort.
+Despite the small number of errors, the model can still recognize the speaker and their accent and capture a vast majority of the text. This should still save you a lot of time and effort.
 
 ### How can I improve the performance of the model from a word-error-rate perspective?
 
-> COMING SHORTLY: openai's [whisper](https://openai.com/blog/whisper/) model will be added soon, it is amazing for this application.
+> COMING SHORTLY: openai's [whisper](https://openai.com/blog/whisper/) model will be added soon; it is incredible for this application.
 
-The neural ASR model that transcribes the audio is typically the most important element to choose/tune. You can use **any wav2vec2 or wavLM model** from the [huggingface hub](https://huggingface.co/models?pipeline_tag=automatic-speech-recognition&sort=downloads), just pass the model ID string with `--model` in CLI and `model_id="my-cool-model"` in python.
+The neural ASR model that transcribes the audio is typically the most crucial element to choose/tune. You can use **any wav2vec2 or wavLM model** from the [huggingface hub](https://huggingface.co/models?pipeline_tag=automatic-speech-recognition&sort=downloads); pass the model ID string with `--model` in CLI and `model_id="my-cool-model"` in python.
 
-You can also train your own model, but that requires that you already have a transcription of that person's speech already. As you may find, manual transcription is a bit of a pain and therefore transcripts are rarely provided - hence this repo. If interested see [this notebook](https://github.com/huggingface/notebooks/blob/master/examples/speech_recognition.ipynb)
+You can also train your own model, but that requires you to have a transcription of that person's speech. As you may find, manual transcription is a bit of a pain; therefore, transcripts are rarely provided - hence this repo. If interested see [this notebook](https://github.com/huggingface/notebooks/blob/master/examples/speech_recognition.ipynb)
 
 ### Why use wav2vec2 instead of SpeechRecognition or other transcription methods?
 
-Google's SpeechRecognition (with the free API) requires optimization of three unknown parameters\*, which in my experience can vary widely among english as a second language speakers. With wav2vec2, the base model is pretrained, so a 'decent transcription' can be made without having to spend a bunch of time testing and optimizing parameters.
+Google's SpeechRecognition (with the free API) requires optimization of three unknown parameters\*, which in my experience, can vary widely among English as a second language speakers. With wav2vec2, the base model is pretrained, so a 'decent transcription' can be made without spending a lot of time testing and optimizing parameters.
 
-Also, because it's an API you can't train it even if you wanted to, you have to be online for functionally most of the script runtime, and then of course you have privacy concerns with sending data out of your machine.
+Also, because it's an API, you can't train it even if you wanted to, you have to be online for most of the script runtime functionally, and then, of course you have privacy concerns with sending data out of your machine.
 
-_`*` these statements reflect the assessment completed around project inception about early 2021._
+_`*` these statements reflect the assessment completed around project inception in early 2021._
 
 ### Errors
 
@@ -360,8 +360,8 @@ _`*` these statements reflect the assessment completed around project inception 
 
 ## Examples
 
-- two examples are available in the `examples/` directory. One example is a single video (another speech) and the other is multiple videos (MIT OpenCourseWare). Citations are in the respective folders.
-- Note that the videos first need to be downloaded video the respective scripts in each folder first, i.e. run: `python examples/TEST_singlefile/dl_src_video.py`
+- two examples are available in the `examples/` directory. One example is a single video (another speech), and the other is multiple videos (MIT OpenCourseWare). Citations are in the respective folders.
+- Note that the videos first need to be downloaded video the respective scripts in each folder first, i.e., run: `python examples/TEST_singlefile/dl_src_video.py`
 
 ## Future Work, Collaboration, & Citations
 
@@ -369,32 +369,32 @@ _`*` these statements reflect the assessment completed around project inception 
 
 A _rough_ timeline of what has been going on in the repo:
 
-- Oct 2022 - Redesign as Python package as opposed to an assortment of python scripts/notebooks that happen to share a repository and do similar things.
-- Feb 2022 - Add backup functions for spell correction in case of NeuSpell failure (which at the time of writing is a known issue).
+- Oct 2022 - Redesign as Python package instead of an assortment of python scripts/notebooks that share a repository and do similar things.
+- Feb 2022 - Add backup functions for spell correction in case of NeuSpell failure (which, is a known issue at the time of writing).
 - Jan 2022 - add huBERT support, abstract the boilerplate out of Colab Notebooks. Starting work on the PDF generation w/ results.
-- Dec 2021 - greatly improved runtime of the script, and added more features (command line, docstring, etc.)
-- Sept-Oct 2021: Fixing bugs, formatting code.
-- July 12, 2021 - sync work from Colab notebooks: add CUDA support for pytorch in the `.py` versions, added Neuspell as a spell checker. General organization and formatting improvements.
+- Dec 2021 - greatly improved script runtime, and added more features (command line, docstring, etc.)
+- Sept-Oct 2021: Fixing bugs, and formatting code.
+- July 12, 2021 - sync work from Colab notebooks: add CUDA support for PyTorch in the `.py` versions, added Neuspell as a spell checker. General organization and formatting improvements.
 - July 8, 2021 - python scripts cleaned and updated.
-- April - June: Work done mostly on Colab improving saving, grammar correction, etc.
+- April - June: Work done mostly on Colab, improving saving, grammar correction, etc.
 - March 2021: public repository added
 
 ### Future Work
 
 0. add OpenAI's [whisper](https://github.com/openai/whisper) through integration with the transformers lib.
-1. Unfortunately trying to use the [Neuspell](https://github.com/neuspell/neuspell) package is still not possible as the default package etc has still not been fixed. Will add a permanent workaround to load/use with vid2cleantxt.
-2. ~~syncing improvements currently in the existing **Google Colab** notebooks (links) above such as [NeuSpell](https://github.com/neuspell/neuspell)~~
+1. Unfortunately, trying to use the [Neuspell](https://github.com/neuspell/neuspell) package is still not possible as the default package etc, has still not been fixed. I will add a permanent workaround to load/use with vid2cleantxt.
+2. ~~syncing improvements currently in the existing **Google Colab** notebooks (links) above, such as [NeuSpell](https://github.com/neuspell/neuspell)~~
 
     - ~~this will include support for CUDA automatically when running the code (currently just on Colab)~~
 
 3. ~~clean up the code, add more features, and make it more robust.~~
-4. add script to convert `.txt` files to a clean PDF report, [example here](https://www.dropbox.com/s/fpqq2qw7txbkujq/ACE%20NLP%20Workshop%20-%20Session%20II%20-%20Dec%202%202021%20-%20full%20transcription%20-%20txt2pdf%2012.05.2021%20%20Standard.pdf?dl=1)
-5. add summarization script / module
-6. further expand functionality of the `vid2cleantxt` module
+4. add a script to convert `.txt` files to a clean PDF report, [example here](https://www.dropbox.com/s/fpqq2qw7txbkujq/ACE%20NLP%20Workshop%20-%20Session%20II%20-%20Dec%202%202021%20-%20full%20transcription%20-%20txt2pdf%2012.05.2021%20%20Standard.pdf?dl=1)
+5. add summarization script/module
+6. further expand the functionality of the `vid2cleantxt` module
 
 ### I've found x repo / script / concept that I think you should incorporate or collaborate with the author
 
-Send me a message / start a discussion! Always looking to improve. Or create an issue, that works too.
+Could you send me a message / start a discussion? Always looking to improve. Or create an issue that works too.
 
 ### Citations
 
