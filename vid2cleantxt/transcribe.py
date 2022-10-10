@@ -40,7 +40,14 @@ import pandas as pd
 import torch
 import transformers
 from tqdm.auto import tqdm
-from transformers import HubertForCTC, Wav2Vec2ForCTC, Wav2Vec2Processor, WavLMForCTC, WhisperProcessor, WhisperForConditionalGeneration
+from transformers import (
+    HubertForCTC,
+    Wav2Vec2ForCTC,
+    Wav2Vec2Processor,
+    WavLMForCTC,
+    WhisperProcessor,
+    WhisperForConditionalGeneration,
+)
 
 #  filter out warnings that pretend transfer learning does not exist
 warnings.filterwarnings("ignore", message="Some weights of")
@@ -75,7 +82,10 @@ from vid2cleantxt.v2ct_utils import (
     torch_validate_cuda,
 )
 
-def laod_whisper_modules(hf_id:str, language:str="en", task:str="transcribe", chunk_length:int=30):
+
+def laod_whisper_modules(
+    hf_id: str, language: str = "en", task: str = "transcribe", chunk_length: int = 30
+):
     """
     laod_whisper_modules - load the whisper modules from huggingface
 
@@ -86,16 +96,18 @@ def laod_whisper_modules(hf_id:str, language:str="en", task:str="transcribe", ch
     :return processor, model: the processor and model objects
     """
 
-
     processor = WhisperProcessor.from_pretrained(hf_id)
     model = WhisperForConditionalGeneration.from_pretrained(hf_id)
 
     processor.feature_extractor.chunk_length = chunk_length
-    model.config.forced_decoder_ids = processor.get_decoder_prompt_ids(language = language, task = task)
+    model.config.forced_decoder_ids = processor.get_decoder_prompt_ids(
+        language=language, task=task
+    )
 
     return processor, model
 
-def load_transcription_objects(hf_id: str):
+
+def load_wav2vec2_modules(hf_id: str):
     """
     load_transcription_objects - load the transcription objects from huggingface
 
@@ -272,12 +284,16 @@ def transcribe_video_whisper(
             join(ac_storedir, audio_chunk), sr=16000
         )  # 16000 is the sampling rate of the wav2vec model
         # convert audio to tensor
-        input_features = processor(audio_input, sampling_rate=clip_sr, truncation=True,  return_tensors="pt").input_features
+        input_features = processor(
+            audio_input, sampling_rate=clip_sr, truncation=True, return_tensors="pt"
+        ).input_features
         predicted_ids = model.generate(input_features)
-        this_transc = processor.batch_decode(predicted_ids,
-                                            max_length=512,
-                                            clean_up_tokenization_spaces=True,
-                                            skip_special_tokens=True)[0]
+        this_transc = processor.batch_decode(
+            predicted_ids,
+            max_length=512,
+            clean_up_tokenization_spaces=True,
+            skip_special_tokens=True,
+        )[0]
         this_transc = (
             "".join(this_transc) if isinstance(this_transc, list) else this_transc
         )
@@ -325,6 +341,7 @@ def transcribe_video_whisper(
         print(f"finished transcription of {clip_name} - {get_timestamp()}")
     logging.info(f"finished transcription of {clip_name} - {get_timestamp()}")
     return transc_res
+
 
 def transcribe_video_wav2vec(
     ts_model,
@@ -576,11 +593,17 @@ def transcribe_dir(
     print(f"\nLoading models @ {get_timestamp(True)} - may take some time...")
     print("if RT seems excessive, try --verbose flag or checking logfile")
 
+    _is_whisper = "whisper" in model.lower()
+
+    if _is_whisper:
+        logging.info("whisper model detected, using special settings")
+
     model = (
         "facebook/hubert-large-ls960-ft" if model_id is None else model_id
     )  # load the model
-    processor, model = load_transcription_objects(model)
-
+    processor, model = (
+        laod_whisper_modules(model) if _is_whisper else load_wav2vec2_modules(model)
+    )
     # load the spellchecker models. suppressing outputs
     orig_out = sys.__stdout__
     sys.stdout = NullIO()
@@ -615,12 +638,22 @@ def transcribe_dir(
         total=len(approved_files),
         desc="transcribing...",
     ):
-        t_results = transcribe_video_wav2vec(
-            ts_model=model,
-            ts_tokenizer=processor,
-            src_dir=directory,
-            clip_name=filename,
-            chunk_dur=chunk_length,
+        t_results = (
+            transcribe_video_whisper(
+                model=model,
+                processor=processor,
+                ssrc_dir=directory,
+                clip_name=filename,
+                chunk_dur=chunk_length,
+            )
+            if _is_whisper
+            else transcribe_video_wav2vec(
+                ts_model=model,
+                ts_tokenizer=processor,
+                src_dir=directory,
+                clip_name=filename,
+                chunk_dur=chunk_length,
+            )
         )
 
         if move_comp:
@@ -690,7 +723,7 @@ def get_parser():
         "-m",
         "--model",
         required=False,
-        default="facebook/hubert-large-ls960-ft",
+        default="openai/whisper-base.en",
         help="huggingface ASR model name. try 'facebook/wav2vec2-base-960h' if issues running default.",
     )
 
