@@ -388,11 +388,11 @@ def postprocess_transc(
             linebyline=linebyline,
         )
 
-        kw_dir = PL_out.get("spell_corrected_dir") # directory where the corrected text is saved
+        processed_dir = PL_out.get("spell_corrected_dir") # directory where the corrected text is saved
         kw_name = PL_out.get("sc_filename")
 
         qk_df = quick_keys(
-            filepath=kw_dir,
+            filepath=processed_dir,
             filename=kw_name,
             num_kw=25,
             max_ngrams=3,
@@ -409,13 +409,15 @@ def postprocess_transc(
         index=True,
     )
 
+    return processed_dir
+
 
 def transcribe_dir(
     input_src: str,
     chunk_length: int = 15,
+    model_arg: str = None,
     basic_spelling=False,
     move_comp=False,
-    model_arg=None,
     join_text=False,
     verbose=False,
 ):
@@ -493,7 +495,7 @@ def transcribe_dir(
     # postprocess the transcriptions
     out_p_tscript = storage_locs["t_out"]
     out_p_metadata = storage_locs["m_out"]
-    postprocess_transc(
+    processed_dir = postprocess_transc(
         tscript_dir=out_p_tscript,
         mdata_dir=out_p_metadata,
         merge_files=False,
@@ -506,7 +508,7 @@ def transcribe_dir(
     logging.info(f"Finished transcription pipeline @ {get_timestamp(True)}" + "\n")
     logging.info(f"Total time: {round((time.perf_counter() - st)/60, 3)} mins")
 
-    return out_p_tscript, out_p_metadata
+    return processed_dir, out_p_metadata
 
 def get_parser():
     """
