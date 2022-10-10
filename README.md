@@ -12,39 +12,39 @@ TL;DR check out [this Colab notebook](https://colab.research.google.com/gist/psz
 
 <!-- TOC -->
 
-- [Motivation](#motivation)
-- [Overview](#overview)
-  - [Example Output](#example-output)
-  - [Pipeline Intro](#pipeline-intro)
-- [Quickstart](#quickstart)
-  - [Installation](#installation)
-    - [As a Python package](#as-a-python-package)
-    - [Install from source](#install-from-source)
-    - [install details & gotchas](#install-details--gotchas)
-  - [example usage](#example-usage)
-- [Notebooks on Colab](#notebooks-on-colab)
-- [Details & Application](#details--application)
-  - [How long does this take to run?](#how-long-does-this-take-to-run)
-  - [Now I have a bunch of long text files. How are these useful?](#now-i-have-a-bunch-of-long-text-files-how-are-these-useful)
-    - [Visualization and Analysis](#visualization-and-analysis)
-    - [Text Extraction / Manipulation](#text-extraction--manipulation)
-  - [Text Summarization](#text-summarization)
-    - [TextHero example use case](#texthero-example-use-case)
-- [ScatterText example use case](#scattertext-example-use-case)
-- [Design Choices & Troubleshooting](#design-choices--troubleshooting)
-  - [What python package dependencies does this repo have?](#what-python-package-dependencies-does-this-repo-have)
-  - [My computer crashes once it starts running the wav2vec2 model](#my-computer-crashes-once-it-starts-running-the-wav2vec2-model)
-  - [The transcription is not perfect, and therefore I am mad](#the-transcription-is-not-perfect-and-therefore-i-am-mad)
-  - [How can I improve the performance of the model from a word-error-rate perspective?](#how-can-i-improve-the-performance-of-the-model-from-a-word-error-rate-perspective)
-  - [Why use wav2vec2 instead of SpeechRecognition or other transcription methods?](#why-use-wav2vec2-instead-of-speechrecognition-or-other-transcription-methods)
-  - [Errors](#errors)
-- [Examples](#examples)
-- [Future Work, Collaboration, & Citations](#future-work-collaboration--citations)
-  - [Project Updates](#project-updates)
-  - [Future Work](#future-work)
-  - [I've found x repo / script / concept that I think you should incorporate or collaborate with the author](#ive-found-x-repo--script--concept-that-i-think-you-should-incorporate-or-collaborate-with-the-author)
-  - [Citations](#citations)
-    - [Video Citations](#video-citations)
+-   [Motivation](#motivation)
+-   [Overview](#overview)
+    -   [Example Output](#example-output)
+    -   [Pipeline Intro](#pipeline-intro)
+-   [Quickstart](#quickstart)
+    -   [Installation](#installation)
+        -   [As a Python package](#as-a-python-package)
+        -   [Install from source](#install-from-source)
+        -   [install details & gotchas](#install-details--gotchas)
+    -   [example usage](#example-usage)
+-   [Notebooks on Colab](#notebooks-on-colab)
+-   [Details & Application](#details--application)
+    -   [How long does this take to run?](#how-long-does-this-take-to-run)
+    -   [Now I have a bunch of long text files. How are these useful?](#now-i-have-a-bunch-of-long-text-files-how-are-these-useful)
+        -   [Visualization and Analysis](#visualization-and-analysis)
+        -   [Text Extraction / Manipulation](#text-extraction--manipulation)
+    -   [Text Summarization](#text-summarization)
+        -   [TextHero example use case](#texthero-example-use-case)
+-   [ScatterText example use case](#scattertext-example-use-case)
+-   [Design Choices & Troubleshooting](#design-choices--troubleshooting)
+    -   [What python package dependencies does this repo have?](#what-python-package-dependencies-does-this-repo-have)
+    -   [My computer crashes once it starts running the wav2vec2 model](#my-computer-crashes-once-it-starts-running-the-wav2vec2-model)
+    -   [The transcription is not perfect, and therefore I am mad](#the-transcription-is-not-perfect-and-therefore-i-am-mad)
+    -   [How can I improve the performance of the model from a word-error-rate perspective?](#how-can-i-improve-the-performance-of-the-model-from-a-word-error-rate-perspective)
+    -   [Why use wav2vec2 instead of SpeechRecognition or other transcription methods?](#why-use-wav2vec2-instead-of-speechrecognition-or-other-transcription-methods)
+    -   [Errors](#errors)
+-   [Examples](#examples)
+-   [Future Work, Collaboration, & Citations](#future-work-collaboration--citations)
+    -   [Project Updates](#project-updates)
+    -   [Future Work](#future-work)
+    -   [I've found x repo / script / concept that I think you should incorporate or collaborate with the author](#ive-found-x-repo--script--concept-that-i-think-you-should-incorporate-or-collaborate-with-the-author)
+    -   [Citations](#citations)
+        -   [Video Citations](#video-citations)
 
 <!-- /TOC -->
 
@@ -147,7 +147,7 @@ pip install -e .
 
 ### example usage
 
-Transcribe a directory of example videos in `./examples/` with a `chunk_length` of 10 seconds (shorter than default) and print the transcriptions with the `cat` command:
+**CLI:** transcribe a directory of example videos in `./examples/` with a `chunk_length` of 10 seconds (shorter than default) and print the transcriptions with the `cat` command:
 
 ```bash
 python examples/TEST_folder_edition/dl_src_videos.py
@@ -157,7 +157,7 @@ find /examples/TEST_folder_edition/v2clntxt_transcriptions/results_SC_pipeline -
 
 Run `python vid2cleantxt/transcribe.py --help` for more details on the CLI.
 
-The following will transcribe an input directory of user-specified videos using `wav2vec2-base`, a smaller but faster model than default.
+**python API:** following will transcribe an input directory of user-specified videos using `wav2vec2-base`, a smaller but faster model than default.
 
 ```python
 import vid2cleantxt
@@ -195,23 +195,17 @@ print(inspect.getdoc(vid2cleantxt.transcribe.transcribe_dir))
 
 ## Notebooks on Colab
 
-Notebook versions are available on Google Colab, because they offer free GPUs which makes vid2cleantxt _much_ faster. If you want a notebook to run locally for whatever reason, in Colab you can download as .ipynb, but you may need to make some small changes (some directories, packages, etc. are specific to Colab's structure) - the same goes for the colab notebooks in this repo.
+Notebook versions are available on Google Colab as they offer free GPUs which makes vid2cleantxt _much_ faster.
 
-Links to Colab Scripts:
+As `vid2cleantxt` is now available as a package with python API, there is no longer a need for long, complicated notebooks. See [this notebook](https://colab.research.google.com/gist/pszemraj/9678129fe0b552e114e3576606446dee/vid2cleantxt-minimal-example.ipynb) for a fairly simple example - copy it to your drive and adjust as needed.
 
-1.  Single-File Version (Implements GPU)
-    -   Link [here](https://colab.research.google.com/gist/pszemraj/4183c4b39bf718b54de9dbf2df499cd9/vid2cleantext-single-demo.ipynb), updated on 2022-02-24.
-    -   This notebook downloads a video of JFK's "Moon Speech" (originally downloaded from C-SPAN) and transcribes it, printing and/or optionally downloading the output. No authentication etc required.
-    -   This **is the recommended link for seeing how this pipeline works**. Only work involved is running all cells.
-2.  Multi-File Version (Implements GPU)
-    -   Link [here](https://colab.research.google.com/gist/pszemraj/a88ff352258f596d11027689653124ed/vid2cleantext-multi.ipynb), updated on 2022-02-24. The example here is MIT OpenCourseWare Lecture Videos (see `examples/` for citations).
-    -   This notebook connects to the user's google drive to convert a whole folder of videos. The input can be either Colab or URL to a `.zip` file of media. Outputs are stored in the user's Google Drive and optionally downloaded.
-    -   _NOTE:_ this notebook does require Drive authorization. Google's instructions for this have improved as of late, and it will pop up a window for confirmation etc.
+⚠️ The notebooks in /colab-notebooks are now deprecated and not recommended to be used. ⚠️ TODO: remove in a future PR.
 
-If you are new to Colab, it is probably best to read the [Colab Quickstart](https://colab.research.google.com/notebooks/intro.ipynb) first and the below, for info on how to do file I/O etc.
+**Resources for those new to Colab**
+
+If you like the benefits Colab/cloud notebooks offer but haven't used them before, it's recommended to read the [Colab Quickstart](https://colab.research.google.com/notebooks/intro.ipynb) and some of the below resources as things like file I/O are different than your PC.
 
 -   [Google's FAQ](https://research.google.com/colaboratory/faq.html)
--   [Medium Article on Colab + Large Datasets](https://satyajitghana.medium.com/working-with-huge-datasets-800k-files-in-google-colab-and-google-drive-bcb175c79477)
 -   [Google's Demo Notebook on I/O](https://colab.research.google.com/notebooks/io.ipynb)
 -   [A better Colab Experience](https://towardsdatascience.com/10-tips-for-a-better-google-colab-experience-33f8fe721b82)
 
@@ -368,7 +362,7 @@ _`*` these statements reflect the assessment completed around project inception 
 
 A _rough_ timeline of what has been going on in the repo:
 
--   Oct 2022 - Redesign as Python package vs. assortment of python scripts/notebooks that happen to share a repository and do similar things.
+-   Oct 2022 - Redesign as Python package as opposed to an assortment of python scripts/notebooks that happen to share a repository and do similar things.
 -   Feb 2022 - Add backup functions for spell correction in case of NeuSpell failure (which at the time of writing is a known issue).
 -   Jan 2022 - add huBERT support, abstract the boilerplate out of Colab Notebooks. Starting work on the PDF generation w/ results.
 -   Dec 2021 - greatly improved runtime of the script, and added more features (command line, docstring, etc.)
