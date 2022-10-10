@@ -295,7 +295,7 @@ Comparing the frequency of terms in one body of text vs. another
 
 ### What python package dependencies does this repo have?
 
-Upon cloning the repo, run the command `pip install -e .` (or`pip install -r requirements.txt` works too) in a terminal opened in the project directory. Requirements (upd. Oct 10, 2022) are:
+Upon cloning the repo, run the command `pip install -e .` (or`pip install -r requirements.txt` works too) in a terminal opened in the project directory. Requirements (upd. Oct 9, 2022) are:
 
 ```text
 clean-text
