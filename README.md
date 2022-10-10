@@ -94,10 +94,10 @@ Given `INPUT_DIRECTORY`:
 
 Install, then you can use `vid2cleantxt` in two ways:
 
-1. CLI via transcribe.py`script from the command line (`python vid2cleantxt/transcribe.py --input-dir "path/to/video/files" --output-dir "path/to/output/dir"\`)
+1. CLI via `transcribe.py` script from the command line (`python vid2cleantxt/transcribe.py --input-dir "path/to/video/files" --output-dir "path/to/output/dir"\`)
 2. As a python package, import `vid2cleantxt` and use the `transcribe` module to transcribe videos (`vid2cleantxt.transcribe.transcribe_dir()`)
 
-If you don't want to use it locally or don't have a GPU, you may be interested in the [demo notebook](https://colab.research.google.com/gist/pszemraj/9678129fe0b552e114e3576606446dee/vid2cleantxt-minimal-example.ipynb) on Google Colab.
+Don't want to use it locally or don't have a GPU? you may be interested in the [demo notebook](https://colab.research.google.com/gist/pszemraj/9678129fe0b552e114e3576606446dee/vid2cleantxt-minimal-example.ipynb) on Google Colab.
 
 ### Installation
 
@@ -229,17 +229,19 @@ On my machine (CPU only due to Windows + AMD GPU), it takes approximately 30-70%
 
 **Specs:**
 
-     Processor Intel(R) Core(TM) i7-8665U CPU @ 1.90GHz
-     Speed 4.8 GHz
-     Number of Cores 8
-     Memory RAM 32 GB
-     Video Card #1 Intel(R) UHD Graphics 620
-     Dedicated Memory 128 MB
-     Total Memory 16 GB
-     Video Card #2 AMD Radeon Pro WX3200 Graphics
-     Dedicated Memory 4.0 GB
-     Total Memory 20 GB
-     Operating System  Windows 10 64-bit
+```text
+Processor Intel(R) Core(TM) i7-8665U CPU @ 1.90GHz
+Speed 4.8 GHz
+Number of Cores 8
+Memory RAM 32 GB
+Video Card #1 Intel(R) UHD Graphics 620
+Dedicated Memory 128 MB
+Total Memory 16 GB
+Video Card #2 AMD Radeon Pro WX3200 Graphics
+Dedicated Memory 4.0 GB
+Total Memory 20 GB
+Operating System  Windows 10 64-bit
+```
 
 > _NOTE:_ that the default model is `facebook/hubert-large-ls960-ft`. See the [model card](https://huggingface.co/facebook/hubert-large-ls960-ft) for details.
 
@@ -295,30 +297,32 @@ Comparing the frequency of terms in one body of text vs. another
 
 Upon cloning the repo, run the command `pip install -e .` (or`pip install -r requirements.txt` works too) in a terminal opened in the project directory. Requirements (upd. Oct 10, 2022) are:
 
-    clean-text
-    GPUtil
-    humanize
-    joblib
-    librosa
-    moviepy~=1.0.3
-    natsort>=7.1.1
-    neuspell>=1.0.0
-    numpy
-    packaging
-    pandas>=1.3.0
-    psutil>=5.9.2
-    pydub>=0.24.1
-    pysbd>=0.3.4
-    requests
-    setuptools>=58.1.0
-    spacy>=3.0.0,<4.0.0
-    symspellpy~=6.7.0
-    torch>=1.8.2
-    tqdm
-    transformers>=4.15.0
-    wordninja==2.0.0
-    wrapt
-    yake>=0.4.8
+```text
+clean-text
+GPUtil
+humanize
+joblib
+librosa
+moviepy~=1.0.3
+natsort>=7.1.1
+neuspell>=1.0.0
+numpy
+packaging
+pandas>=1.3.0
+psutil>=5.9.2
+pydub>=0.24.1
+pysbd>=0.3.4
+requests
+setuptools>=58.1.0
+spacy>=3.0.0,<4.0.0
+symspellpy~=6.7.0
+torch>=1.8.2
+tqdm
+transformers>=4.15.0
+wordninja==2.0.0
+wrapt
+yake>=0.4.8
+```
 
 If you encounter warnings/errors that mention FFmpeg, please download the latest version of FFMPEG from their website [here](https://www.ffmpeg.org/download.html) and ensure it is added to PATH.
 
