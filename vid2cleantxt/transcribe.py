@@ -40,8 +40,7 @@ import pandas as pd
 import torch
 import transformers
 from tqdm.auto import tqdm
-from transformers import (HubertForCTC, Wav2Vec2ForCTC, Wav2Vec2Processor,
-                          WavLMForCTC)
+from transformers import HubertForCTC, Wav2Vec2ForCTC, Wav2Vec2Processor, WavLMForCTC
 
 #  filter out warnings that pretend transfer learning does not exist
 warnings.filterwarnings("ignore", message="Some weights of")
@@ -52,27 +51,30 @@ from vid2cleantxt.v2ct_utils import load_spacy_models
 load_spacy_models()
 
 from vid2cleantxt.audio2text_functions import (
-    trim_fname,
     corr,
     create_metadata_df,
+    get_av_fmts,
     init_neuspell,
     init_symspell,
-    quick_keys,
-    spellcorrect_pipeline,
-    setup_out_dirs,
-    get_av_fmts,
     prep_transc_pydub,
+    quick_keys,
+    setup_out_dirs,
+    spellcorrect_pipeline,
+    trim_fname,
 )
 from vid2cleantxt.v2ct_utils import (
+    NullIO,
     check_runhardware,
     create_folder,
     digest_txt_directory,
     find_ext_local,
-    move2completed,
-    NullIO,
-    torch_validate_cuda,
     get_timestamp,
+    load_spacy_models,
+    move2completed,
+    torch_validate_cuda,
 )
+
+
 
 def load_transcription_objects(hf_id: str):
     """
@@ -480,9 +482,18 @@ def get_parser():
 
     return parser
 
-def transcribe_dir(input_src, basic_spelling=False, is_verbose=False, move_comp=False, chunk_length=15, model_arg=None, join_text=False):
+
+def transcribe_dir(
+    input_src,
+    basic_spelling=False,
+    is_verbose=False,
+    move_comp=False,
+    chunk_length=15,
+    model_arg=None,
+    join_text=False,
+):
     st = time.perf_counter()
-    
+
     directory = os.path.abspath(input_src)
     linebyline = not join_text
     base_spelling = basic_spelling
@@ -576,4 +587,12 @@ if __name__ == "__main__":
     join_text = args.join_text
     basic_spelling = args.basic_spelling
 
-    transcribe_dir(input_src, basic_spelling, is_verbose, move_comp, chunk_length, model_arg, join_text)
+    transcribe_dir(
+        input_src,
+        basic_spelling,
+        is_verbose,
+        move_comp,
+        chunk_length,
+        model_arg,
+        join_text,
+    )

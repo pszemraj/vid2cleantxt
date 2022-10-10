@@ -24,8 +24,7 @@ from pydub import AudioSegment
 from symspellpy import SymSpell
 from tqdm.auto import tqdm
 
-from vid2cleantxt.v2ct_utils import (NullIO, create_folder, get_timestamp,
-                                     trim_fname)
+from vid2cleantxt.v2ct_utils import NullIO, create_folder, get_timestamp, trim_fname
 
 
 def get_av_fmts():

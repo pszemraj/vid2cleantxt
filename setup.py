@@ -32,7 +32,8 @@ def get_requirements():
         requirements = f.readlines()
     return list(requirements)
 
-def scour_for_file(file_name:str):
+
+def scour_for_file(file_name: str):
     """
     scour_for_file - search every possible location for a file name. Load each line from that filename into a list.
     """
