@@ -15,33 +15,35 @@ TL;DR check out [this Colab script](https://colab.research.google.com/gist/pszem
 - [vid2cleantxt](#vid2cleantxt)
 - [Motivation](#motivation)
 - [Overview](#overview)
-    - [Example Output](#example-output)
-    - [Pipeline Intro](#pipeline-intro)
+  - [Example Output](#example-output)
+  - [Pipeline Intro](#pipeline-intro)
 - [Installation](#installation)
-    - [Quickstart (aka: how to get the script running)](#quickstart-aka-how-to-get-the-script-running)
-    - [Notebooks on Colab](#notebooks-on-colab)
-    - [How long does this take to run?](#how-long-does-this-take-to-run)
+  - [Quickstart (aka: how to get the script running)](#quickstart-aka-how-to-get-the-script-running)
+  - [Use as package](#use-as-package)
+  - [Notebooks on Colab](#notebooks-on-colab)
+  - [How long does this take to run?](#how-long-does-this-take-to-run)
 - [Application](#application)
-    - [Now I have a bunch of long text files. How are these useful?](#now-i-have-a-bunch-of-long-text-files-how-are-these-useful)
-        - [Visualization and Analysis](#visualization-and-analysis)
-        - [Text Extraction / Manipulation](#text-extraction--manipulation)
-        - [Text Summarization](#text-summarization)
-    - [TextHero example use case](#texthero-example-use-case)
-    - [ScatterText example use case](#scattertext-example-use-case)
+  - [Now I have a bunch of long text files. How are these useful?](#now-i-have-a-bunch-of-long-text-files-how-are-these-useful)
+    - [Visualization and Analysis](#visualization-and-analysis)
+    - [Text Extraction / Manipulation](#text-extraction--manipulation)
+    - [Text Summarization](#text-summarization)
+  - [TextHero example use case](#texthero-example-use-case)
+  - [ScatterText example use case](#scattertext-example-use-case)
 - [Design Choices & Troubleshooting](#design-choices--troubleshooting)
-    - [What python package dependencies does this repo have?](#what-python-package-dependencies-does-this-repo-have)
-    - [My computer crashes once it starts running the wav2vec2 model](#my-computer-crashes-once-it-starts-running-the-wav2vec2-model)
-    - [The transcription is not perfect, and therefore I am mad](#the-transcription-is-not-perfect-and-therefore-i-am-mad)
-    - [How can I improve the performance of the model from a word-error-rate perspective?](#how-can-i-improve-the-performance-of-the-model-from-a-word-error-rate-perspective)
-    - [Why use wav2vec2 instead of SpeechRecognition or other transcription methods?](#why-use-wav2vec2-instead-of-speechrecognition-or-other-transcription-methods)
+  - [What python package dependencies does this repo have?](#what-python-package-dependencies-does-this-repo-have)
+  - [My computer crashes once it starts running the wav2vec2 model](#my-computer-crashes-once-it-starts-running-the-wav2vec2-model)
+  - [The transcription is not perfect, and therefore I am mad](#the-transcription-is-not-perfect-and-therefore-i-am-mad)
+  - [How can I improve the performance of the model from a word-error-rate perspective?](#how-can-i-improve-the-performance-of-the-model-from-a-word-error-rate-perspective)
+  - [Why use wav2vec2 instead of SpeechRecognition or other transcription methods?](#why-use-wav2vec2-instead-of-speechrecognition-or-other-transcription-methods)
+  - [Errors](#errors)
 - [Examples](#examples)
 - [Future Work, Collaboration, & Citations](#future-work-collaboration--citations)
-    - [Project Updates](#project-updates)
-    - [Future Work](#future-work)
-    - [I've found x repo / script / concept that I think you should incorporate or collaborate with the author](#ive-found-x-repo--script--concept-that-i-think-you-should-incorporate-or-collaborate-with-the-author)
-    - [Citations](#citations)
-        - [Video Citations](#video-citations)
-
+  - [Project Updates](#project-updates)
+  - [Future Work](#future-work)
+  - [I've found x repo / script / concept that I think you should incorporate or collaborate with the author](#ive-found-x-repo--script--concept-that-i-think-you-should-incorporate-or-collaborate-with-the-author)
+  - [Citations](#citations)
+    - [Video Citations](#video-citations)
+  
 <!-- /TOC -->
 
 * * *
@@ -100,13 +102,20 @@ Essentially, clone the repo, and run `python vid2cleantxt/transcribe.py --input-
     -   add `--depth=1` to above to clone just the current code & objects and **will be faster**
 2.  `cd vid2cleantxt/`
 3.  `pip install -r requirements.txt`
-4.  `python vid2cleantxt/transcribe.py --input-dir "example_JFK_speech/TEST_singlefile"`
+4.  `python vid2cleantxt/transcribe.py --input-dir "examples/TEST_singlefile"`
     -   in this example\*, all video and audio files in the repo example "example_JFK_speech/TEST_singlefile" would be transcribed.
+    -   download the video with `python examples/TEST_singlefile/dl_src_video.py`
 
 -   if you are new, you can clone with [github desktop](https://desktop.github.com/)
 -   if neither option works for you, check out the Colab notebooks distributed with this repo.
 
 > \* the example videos need to be downloaded with the scripts in the relevant dirs, such as `python examples/TEST_singlefile/dl_src_video.py`
+
+## Use as package
+1.  `pip install .`
+2.  `spacy download en_core_web_sm`
+3.  `import vid2cleantxt`
+4.  `vid2cleantxt.transcribe.transcribe_dir("examples/TEST_singlefile")`
 
 ## Notebooks on Colab
 
@@ -264,6 +273,14 @@ Google's SpeechRecognition (with the free API) requires optimization of three un
 Also, because it's an API you can't train it even if you wanted to, you have to be online for functionally most of the script runtime, and then of course you have privacy concerns with sending data out of your machine.
 
 _`*` these statements reflect the assessment completed around project inception about early 2021._
+
+## Errors
+- _pickle.UnpicklingError: invalid load key, '<' --> Neuspell model was not downloaded correctly. Try re-downloading it.
+- manually open /Users/yourusername/.local/share/virtualenvs/vid2cleantxt-vMRD7uCV/lib/python3.8/site-packages/neuspell/../data
+- download the model from https://github.com/neuspell/neuspell#Download-Checkpoints 
+- import neuspell
+- neuspell.seq_modeling.downloads.download_pretrained_model("scrnnelmo-probwordnoise")
+
 
 # Examples
 

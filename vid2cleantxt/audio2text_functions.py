@@ -509,6 +509,7 @@ def spellcorrect_pipeline(
     )
     with open(join(filepath, filename), "r", encoding="utf-8", errors="ignore") as file:
         textlines = file.readlines()  # return a list
+
     # lowercase the textlines
     textlines = [line.lower() for line in textlines]
     # step 1: spellcheck using specified method
@@ -524,6 +525,7 @@ def spellcorrect_pipeline(
             speller=spell_checker,
         )
     loc_SC = f"{method}_corrected"
+
     create_folder(join(filepath, loc_SC))
 
     sc_outname = f"{trim_fname(filename)}_NSC_results.txt"
