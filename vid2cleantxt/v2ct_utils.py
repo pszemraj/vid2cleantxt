@@ -5,9 +5,12 @@
 """
 import os
 import sys
+import logging
 from os.path import dirname, join
 
 sys.path.append(dirname(dirname(os.path.abspath(__file__))))
+
+logging.basicConfig(level=logging.INFO)
 import pprint as pp
 import shutil
 from datetime import datetime
