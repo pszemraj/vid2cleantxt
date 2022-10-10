@@ -563,7 +563,7 @@ def postprocess_transc(
 
 def transcribe_dir(
     input_dir: str,
-    chunk_length: int = 15,
+    chunk_length: int = 30,
     model_id: str = None,
     basic_spelling=False,
     move_comp=False,
@@ -574,7 +574,7 @@ def transcribe_dir(
     transcribe_dir - transcribe all videos in a directory
 
     :param str input_src: the path to the directory containing the videos to transcribe
-    :param int chunk_length: the length of the chunks to split the audio into, in seconds. Default is 15 seconds
+    :param int chunk_length: the length of the chunks to split the audio into, in seconds. Default is 30 seconds
     :param str model_id: the model id to use for the transcription. Default is None, which will use the default model facebook/hubert-large-ls960-ft
     :param bool basic_spelling: if True, use basic spelling correction instead of neural spell correction
     :param bool move_comp: if True, move the completed files to a new folder
@@ -731,9 +731,9 @@ def get_parser():
         "-cl",
         "--chunk-length",
         required=False,
-        default=15,  # pass lower value if running out of memory / GPU memory
+        default=30,
         type=int,
-        help="Duration of .wav chunks (in seconds) that the transformer model will be fed",
+        help="Duration of .wav chunks (in seconds) that the transformer model will be fed. decrease if you run into memory issues",
     )
 
     parser.add_argument(
