@@ -18,7 +18,7 @@ spacy>=3.0.0,<4.0.0
 symspellpy~=6.7.0
 torch>=1.8.2
 tqdm
-transformers>=4.15.0
+git+https://github.com/huggingface/transformers.git
 wordninja==2.0.0
 wrapt
 yake>=0.4.8
