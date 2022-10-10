@@ -593,6 +593,8 @@ def transcribe_dir(
 
     if _is_whisper:
         logging.info("whisper model detected, using special settings")
+        if chunk_length != 30:
+            warnings.warn(f"you have set chunk_length to {chunk_length}, but whisper models default to 30s chunks. strange things may happen")
 
     processor, model = (
         load_whisper_modules(model) if _is_whisper else load_wav2vec2_modules(model)
