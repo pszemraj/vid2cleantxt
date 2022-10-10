@@ -595,7 +595,7 @@ def transcribe_dir(
             warnings.warn(f"you have set chunk_length to {chunk_length}, but whisper models default to 30s chunks. strange things may happen")
 
     processor, model = (
-        load_whisper_modules(model) if _is_whisper else load_wav2vec2_modules(model)
+        load_whisper_modules(model_id) if _is_whisper else load_wav2vec2_modules(model_id)
     )
     # load the spellchecker models. suppressing outputs
     orig_out = sys.__stdout__
