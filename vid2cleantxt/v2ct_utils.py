@@ -173,7 +173,6 @@ def create_folder(new_path):
     os.makedirs(new_path, exist_ok=True)
 
 
-
 def load_spacy_models():
     """downloads spaCy models if not installed on local machine."""
     try:
@@ -186,6 +185,8 @@ def load_spacy_models():
         logging.info(f"downloading the spacy model en_core_web_sm due to:\t{e}")
         download("en_core_web_sm")
         nlp = spacy.load("en_core_web_sm")
+
+
 class NullIO(StringIO):
     """NullIO - used to redirect system output for things that print a lot to console"""
 
