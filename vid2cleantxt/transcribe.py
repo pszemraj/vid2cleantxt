@@ -48,6 +48,7 @@ warnings.filterwarnings("ignore", message="initializing BertModel")
 transformers.utils.logging.set_verbosity(40)
 
 from vid2cleantxt.v2ct_utils import load_spacy_models
+
 load_spacy_models()
 
 from vid2cleantxt.audio2text_functions import (
@@ -73,7 +74,6 @@ from vid2cleantxt.v2ct_utils import (
     move2completed,
     torch_validate_cuda,
 )
-
 
 
 def load_transcription_objects(hf_id: str):
@@ -193,7 +193,9 @@ def save_transc_results(
             f"Saved transcript and metadata to: {out_p_tscript} \n and {out_p_metadata}"
         )
 
-    logging.info(f"Saved transcript and metadata to: {out_p_tscript} and {out_p_metadata}")
+    logging.info(
+        f"Saved transcript and metadata to: {out_p_tscript} and {out_p_metadata}"
+    )
 
 
 def transcribe_video_wav2vec(
@@ -204,7 +206,7 @@ def transcribe_video_wav2vec(
     chunk_dur: int,
     verbose=False,
     temp_dir: str = "audio_chunks",
-)-> dict:
+) -> dict:
     """
     transcribe_video_wav2vec - transcribes a video clip using the wav2vec2 model. Note that results will be saved to the output directory, src_dir
 
@@ -370,7 +372,7 @@ def postprocess_transc(
 
     txt_files = find_ext_local(
         tscript_dir, req_ext=".txt", verbose=verbose, full_path=False
-    ) # load the text files
+    )  # load the text files
 
     kw_all_vids = pd.DataFrame()
 
@@ -388,7 +390,9 @@ def postprocess_transc(
             linebyline=linebyline,
         )
 
-        processed_dir = PL_out.get("spell_corrected_dir") # directory where the corrected text is saved
+        processed_dir = PL_out.get(
+            "spell_corrected_dir"
+        )  # directory where the corrected text is saved
         kw_name = PL_out.get("sc_filename")
 
         qk_df = quick_keys(
@@ -398,7 +402,7 @@ def postprocess_transc(
             max_ngrams=3,
             save_db=False,
             verbose=verbose,
-        ) # keyword extraction
+        )  # keyword extraction
 
         kw_all_vids = pd.concat([kw_all_vids, qk_df], axis=1)
 
@@ -409,7 +413,7 @@ def postprocess_transc(
         index=True,
     )
 
-    return PL_out['SBD_dir']
+    return PL_out["SBD_dir"]
 
 
 def transcribe_dir(
@@ -512,6 +516,7 @@ def transcribe_dir(
 
     return processed_dir, out_p_metadata
 
+
 def get_parser():
     """
     get_parser - a helper function for the argparse module
@@ -588,6 +593,7 @@ def get_parser():
 
     return parser
 
+
 # TODO: change to pathlib from os.path
 
 if __name__ == "__main__":
@@ -604,16 +610,14 @@ if __name__ == "__main__":
     is_verbose = args.verbose
 
     output_text, output_metadata = transcribe_dir(
-        input_dir = input_src,
-        chunk_length = chunk_length,
-        model_id = model_id,
-        move_comp = move_comp,
-        join_text = join_text,
-        basic_spelling = basic_spelling,
-        verbose = is_verbose,
-
+        input_dir=input_src,
+        chunk_length=chunk_length,
+        model_id=model_id,
+        move_comp=move_comp,
+        join_text=join_text,
+        basic_spelling=basic_spelling,
+        verbose=is_verbose,
     )
-
 
     print(
         f"Complete. Relevant files for run are in: \n{output_text} \n{output_metadata}"
