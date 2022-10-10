@@ -266,7 +266,7 @@ def transcribe_video_whisper(
     )
     torch_validate_cuda()
     gc.collect()  # free up memory
-    device = "cuda:0" if torch.cuda.is_available() else "cpu"  # set device
+    device = "cuda" if torch.cuda.is_available() else "cpu"  # set device
     full_transc = []
     GPU_update_incr = (
         math.ceil(len(chunk_directory) / 2) if len(chunk_directory) > 1 else 1
@@ -301,7 +301,7 @@ def transcribe_video_whisper(
         full_transc.append(f"{this_transc}\n")
         pbar.update(1)
         # empty memory so you don't overload the GPU
-        if device == "cuda:0":
+        if device == "cuda":
             torch.cuda.empty_cache()  # empty memory on GPU
 
     pbar.close()
@@ -385,7 +385,7 @@ def transcribe_video_wav2vec(
     )
     torch_validate_cuda()
     gc.collect()  # free up memory
-    device = "cuda:0" if torch.cuda.is_available() else "cpu"  # set device
+    device = "cuda" if torch.cuda.is_available() else "cpu"  # set device
     full_transc = []
     GPU_update_incr = (
         math.ceil(len(chunk_directory) / 2) if len(chunk_directory) > 1 else 1
@@ -427,7 +427,7 @@ def transcribe_video_wav2vec(
         del input_values
         del logits
         del predicted_ids
-        if device == "cuda:0":
+        if device == "cuda":
             torch.cuda.empty_cache()  # empty memory on GPU
 
     pbar.close()
