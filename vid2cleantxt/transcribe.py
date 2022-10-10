@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-vid2cleantxt by Peter Szemraj
+transcribe.py - transcribe a video file using a pretrained wav2vec2 model
 
-Pipeline fortranscription of a speech-based video file to text using facebook's wav2vec2 model (or Hubert model)
-this is the primary script for the project
+Pipeline for transcription of a speech-based video file to text using facebook's wav2vec2 model (or Hubert model)
 
-You can access the arguments for this script by running the following command:
-    *\vid2cleantxt\transcribe.py -h (windows)
-    */vid2cleantxt/transcribe.py -h (everything else + Windows bash)
+Usage:
+    vid2cleantxt.py --video <video_file> --model <model_id> [--out <out_dir>] [--verbose] [--debug] [--log <log_file>]
 
 Tips for runtime:
 
-- use the default "facebook/wav2vec2-base-960h" to start out with (the default model is "facebook/hubert-large-ls960-ft")
+- use the default model to start. If issues try "facebook/wav2vec2-base-960h"
 - if model fails to work or errors out, try reducing the chunk length with --chunk-length <int>
 """
+
+__author__ = "Peter Szemraj"
 
 import argparse
 import gc
@@ -193,6 +193,8 @@ def save_transc_results(
             f"Saved transcript and metadata to: {out_p_tscript} \n and {out_p_metadata}"
         )
 
+    logging.info(f"Saved transcript and metadata to: {out_p_tscript} and {out_p_metadata}")
+
 
 def transcribe_video_wav2vec(
     ts_model,
@@ -328,7 +330,7 @@ def postprocess_transc(
     verbose=False,
     spell_correct_method: str = "symspell",
     checker=None,
-):
+) -> None:
     """
     postprocess_transc - postprocess the transcribed text by consolidating the text and metadata, and spell checking + sentence splitting
 
@@ -341,6 +343,10 @@ def postprocess_transc(
     spell_correct_method : str, optional, by default "symspell", the method to use for spell checking. Options are "symspell", "neuspell"
     checker : spellchecker.SpellChecker, optional, by default None, the spell checker object to use for spell checking. If None, it will be created.
     verbose : bool, optional
+
+    Returns
+    -------
+    None
     """
     logging.info(
         f"Starting postprocessing of transcribed text @ {get_timestamp()} with params {locals()}"
@@ -362,12 +368,10 @@ def postprocess_transc(
             make_folder=True,
         )
 
-    # add spelling correction to output transcriptions
-    # reload the metadata and text
     txt_files = find_ext_local(
         tscript_dir, req_ext=".txt", verbose=verbose, full_path=False
-    )
-    # Spellcorrect Pipeline
+    ) # load the text files
+
     kw_all_vids = pd.DataFrame()
 
     for this_transc in tqdm(
@@ -383,10 +387,10 @@ def postprocess_transc(
             spell_checker=checker,
             linebyline=linebyline,
         )
-        # get locations of where corrected files were saved
-        kw_dir = PL_out.get("spell_corrected_dir")
+
+        kw_dir = PL_out.get("spell_corrected_dir") # directory where the corrected text is saved
         kw_name = PL_out.get("sc_filename")
-        # extract keywords from the saved file
+
         qk_df = quick_keys(
             filepath=kw_dir,
             filename=kw_name,
@@ -394,7 +398,7 @@ def postprocess_transc(
             max_ngrams=3,
             save_db=False,
             verbose=verbose,
-        )
+        ) # keyword extraction
 
         kw_all_vids = pd.concat([kw_all_vids, qk_df], axis=1)
 
@@ -406,6 +410,104 @@ def postprocess_transc(
     )
 
 
+def transcribe_dir(
+    input_src: str,
+    chunk_length: int = 15,
+    basic_spelling=False,
+    move_comp=False,
+    model_arg=None,
+    join_text=False,
+    verbose=False,
+) -> str, str:
+    """
+    transcribe_dir - transcribe all videos in a directory
+
+    :param str input_src: the path to the directory containing the videos to transcribe
+    :param int chunk_length: the length of the chunks to split the audio into, in seconds. Default is 15 seconds
+    :param bool basic_spelling: if True, use basic spelling correction instead of neural spell correction
+    :param bool move_comp: if True, move the completed files to a new folder
+    :param _type_ model_arg: the model to use for transcription. If None, it will use the default model
+    :param bool join_text: if True, join all lines of text into one long string
+    :param bool verbose: if True, print out more information
+    :return str, str: the path to the directory of transcribed text files, and the path to the directory of metadata files
+    """
+    st = time.perf_counter()
+
+    directory = os.path.abspath(input_src)
+    linebyline = not join_text
+    base_spelling = basic_spelling
+    logging.info(f"Starting transcription pipeline @ {get_timestamp(True)}" + "\n")
+    print(f"\nLoading models @ {get_timestamp(True)} - may take some time...")
+    print("if RT seems excessive, try --verbose flag or checking logfile")
+
+    wav_model = (
+        "facebook/hubert-large-ls960-ft" if model_arg is None else model_arg
+    )  # load the model
+    tokenizer, model = load_transcription_objects(wav_model)
+
+    # load the spellchecker models. suppressing outputs
+    orig_out = sys.__stdout__
+    sys.stdout = NullIO()
+    if base_spelling:
+        checker = init_symspell()
+    else:
+        try:
+            checker = init_neuspell()
+
+        except Exception as e:
+            print(
+                "Failed loading NeuSpell spellchecker, reverting to basic spellchecker"
+            )
+            logging.warning(
+                f"Failed loading NeuSpell spellchecker, reverting to basic spellchecker"
+            )
+            logging.warning(f"{e}")
+            base_spelling = True
+            checker = init_symspell()
+
+    sys.stdout = orig_out  # return to default of print-to-console
+
+    approved_files = []
+    for ext in get_av_fmts():  # load vid2cleantxt inputs
+        approved_files.extend(find_ext_local(directory, req_ext=ext, full_path=False))
+
+    print(f"\nFound {len(approved_files)} audio or video files in {directory}")
+
+    storage_locs = setup_out_dirs(directory)  # create and get output folders
+    for filename in tqdm(
+        approved_files,
+        total=len(approved_files),
+        desc="transcribing...",
+    ):
+        t_results = transcribe_video_wav2vec(
+            ts_model=model,
+            ts_tokenizer=tokenizer,
+            src_dir=directory,
+            clip_name=filename,
+            chunk_dur=chunk_length,
+        )
+
+        if move_comp:
+            move2completed(directory, filename=filename)  # move src to completed folder
+
+    # postprocess the transcriptions
+    out_p_tscript = storage_locs["t_out"]
+    out_p_metadata = storage_locs["m_out"]
+    postprocess_transc(
+        tscript_dir=out_p_tscript,
+        mdata_dir=out_p_metadata,
+        merge_files=False,
+        verbose=verbose,
+        linebyline=linebyline,
+        spell_correct_method="symspell" if base_spelling else "neuspell",
+        checker=checker,
+    )
+
+    logging.info(f"Finished transcription pipeline @ {get_timestamp(True)}" + "\n")
+    logging.info(f"Total time: {round((time.perf_counter() - st)/60, 3)} mins")
+
+    return out_p_tscript, out_p_metadata
+
 def get_parser():
     """
     get_parser - a helper function for the argparse module
@@ -413,7 +515,7 @@ def get_parser():
     """
 
     parser = argparse.ArgumentParser(
-        description="Transcribe a directory of videos using wav2vec2"
+        description="Transcribe a directory of videos using transformers"
     )
     parser.add_argument(
         "-i",
@@ -422,13 +524,15 @@ def get_parser():
         help="path to directory containing video files to be transcribed",
     )
 
+    # parser.add_argument(
+    #     "-o",
+    #     "--output-dir",
+    #     default=None,
+    #     required=False,
+    #     help="folder - where to save the output files. If not specified, will save to the input-dir",
+    # )
     parser.add_argument(
-        "--output-dir",
-        default=None,
-        required=False,
-        help="folder - where to save the output files. If not specified, will save to the input-dir",
-    )
-    parser.add_argument(
+        "-move",
         "--move-input-vids",
         required=False,
         default=False,
@@ -449,10 +553,8 @@ def get_parser():
         "-m",
         "--model",
         required=False,
-        default=None,
-        help="huggingface wav2vec2 model name, ex 'facebook/wav2vec2-base-960h'",
-        # "facebook/wav2vec2-large-960h-lv60-self" is one of the best models but taxing on the GPU/CPU
-        # for wavLM, "patrickvonplaten/wavlm-libri-clean-100h-large" or others
+        default="facebook/hubert-large-ls960-ft",
+        help="huggingface ASR model name. try 'facebook/wav2vec2-base-960h' if issues running default.",
     )
 
     parser.add_argument(
@@ -482,96 +584,6 @@ def get_parser():
 
     return parser
 
-
-def transcribe_dir(
-    input_src,
-    basic_spelling=False,
-    is_verbose=False,
-    move_comp=False,
-    chunk_length=15,
-    model_arg=None,
-    join_text=False,
-):
-    st = time.perf_counter()
-
-    directory = os.path.abspath(input_src)
-    linebyline = not join_text
-    base_spelling = basic_spelling
-    logging.info(f"Starting transcription pipeline @ {get_timestamp(True)}" + "\n")
-    print(f"\nLoading models @ {get_timestamp(True)} - may take some time...")
-    print("if RT seems excessive, try --verbose flag or checking logfile")
-    # load the model facebook/hubert-large-ls960-ft
-    wav_model = (
-        "facebook/hubert-large-ls960-ft" if model_arg is None else model_arg
-    )  # try "facebook/wav2vec2-base-960h" if crashes
-    tokenizer, model = load_transcription_objects(wav_model)
-
-    # load the spellchecker models. suppress outputs as there are way too many
-    orig_out = sys.__stdout__
-    sys.stdout = NullIO()
-    if base_spelling:
-        checker = init_symspell()
-    else:
-        try:
-            checker = init_neuspell()
-
-        except Exception as e:
-            print(
-                "Failed loading NeuSpell spellchecker, reverting to basic spellchecker"
-            )
-            logging.warning(
-                f"Failed loading NeuSpell spellchecker, reverting to basic spellchecker"
-            )
-            logging.warning(f"{e}")
-            base_spelling = True
-            checker = init_symspell()
-
-    sys.stdout = orig_out  # return to default of print-to-console
-    # load vid2cleantxt inputs
-    approved_files = []
-    for ext in get_av_fmts():  # now include audio formats and video formats
-        approved_files.extend(find_ext_local(directory, req_ext=ext, full_path=False))
-
-    print(f"\nFound {len(approved_files)} audio or video files in {directory}")
-
-    # transcribe video and get results
-    storage_locs = setup_out_dirs(directory)  # create and get output folders
-    for filename in tqdm(
-        approved_files,
-        total=len(approved_files),
-        desc="transcribing vids",
-    ):
-        t_results = transcribe_video_wav2vec(
-            ts_model=model,
-            ts_tokenizer=tokenizer,
-            src_dir=directory,
-            clip_name=filename,
-            chunk_dur=chunk_length,
-        )
-
-        if move_comp:
-            move2completed(directory, filename=filename)  # move src to completed folder
-
-    # postprocess the transcriptions
-    out_p_tscript = storage_locs.get("t_out")
-    out_p_metadata = storage_locs.get("m_out")
-    postprocess_transc(
-        tscript_dir=out_p_tscript,
-        mdata_dir=out_p_metadata,
-        merge_files=False,
-        verbose=is_verbose,
-        linebyline=linebyline,
-        spell_correct_method="symspell" if base_spelling else "neuspell",
-        checker=checker,
-    )
-
-    logging.info(f"Finished transcription pipeline @ {get_timestamp(True)}" + "\n")
-    logging.info(f"Total time: {round((time.perf_counter() - st)/60, 3)} mins")
-    print(
-        f"Complete. Relevant files for run are in: \n{out_p_tscript} \n and: \n{out_p_metadata}"
-    )
-
-
 # TODO: change to pathlib from os.path
 
 if __name__ == "__main__":
@@ -580,19 +592,25 @@ if __name__ == "__main__":
     args = get_parser().parse_args()
     input_src = str(args.input_dir)
     # TODO: add output directory from user arg
-    is_verbose = args.verbose
     move_comp = args.move_input_vids
     chunk_length = int(args.chunk_length)
     model_arg = args.model
     join_text = args.join_text
     basic_spelling = args.basic_spelling
+    is_verbose = args.verbose
 
-    transcribe_dir(
-        input_src,
-        basic_spelling,
-        is_verbose,
-        move_comp,
-        chunk_length,
-        model_arg,
-        join_text,
+    output_text, output_metadata = transcribe_dir(
+        input_src = input_src,
+        chunk_length = chunk_length,
+        model_arg = model_arg,
+        move_comp = move_comp,
+        join_text = join_text,
+        basic_spelling = basic_spelling,
+        verbose = is_verbose,
+
+    )
+
+
+    print(
+        f"Complete. Relevant files for run are in: \n{output_text} \n{output_metadata}"
     )
