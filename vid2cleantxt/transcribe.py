@@ -593,7 +593,7 @@ def transcribe_dir(
     print(f"\nLoading models @ {get_timestamp(True)} - may take some time...")
     print("if RT seems excessive, try --verbose flag or checking logfile")
 
-    _is_whisper = "whisper" in model.lower()
+    _is_whisper = "whisper" in model_id.lower()
 
     if _is_whisper:
         logging.info("whisper model detected, using special settings")
