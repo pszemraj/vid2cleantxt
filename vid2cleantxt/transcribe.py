@@ -237,7 +237,6 @@ def transcribe_video_whisper(
     temp_dir: str = "audio_chunks",
     manually_clear_cuda_cache=False,
     verbose=False,
-
 ) -> dict:
     """
     transcribe_video_whisper - transcribe a video file using the whisper model
@@ -274,23 +273,26 @@ def transcribe_video_whisper(
     for i, audio_chunk in enumerate(chunk_directory):
 
         if (i % GPU_update_incr == 0) and (GPU_update_incr != 0):
-            check_runhardware() # utilization check
+            check_runhardware()  # utilization check
             gc.collect()
         audio_input, clip_sr = librosa.load(
             join(ac_storedir, audio_chunk), sr=16000
         )  # load the audio chunk @ 16kHz
 
         input_features = processor(
-            audio_input, truncation=True, padding='max_length',
-            return_tensors="pt"
-        ).input_features # audio to tensor
-        predicted_ids = model.generate(input_features, max_new_tokens=chunk_max_new_tokens)
+            audio_input, truncation=True, padding="max_length", return_tensors="pt"
+        ).input_features  # audio to tensor
+        predicted_ids = model.generate(
+            input_features, max_new_tokens=chunk_max_new_tokens
+        )
         this_transc = processor.batch_decode(
             predicted_ids,
             max_length=chunk_max_new_tokens,
             clean_up_tokenization_spaces=True,
             skip_special_tokens=True,
-        )[0] # decode the tensor to text
+        )[
+            0
+        ]  # decode the tensor to text
         this_transc = (
             "".join(this_transc) if isinstance(this_transc, list) else this_transc
         )
@@ -348,7 +350,6 @@ def transcribe_video_wav2vec(
     temp_dir: str = "audio_chunks",
     manually_clear_cuda_cache=False,
     verbose=False,
-
 ) -> dict:
     """
     transcribe_video_wav2vec - transcribe a video file using the wav2vec model
@@ -374,7 +375,7 @@ def transcribe_video_wav2vec(
 
     chunk_directory = prep_transc_pydub(
         clip_name, clip_directory, ac_storedir, chunk_dur, verbose=verbose
-    ) # split the video into chunks
+    )  # split the video into chunks
     torch_validate_cuda()
     gc.collect()
     device = "cuda" if torch.cuda.is_available() else "cpu"  # set device
@@ -388,13 +389,15 @@ def transcribe_video_wav2vec(
 
         # note that large-960h-lv60 has an attention mask of length of the input sequence, the base model does not
         if (i % GPU_update_incr == 0) and (GPU_update_incr != 0):
-            check_runhardware() # check utilization
+            check_runhardware()  # check utilization
             gc.collect()
         audio_input, clip_sr = librosa.load(
             join(ac_storedir, audio_chunk), sr=16000
         )  # load the audio chunk @ 16kHz (wav2vec2 expects 16kHz)
 
-        inputs = processor(audio_input, return_tensors="pt", padding="longest") # audio to tensor
+        inputs = processor(
+            audio_input, return_tensors="pt", padding="longest"
+        )  # audio to tensor
         input_values = inputs.input_values.to(device)
         attention_mask = (
             inputs.attention_mask.to(device) if use_attn else None
@@ -584,16 +587,12 @@ def transcribe_dir(
     print(f"\nLoading models @ {get_timestamp(True)} - may take some time...")
     print("if RT seems excessive, try --verbose flag or checking logfile")
 
-
-    model = (
-        "openai/whisper-base.en" if model_id is None else model_id
-    )
+    model = "openai/whisper-base.en" if model_id is None else model_id
 
     _is_whisper = "whisper" in model_id.lower()
 
     if _is_whisper:
         logging.info("whisper model detected, using special settings")
-
 
     processor, model = (
         load_whisper_modules(model) if _is_whisper else load_wav2vec2_modules(model)
