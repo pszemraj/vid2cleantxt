@@ -21,4 +21,4 @@ tqdm
 wordninja==2.0.0
 wrapt
 yake>=0.4.8
-transformers>=4.22.0
+git+https://github.com/huggingface/transformers.git
