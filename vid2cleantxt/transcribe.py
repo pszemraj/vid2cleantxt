@@ -83,7 +83,7 @@ from vid2cleantxt.v2ct_utils import (
 )
 
 
-def laod_whisper_modules(
+def load_whisper_modules(
     hf_id: str, language: str = "en", task: str = "transcribe", chunk_length: int = 30
 ):
     """
