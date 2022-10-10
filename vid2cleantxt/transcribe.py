@@ -409,7 +409,7 @@ def postprocess_transc(
         index=True,
     )
 
-    return processed_dir
+    return PL_out['SBD_dir']
 
 
 def transcribe_dir(
