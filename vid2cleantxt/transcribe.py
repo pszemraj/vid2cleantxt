@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-transcribe.py - transcribe a video file using a pretrained wav2vec2 model
-
-Pipeline for transcription of a speech-based video file to text using facebook's wav2vec2 model (or Hubert model)
+transcribe.py - transcribe a video file using a pretrained ASR model such as wav2vec2 or whisper
 
 Usage:
     vid2cleantxt.py --video <video_file> --model <model_id> [--out <out_dir>] [--verbose] [--debug] [--log <log_file>]
@@ -89,7 +87,7 @@ def load_whisper_modules(
     """
     laod_whisper_modules - load the whisper modules from huggingface
 
-    :param str hf_id: the id of the model to load on huggingface, for example: "facebook/wav2vec2-base-960h" or "facebook/hubert-large-ls960-ft"
+    :param str hf_id: the id of the model to load on huggingface, for example: "openai/whisper-base.en" or "openai/whisper-medium"
     :param str language: the language of the model, for example "en" or "de"
     :param str task: the task of the model, for example "transcribe" or "translate"
     :param int chunk_length: the length of the chunks to transcribe, in seconds
@@ -568,7 +566,7 @@ def transcribe_dir(
 
     :param str input_src: the path to the directory containing the videos to transcribe
     :param int chunk_length: the length of the chunks to split the audio into, in seconds. Default is 30 seconds
-    :param str model_id: the model id to use for the transcription. Default is None, which will use the default model facebook/hubert-large-ls960-ft
+    :param str model_id: the model id to use for the transcription. Default is None, which will use the default model openai/whisper-base.en
     :param bool basic_spelling: if True, use basic spelling correction instead of neural spell correction
     :param bool move_comp: if True, move the completed files to a new folder
     :param bool join_text: if True, join all lines of text into one long string
@@ -586,14 +584,17 @@ def transcribe_dir(
     print(f"\nLoading models @ {get_timestamp(True)} - may take some time...")
     print("if RT seems excessive, try --verbose flag or checking logfile")
 
+
+    model = (
+        "openai/whisper-base.en" if model_id is None else model_id
+    )
+
     _is_whisper = "whisper" in model_id.lower()
 
     if _is_whisper:
         logging.info("whisper model detected, using special settings")
 
-    model = (
-        "facebook/hubert-large-ls960-ft" if model_id is None else model_id
-    )  # load the model
+
     processor, model = (
         load_whisper_modules(model) if _is_whisper else load_wav2vec2_modules(model)
     )
