@@ -40,7 +40,7 @@ import pandas as pd
 import torch
 import transformers
 from tqdm.auto import tqdm
-from transformers import HubertForCTC, Wav2Vec2ForCTC, Wav2Vec2Processor, WavLMForCTC
+from transformers import HubertForCTC, Wav2Vec2ForCTC, Wav2Vec2Processor, WavLMForCTC, WhisperProcessor, WhisperForConditionalGeneration
 
 #  filter out warnings that pretend transfer learning does not exist
 warnings.filterwarnings("ignore", message="Some weights of")
@@ -75,6 +75,25 @@ from vid2cleantxt.v2ct_utils import (
     torch_validate_cuda,
 )
 
+def laod_whisper_modules(hf_id:str, language:str="en", task:str="transcribe", chunk_length:int=30):
+    """
+    laod_whisper_modules - load the whisper modules from huggingface
+
+    :param str hf_id: the id of the model to load on huggingface, for example: "facebook/wav2vec2-base-960h" or "facebook/hubert-large-ls960-ft"
+    :param str language: the language of the model, for example "en" or "de"
+    :param str task: the task of the model, for example "transcribe" or "translate"
+    :param int chunk_length: the length of the chunks to transcribe, in seconds
+    :return processor, model: the processor and model objects
+    """
+
+
+    processor = WhisperProcessor.from_pretrained(hf_id)
+    model = WhisperForConditionalGeneration.from_pretrained(hf_id)
+
+    processor.feature_extractor.chunk_length = chunk_length
+    model.config.forced_decoder_ids = processor.get_decoder_prompt_ids(language = language, task = task)
+
+    return processor, model
 
 def load_transcription_objects(hf_id: str):
     """
