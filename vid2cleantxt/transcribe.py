@@ -558,7 +558,7 @@ def postprocess_transc(
 def transcribe_dir(
     input_dir: str,
     chunk_length: int = 30,
-    model_id: str = None,
+    model_id: str = "openai/whisper-base.en",
     basic_spelling=False,
     move_comp=False,
     join_text=False,
@@ -569,7 +569,7 @@ def transcribe_dir(
 
     :param str input_src: the path to the directory containing the videos to transcribe
     :param int chunk_length: the length of the chunks to split the audio into, in seconds. Default is 30 seconds
-    :param str model_id: the model id to use for the transcription. Default is None, which will use the default model openai/whisper-base.en
+    :param str model_id: the model id to use for the transcription. Default is openai/whisper-base.en
     :param bool basic_spelling: if True, use basic spelling correction instead of neural spell correction
     :param bool move_comp: if True, move the completed files to a new folder
     :param bool join_text: if True, join all lines of text into one long string
@@ -586,8 +586,6 @@ def transcribe_dir(
     logging.info(f"Starting transcription pipeline @ {get_timestamp(True)}" + "\n")
     print(f"\nLoading models @ {get_timestamp(True)} - may take some time...")
     print("if RT seems excessive, try --verbose flag or checking logfile")
-
-    model = "openai/whisper-base.en" if model_id is None else model_id
 
     _is_whisper = "whisper" in model_id.lower()
 
