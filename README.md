@@ -72,32 +72,32 @@ See the [demo notebook](https://colab.research.google.com/gist/pszemraj/9678129f
 
 ![vid2cleantxt detailed](https://user-images.githubusercontent.com/74869040/131499569-c894c096-b6b8-4d17-b99c-a4cfce395ea8.png)
 
-1. The `transcribe.py` script uses audio2text_functions.py to convert video files to .wav format audio chunks of duration X\* seconds
-2. transcribe all X audio chunks through a pretrained wav2vec2 model
-3. Write all results of the list into a text file, stores various runtime metrics into a separate text list, and deletes the .wav audio chunk directory after completed using them.
-4. (Optional) create two new text files: one with all transcriptions appended, and one with all metadata appended. The script then
+1. The `transcribe.py` script uses `audio2text_functions.py` to convert video files to `.wav` format audio chunks of duration X\* seconds
+2. transcribe all X audio chunks through a pretrained `wav2vec2` model
+3. Write all results of the list into a text file, stores various runtime metrics into a separate text list, and deletes the `.wav` audio chunk directory after completed using them.
+4. (Optional) create two new text files: one with all transcriptions appended, and one with all metadata appended.
 5. FOR each transcription text file:
-    - Passes the 'base' transcription text through a spell checker (_Neuspell_) and autocorrect spelling. Saves as new text file.
-    - Uses pySBD to infer sentence boundaries on the spell-corrected text and add periods in to delineate sentences. Saves as new file.
-    - Runs basic keyword extraction (via YAKE) on spell-corrected file. All keywords per file are stored in one data frame for comparison, and exported to `.xlsx` format
+    - Passes the 'base' transcription text through a spell checker (_Neuspell_) and auto-correct spelling. Saves as new text file.
+    - Uses _pySBD_ to infer sentence boundaries on the spell-corrected text and add periods in to delineate sentences. Saves as new file.
+    - Runs basic keyword extraction (via _YAKE_) on spell-corrected file. All keywords per file are stored in one data frame for comparison, and exported to `.xlsx` format
 
-_\*\* (where X is some duration that does not overload your computer or crash your runtime)_
+_\*\* (where X is some duration that does not overload your computer/runtime)_
 
-With `.` indicating passed video dir:
+given `INPUT_DIRECTORY`:
 
-- results as `.txt` are stored in `./v2clntxt_transcriptions/results_SC_pipeline/`
-- metadata in `~/v2clntxt_transc_metadata`
+- _final_ transcriptions in`.txt` will be in `INPUT_DIRECTORY/v2clntxt_transcriptions/results_SC_pipeline/`
+- metadata about transcription process will be in `INPUT_DIRECTORY/v2clntxt_transc_metadata`
 
 * * *
 
 ## Quickstart
 
-Install, then you can use vid2cleantxt in two ways:
+Install, then you can use `vid2cleantxt` in two ways:
 
 1. CLI via transcribe.py`script from the command line (`python vid2cleantxt/transcribe.py --input-dir "path/to/video/files" --output-dir "path/to/output/dir"\`)
 2. As a python package, import `vid2cleantxt` and use the `transcribe` module to transcribe videos (`vid2cleantxt.transcribe.transcribe_dir()`)
 
-If you either don't have want to use locally or don't have a GPU, you may be interested in the [demo notebook](https://colab.research.google.com/gist/pszemraj/9678129fe0b552e114e3576606446dee/vid2cleantxt-minimal-example.ipynb) on Google Colab.
+If you either don't have want to use it locally or don't have a GPU, you may be interested in the [demo notebook](https://colab.research.google.com/gist/pszemraj/9678129fe0b552e114e3576606446dee/vid2cleantxt-minimal-example.ipynb) on Google Colab.
 
 ### Installation
 
@@ -204,7 +204,7 @@ Notebook versions are available on Google Colab as they offer free GPUs which ma
 
 As `vid2cleantxt` is now available as a package with python API, there is no longer a need for long, complicated notebooks. See [this notebook](https://colab.research.google.com/gist/pszemraj/9678129fe0b552e114e3576606446dee/vid2cleantxt-minimal-example.ipynb) for a fairly simple example - copy it to your drive and adjust as needed.
 
-⚠️ The notebooks in /colab-notebooks are now deprecated and not recommended to be used. ⚠️ TODO: remove in a future PR.
+⚠️ The notebooks in `./colab_notebooks` are now deprecated and **not recommended to be used**. ⚠️ TODO: remove in a future PR.
 
 **Resources for those new to Colab**
 
@@ -360,7 +360,7 @@ _`*` these statements reflect the assessment completed around project inception 
 
 ## Examples
 
-- two examples are evailable in the `examples/` directory. One example is a single video (another speech) and the other is multiple videos (MIT OpenCourseWare). Citations are in the respective folders.
+- two examples are available in the `examples/` directory. One example is a single video (another speech) and the other is multiple videos (MIT OpenCourseWare). Citations are in the respective folders.
 - Note that the videos first need to be downloaded video the respective scripts in each folder first, i.e. run: `python examples/TEST_singlefile/dl_src_video.py`
 
 ## Future Work, Collaboration, & Citations
