@@ -642,7 +642,7 @@ def transcribe_dir(
             transcribe_video_whisper(
                 model=model,
                 processor=processor,
-                ssrc_dir=directory,
+                src_dir=directory,
                 clip_name=filename,
                 chunk_dur=chunk_length,
             )
