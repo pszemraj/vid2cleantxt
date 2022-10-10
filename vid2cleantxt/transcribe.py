@@ -418,7 +418,7 @@ def transcribe_dir(
     model_arg=None,
     join_text=False,
     verbose=False,
-) -> str, str:
+):
     """
     transcribe_dir - transcribe all videos in a directory
 
