@@ -69,7 +69,10 @@ from vid2cleantxt.v2ct_utils import (
     NullIO,
     torch_validate_cuda,
     get_timestamp,
+    load_spacy_models
 )
+
+load_spacy_models()
 
 def load_transcription_objects(hf_id: str):
     """
