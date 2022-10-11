@@ -236,7 +236,7 @@ def transcribe_video_whisper(
     chunk_max_new_tokens=512,
     temp_dir: str = "audio_chunks",
     manually_clear_cuda_cache=False,
-    display_memory_usage=False,
+    print_memory_usage=False,
     verbose=False,
 ) -> dict:
     """
@@ -250,6 +250,7 @@ def transcribe_video_whisper(
     :param int chunk_max_new_tokens: max new tokens generated per chunk, default 512 (arbitrary upper bound)
     :param str temp_dir: the directory to store the audio chunks in. default "audio_chunks"
     :param bool manually_clear_cuda_cache: whether to manually clear the cuda cache after each chunk. default False
+    :param bool print_memory_usage: whether to print the memory usage at set interval while transcribing. default False
     :param bool verbose: whether to print the transcribed text locations to the console. default False
     :return dict: a dictionary containing the transcribed text, the metadata
 
@@ -273,7 +274,7 @@ def transcribe_video_whisper(
     pbar = tqdm(total=len(chunk_directory), desc="Transcribing video")
     for i, audio_chunk in enumerate(chunk_directory):
 
-        if (i % GPU_update_incr == 0) and (GPU_update_incr != 0) and display_memory_usage:
+        if (i % GPU_update_incr == 0) and (GPU_update_incr != 0) and print_memory_usage:
             check_runhardware()  # utilization check
             gc.collect()
 
@@ -360,6 +361,7 @@ def transcribe_video_wav2vec(
     chunk_dur: int = 15,
     temp_dir: str = "audio_chunks",
     manually_clear_cuda_cache=False,
+    print_memory_usage=False,
     verbose=False,
 ) -> dict:
     """
@@ -372,6 +374,7 @@ def transcribe_video_wav2vec(
     :param int chunk_dur: the duration of each chunk in seconds, default 15
     :param str temp_dir: the directory to store the audio chunks in. default "audio_chunks"
     :param bool manually_clear_cuda_cache: whether to manually clear the cuda cache after each chunk. default False
+    :param bool print_memory_usage: whether to print the memory usage at set interval while transcribing. default False
     :param bool verbose: whether to print the transcribed text locations to the console. default False
     :return dict: a dictionary containing the transcribed text, the metadata
     """
@@ -399,7 +402,7 @@ def transcribe_video_wav2vec(
     for i, audio_chunk in enumerate(chunk_directory):
 
         # note that large-960h-lv60 has an attention mask of length of the input sequence, the base model does not
-        if (i % GPU_update_incr == 0) and (GPU_update_incr != 0):
+        if (i % GPU_update_incr == 0) and (GPU_update_incr != 0) and print_memory_usage:
             check_runhardware()  # check utilization
             gc.collect()
         try:
@@ -581,6 +584,7 @@ def transcribe_dir(
     basic_spelling=False,
     move_comp=False,
     join_text=False,
+    print_memory_usage=False,
     verbose=False,
 ):
     """
@@ -592,6 +596,7 @@ def transcribe_dir(
     :param bool basic_spelling: if True, use basic spelling correction instead of neural spell correction
     :param bool move_comp: if True, move the completed files to a new folder
     :param bool join_text: if True, join all lines of text into one long string
+    :param bool print_memory_usage: if True, print the memory usage of the system during the transcription
     :param bool verbose: if True, print out more information
 
     -------
@@ -661,6 +666,8 @@ def transcribe_dir(
                 clip_directory=directory,
                 clip_name=filename,
                 chunk_dur=chunk_length,
+                print_memory_usage=print_memory_usage,
+                verbose=verbose,
             )
             if _is_whisper
             else transcribe_video_wav2vec(
@@ -669,6 +676,8 @@ def transcribe_dir(
                 clip_directory=directory,
                 clip_name=filename,
                 chunk_dur=chunk_length,
+                print_memory_usage=print_memory_usage,
+                verbose=verbose,
             )
         )
 
@@ -759,6 +768,13 @@ def get_parser():
         action="store_true",
         help="Use the basic spelling correction pipeline with symSpell",
     )
+    parser.add_argument(
+        "--print-memory-usage",
+        required=False,
+        default=False,
+        action="store_true",
+        help="Print memory usage updates during transcription",
+    )
 
     parser.add_argument(
         "-v",
@@ -785,6 +801,7 @@ if __name__ == "__main__":
     model_id = str(args.model)
     join_text = args.join_text
     basic_spelling = args.basic_spelling
+    print_memory_usage = args.print_memory_usage
     is_verbose = args.verbose
 
     output_text, output_metadata = transcribe_dir(
@@ -794,6 +811,7 @@ if __name__ == "__main__":
         move_comp=move_comp,
         join_text=join_text,
         basic_spelling=basic_spelling,
+        print_memory_usage=print_memory_usage,
         verbose=is_verbose,
     )
 
