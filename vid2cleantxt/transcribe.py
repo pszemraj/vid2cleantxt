@@ -25,7 +25,7 @@ sys.path.append(dirname(dirname(os.path.abspath(__file__))))
 
 import logging
 
-logging.basicConfig(level=logging.INFO, filename="LOGFILE_vid2cleantxt_transcriber.log")
+logging.basicConfig(level=logging.INFO, filename="LOGFILE_vid2cleantxt_transcriber.log", format="%(asctime)s %(message)s")
 
 import argparse
 import math
