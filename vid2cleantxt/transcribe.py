@@ -275,24 +275,33 @@ def transcribe_video_whisper(
         if (i % GPU_update_incr == 0) and (GPU_update_incr != 0):
             check_runhardware()  # utilization check
             gc.collect()
-        audio_input, clip_sr = librosa.load(
-            join(ac_storedir, audio_chunk), sr=16000
-        )  # load the audio chunk @ 16kHz
 
-        input_features = processor(
-            audio_input, truncation=True, padding="max_length", return_tensors="pt"
-        ).input_features  # audio to tensor
-        predicted_ids = model.generate(
-            input_features, max_new_tokens=chunk_max_new_tokens
-        )
-        this_transc = processor.batch_decode(
-            predicted_ids,
-            max_length=chunk_max_new_tokens,
-            clean_up_tokenization_spaces=True,
-            skip_special_tokens=True,
-        )[
-            0
-        ]  # decode the tensor to text
+        try:
+            audio_input, clip_sr = librosa.load(
+                join(ac_storedir, audio_chunk), sr=16000
+            )  # load the audio chunk @ 16kHz
+
+            input_features = processor(
+                audio_input, truncation=True, padding="max_length", return_tensors="pt"
+            ).input_features  # audio to tensor
+            predicted_ids = model.generate(
+                input_features, max_new_tokens=chunk_max_new_tokens
+            )
+            this_transc = processor.batch_decode(
+                predicted_ids,
+                max_length=chunk_max_new_tokens,
+                clean_up_tokenization_spaces=True,
+                skip_special_tokens=True,
+            )[
+                0
+            ]  # decode the tensor to text
+        except Exception as e:
+            logging.error(
+                f"Error transcribing chunk {audio_chunk} in {clip_name} @ {get_timestamp()}"
+            )
+            logging.error(e)
+            warnings.warn("Error transcribing chunk - see log for details")
+            this_transc = ""
         this_transc = (
             "".join(this_transc) if isinstance(this_transc, list) else this_transc
         )
@@ -391,29 +400,37 @@ def transcribe_video_wav2vec(
         if (i % GPU_update_incr == 0) and (GPU_update_incr != 0):
             check_runhardware()  # check utilization
             gc.collect()
-        audio_input, clip_sr = librosa.load(
-            join(ac_storedir, audio_chunk), sr=16000
-        )  # load the audio chunk @ 16kHz (wav2vec2 expects 16kHz)
+        try:
+            audio_input, clip_sr = librosa.load(
+                join(ac_storedir, audio_chunk), sr=16000
+            )  # load the audio chunk @ 16kHz (wav2vec2 expects 16kHz)
 
-        inputs = processor(
-            audio_input, return_tensors="pt", padding="longest"
-        )  # audio to tensor
-        input_values = inputs.input_values.to(device)
-        attention_mask = (
-            inputs.attention_mask.to(device) if use_attn else None
-        )  # set attention mask if using large model
+            inputs = processor(
+                audio_input, return_tensors="pt", padding="longest"
+            )  # audio to tensor
+            input_values = inputs.input_values.to(device)
+            attention_mask = (
+                inputs.attention_mask.to(device) if use_attn else None
+            )  # set attention mask if using large model
 
-        with torch.no_grad():
-            if use_attn:
-                logits = model(input_values, attention_mask=attention_mask).logits
-            else:
-                logits = model(input_values).logits
+            with torch.no_grad():
+                if use_attn:
+                    logits = model(input_values, attention_mask=attention_mask).logits
+                else:
+                    logits = model(input_values).logits
 
-        predicted_ids = torch.argmax(logits, dim=-1)  # get the predicted ids
-        this_transc = processor.batch_decode(predicted_ids)
-        this_transc = (
-            "".join(this_transc) if isinstance(this_transc, list) else this_transc
-        )
+            predicted_ids = torch.argmax(logits, dim=-1)  # get the predicted ids
+            this_transc = processor.batch_decode(predicted_ids)
+            this_transc = (
+                "".join(this_transc) if isinstance(this_transc, list) else this_transc
+            )
+        except Exception as e:
+            logging.error(
+                f"Error transcribing chunk {audio_chunk} in {clip_name} @ {get_timestamp()}"
+            )
+            logging.error(e)
+            warnings.warn("Error transcribing chunk - see log for details   ")
+            this_transc = ""
 
         full_transc.append(f"{this_transc}\n")
 
@@ -592,10 +609,14 @@ def transcribe_dir(
     if _is_whisper:
         logging.info("whisper model detected, using special settings")
         if chunk_length != 30:
-            warnings.warn(f"you have set chunk_length to {chunk_length}, but whisper models default to 30s chunks. strange things may happen")
+            warnings.warn(
+                f"you have set chunk_length to {chunk_length}, but whisper models default to 30s chunks. strange things may happen"
+            )
 
     processor, model = (
-        load_whisper_modules(model_id) if _is_whisper else load_wav2vec2_modules(model_id)
+        load_whisper_modules(model_id)
+        if _is_whisper
+        else load_wav2vec2_modules(model_id)
     )
     # load the spellchecker models. suppressing outputs
     orig_out = sys.__stdout__
