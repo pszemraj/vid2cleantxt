@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-transcribe.py - transcribe a video file using a pretrained wav2vec2 model
-
-Pipeline for transcription of a speech-based video file to text using facebook's wav2vec2 model (or Hubert model)
+transcribe.py - transcribe a video file using a pretrained ASR model such as wav2vec2 or whisper
 
 Usage:
     vid2cleantxt.py --video <video_file> --model <model_id> [--out <out_dir>] [--verbose] [--debug] [--log <log_file>]
@@ -27,7 +25,7 @@ sys.path.append(dirname(dirname(os.path.abspath(__file__))))
 
 import logging
 
-logging.basicConfig(level=logging.INFO, filename="LOGFILE_vid2cleantxt_transcriber.log")
+logging.basicConfig(level=logging.INFO, filename="LOGFILE_vid2cleantxt_transcriber.log", format="%(asctime)s %(message)s")
 
 import argparse
 import math
@@ -40,7 +38,14 @@ import pandas as pd
 import torch
 import transformers
 from tqdm.auto import tqdm
-from transformers import HubertForCTC, Wav2Vec2ForCTC, Wav2Vec2Processor, WavLMForCTC
+from transformers import (
+    HubertForCTC,
+    Wav2Vec2ForCTC,
+    Wav2Vec2Processor,
+    WavLMForCTC,
+    WhisperProcessor,
+    WhisperForConditionalGeneration,
+)
 
 #  filter out warnings that pretend transfer learning does not exist
 warnings.filterwarnings("ignore", message="Some weights of")
@@ -76,7 +81,31 @@ from vid2cleantxt.v2ct_utils import (
 )
 
 
-def load_transcription_objects(hf_id: str):
+def load_whisper_modules(
+    hf_id: str, language: str = "en", task: str = "transcribe", chunk_length: int = 30
+):
+    """
+    laod_whisper_modules - load the whisper modules from huggingface
+
+    :param str hf_id: the id of the model to load on huggingface, for example: "openai/whisper-base.en" or "openai/whisper-medium"
+    :param str language: the language of the model, for example "en" or "de"
+    :param str task: the task of the model, for example "transcribe" or "translate"
+    :param int chunk_length: the length of the chunks to transcribe, in seconds
+    :return processor, model: the processor and model objects
+    """
+
+    processor = WhisperProcessor.from_pretrained(hf_id)
+    model = WhisperForConditionalGeneration.from_pretrained(hf_id)
+
+    processor.feature_extractor.chunk_length = chunk_length
+    model.config.forced_decoder_ids = processor.get_decoder_prompt_ids(
+        language=language, task=task
+    )
+
+    return processor, model
+
+
+def load_wav2vec2_modules(hf_id: str):
     """
     load_transcription_objects - load the transcription objects from huggingface
 
@@ -198,104 +227,104 @@ def save_transc_results(
     )
 
 
-def transcribe_video_wav2vec(
-    ts_model,
-    ts_tokenizer,
-    src_dir,
+def transcribe_video_whisper(
+    model,
+    processor,
+    clip_directory,
     clip_name: str,
-    chunk_dur: int,
-    verbose=False,
+    chunk_dur: int = 30,
+    chunk_max_new_tokens=512,
     temp_dir: str = "audio_chunks",
+    manually_clear_cuda_cache=False,
+    print_memory_usage=False,
+    verbose=False,
 ) -> dict:
     """
-    transcribe_video_wav2vec - transcribes a video clip using the wav2vec2 model. Note that results will be saved to the output directory, src_dir
+    transcribe_video_whisper - transcribe a video file using the whisper model
 
-    Parameters
-    ----------
-    ts_model : transformers model, the transformer model that was loaded (must be a wav2vec2 model)
-    ts_tokenizer : transformers.AutoTokenizer, the tokenizer that was loaded (must be a wav2vec2 tokenizer)
-    directory : str, path to the directory containing the video file
-    vid_clip_name : str, name of the video clip
-    chunk_dur : int, duration of audio chunks (in seconds) that the transformer model will be fed
-    verbose : bool, optional
-    temp_dir : str, optional, the name of the temporary directory to store the audio chunks
-
-    Returns
-    -------
-    transc_results : dict, the transcribed text and metadata
+    :param model: the model object
+    :param processor: the processor object
+    :param clip_directory: the directory of the video file
+    :param str clip_name: the name of the video file
+    :param int chunk_dur: the duration of each chunk in seconds, default 30
+    :param int chunk_max_new_tokens: max new tokens generated per chunk, default 512 (arbitrary upper bound)
+    :param str temp_dir: the directory to store the audio chunks in. default "audio_chunks"
+    :param bool manually_clear_cuda_cache: whether to manually clear the cuda cache after each chunk. default False
+    :param bool print_memory_usage: whether to print the memory usage at set interval while transcribing. default False
+    :param bool verbose: whether to print the transcribed text locations to the console. default False
+    :return dict: a dictionary containing the transcribed text, the metadata
 
     """
-    logging.info(f"Starting to transcribe {clip_name} @ {get_timestamp()}")
+    logging.info(f"Starting to transcribe {clip_name}")
     if verbose:
         print(f"Starting to transcribe {clip_name} @ {get_timestamp()}")
-    # create audio chunk folder
-    ac_storedir = join(src_dir, temp_dir)
+    ac_storedir = join(clip_directory, temp_dir)
     create_folder(ac_storedir)
-    use_attn = wav2vec2_islarge(
-        ts_model
-    )  # if they pass in a large model, use attention masking
-    # get the audio chunks
     chunk_directory = prep_transc_pydub(
-        clip_name, src_dir, ac_storedir, chunk_dur, verbose=verbose
+        clip_name, clip_directory, ac_storedir, chunk_dur, verbose=verbose
     )
-    torch_validate_cuda()
-    gc.collect()  # free up memory
-    device = "cuda:0" if torch.cuda.is_available() else "cpu"  # set device
+    gc.collect()
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    logging.info(f"transcribing on {device}")
     full_transc = []
     GPU_update_incr = (
         math.ceil(len(chunk_directory) / 2) if len(chunk_directory) > 1 else 1
     )
+    model = model.to(device)
     pbar = tqdm(total=len(chunk_directory), desc="Transcribing video")
     for i, audio_chunk in enumerate(chunk_directory):
 
-        # note that large-960h-lv60 has an attention mask of length of the input sequence, the base model does not
-        if (i % GPU_update_incr == 0) and (GPU_update_incr != 0):
-            # provide update on GPU usage
-            check_runhardware()
+        if (i % GPU_update_incr == 0) and (GPU_update_incr != 0) and print_memory_usage:
+            check_runhardware()  # utilization check
             gc.collect()
-        audio_input, clip_sr = librosa.load(
-            join(ac_storedir, audio_chunk), sr=16000
-        )  # 16000 is the sampling rate of the wav2vec model
-        # convert audio to tensor
-        inputs = ts_tokenizer(audio_input, return_tensors="pt", padding="longest")
-        input_values = inputs.input_values.to(device)
-        attention_mask = (
-            inputs.attention_mask.to(device) if use_attn else None
-        )  # if using attention masking, set it. for large wav2vec2 model.
-        ts_model = ts_model.to(device)
-        # run the model
-        with torch.no_grad():
-            if use_attn:
-                logits = ts_model(input_values, attention_mask=attention_mask).logits
-            else:
-                logits = ts_model(input_values).logits
 
-        predicted_ids = torch.argmax(logits, dim=-1)  # get the predicted ids by argmax
-        this_transc = ts_tokenizer.batch_decode(predicted_ids)
+        try:
+            audio_input, clip_sr = librosa.load(
+                join(ac_storedir, audio_chunk), sr=16000
+            )  # load the audio chunk @ 16kHz
+
+            input_features = processor(
+                audio_input, truncation=True, padding="max_length", return_tensors="pt"
+            ).input_features  # audio to tensor
+            input_features = input_features.to(device)  # send to device
+            predicted_ids = model.generate(
+                input_features, max_new_tokens=chunk_max_new_tokens
+            )
+            this_transc = processor.batch_decode(
+                predicted_ids,
+                max_length=chunk_max_new_tokens,
+                clean_up_tokenization_spaces=True,
+                skip_special_tokens=True,
+            )[
+                0
+            ]  # decode the tensor to text
+        except Exception as e:
+            logging.warning(
+                f"Error transcribing chunk {i} in {clip_name}"
+            )
+            logging.warning(e)
+            warnings.warn(f"Error transcribing chunk {i} - see log for details")
+            this_transc = ""
         this_transc = (
             "".join(this_transc) if isinstance(this_transc, list) else this_transc
         )
-        # double-check if "" should be joined on  or " "
         full_transc.append(f"{this_transc}\n")
-        pbar.update(1)
-        # empty memory so you don't overload the GPU
-        del input_values
-        del logits
-        del predicted_ids
-        if device == "cuda:0":
-            torch.cuda.empty_cache()  # empty memory on GPU
+
+        if device == "cuda" and manually_clear_cuda_cache:
+            torch.cuda.empty_cache()
+
+        pbar.update()
 
     pbar.close()
-    if verbose:
-        print(f"Finished transcribing {clip_name} @ {get_timestamp()}")
+    logging.info("completed transcription")
 
-    md_df = create_metadata_df()  # makes a blank df with column names
+    md_df = create_metadata_df()  # blank df with column names
     full_text = corr(" ".join(full_transc))
     md_df.loc[len(md_df), :] = [
         clip_name,
         len(chunk_directory),
         chunk_dur,
-        (len(chunk_directory) * chunk_dur) / 60,  # minutes, the duration of the video
+        (len(chunk_directory) * chunk_dur) / 60,  # duration in mins
         get_timestamp(),
         full_text,
         len(full_text),
@@ -305,14 +334,146 @@ def transcribe_video_wav2vec(
         copy=False,
     )
     save_transc_results(
-        out_dir=src_dir,
+        out_dir=clip_directory,
         vid_name=clip_name,
         ttext=full_text,
         mdata=md_df,
         verbose=verbose,
-    )  # save the results here
+    )
 
-    shutil.rmtree(ac_storedir, ignore_errors=True)  # remove audio chunks folder
+    shutil.rmtree(ac_storedir, ignore_errors=True)
+    transc_res = {
+        "audio_transcription": full_transc,
+        "metadata": md_df,
+    }
+
+    if verbose:
+        print(f"finished transcription of {clip_name} - {get_timestamp()}")
+    logging.info(f"finished transcription of {clip_name} - {get_timestamp()}")
+    return transc_res
+
+
+def transcribe_video_wav2vec(
+    model,
+    processor,
+    clip_directory,
+    clip_name: str,
+    chunk_dur: int = 15,
+    temp_dir: str = "audio_chunks",
+    manually_clear_cuda_cache=False,
+    print_memory_usage=False,
+    verbose=False,
+) -> dict:
+    """
+    transcribe_video_wav2vec - transcribe a video file using the wav2vec model
+
+    :param model: the model object
+    :param processor: the processor object
+    :param clip_directory: the directory of the video file
+    :param str clip_name: the name of the video file
+    :param int chunk_dur: the duration of each chunk in seconds, default 15
+    :param str temp_dir: the directory to store the audio chunks in. default "audio_chunks"
+    :param bool manually_clear_cuda_cache: whether to manually clear the cuda cache after each chunk. default False
+    :param bool print_memory_usage: whether to print the memory usage at set interval while transcribing. default False
+    :param bool verbose: whether to print the transcribed text locations to the console. default False
+    :return dict: a dictionary containing the transcribed text, the metadata
+    """
+    logging.info(f"Starting to transcribe {clip_name}")
+    if verbose:
+        print(f"Starting to transcribe {clip_name} @ {get_timestamp()}")
+    ac_storedir = join(clip_directory, temp_dir)
+    create_folder(ac_storedir)
+    use_attn = wav2vec2_islarge(
+        model
+    )  # if they pass in a large model, use attention masking
+
+    chunk_directory = prep_transc_pydub(
+        clip_name, clip_directory, ac_storedir, chunk_dur, verbose=verbose
+    )  # split the video into chunks
+    gc.collect()
+    device = "cuda" if torch.cuda.is_available() else "cpu"  # set device
+    logging.info(f"transcribing on {device}")
+    full_transc = []
+    GPU_update_incr = (
+        math.ceil(len(chunk_directory) / 2) if len(chunk_directory) > 1 else 1
+    )
+    model = model.to(device)
+    pbar = tqdm(total=len(chunk_directory), desc="Transcribing video")
+    for i, audio_chunk in enumerate(chunk_directory):
+
+        # note that large-960h-lv60 has an attention mask of length of the input sequence, the base model does not
+        if (i % GPU_update_incr == 0) and (GPU_update_incr != 0) and print_memory_usage:
+            check_runhardware()  # check utilization
+            gc.collect()
+        try:
+            audio_input, clip_sr = librosa.load(
+                join(ac_storedir, audio_chunk), sr=16000
+            )  # load the audio chunk @ 16kHz (wav2vec2 expects 16kHz)
+
+            inputs = processor(
+                audio_input, return_tensors="pt", padding="longest"
+            )  # audio to tensor
+            input_values = inputs.input_values.to(device)
+            attention_mask = (
+                inputs.attention_mask.to(device) if use_attn else None
+            )  # set attention mask if using large model
+
+            with torch.no_grad():
+                if use_attn:
+                    logits = model(input_values, attention_mask=attention_mask).logits
+                else:
+                    logits = model(input_values).logits
+
+            predicted_ids = torch.argmax(logits, dim=-1)  # get the predicted ids
+            this_transc = processor.batch_decode(predicted_ids)
+            this_transc = (
+                "".join(this_transc) if isinstance(this_transc, list) else this_transc
+            )
+        except Exception as e:
+            logging.warning(
+                f"Error transcribing chunk {i} in {clip_name}"
+            )
+            logging.warning(e)
+            warnings.warn(f"Error transcribing chunk {i} - see log for details   ")
+            this_transc = ""
+
+        full_transc.append(f"{this_transc}\n")
+
+        del input_values
+        del logits
+        del predicted_ids
+        if device == "cuda" and manually_clear_cuda_cache:
+            torch.cuda.empty_cache()
+
+        pbar.update()
+
+    pbar.close()
+    logging.info("completed transcription")
+
+    md_df = create_metadata_df()  # makes a blank df with column names
+    full_text = corr(" ".join(full_transc))
+    md_df.loc[len(md_df), :] = [
+        clip_name,
+        len(chunk_directory),
+        chunk_dur,
+        (len(chunk_directory) * chunk_dur) / 60,
+        get_timestamp(),
+        full_text,
+        len(full_text),
+        len(full_text.split(" ")),
+    ]
+    md_df.transpose(
+        copy=False,
+    )
+    save_transc_results(
+        out_dir=clip_directory,
+        vid_name=clip_name,
+        ttext=full_text,
+        mdata=md_df,
+        verbose=verbose,
+    )
+
+    shutil.rmtree(ac_storedir, ignore_errors=True)
     transc_res = {
         "audio_transcription": full_transc,
         "metadata": md_df,
@@ -351,7 +512,7 @@ def postprocess_transc(
     str, filepath to the "complete" output directory
     """
     logging.info(
-        f"Starting postprocessing of transcribed text @ {get_timestamp()} with params {locals()}"
+        f"Starting postprocessing of transcribed text with params {locals()}"
     )
     if checker is None:
         checker = (
@@ -418,22 +579,24 @@ def postprocess_transc(
 
 def transcribe_dir(
     input_dir: str,
-    chunk_length: int = 15,
-    model_id: str = None,
+    chunk_length: int = 30,
+    model_id: str = "openai/whisper-base.en",
     basic_spelling=False,
     move_comp=False,
     join_text=False,
+    print_memory_usage=False,
     verbose=False,
 ):
     """
     transcribe_dir - transcribe all videos in a directory
 
     :param str input_src: the path to the directory containing the videos to transcribe
-    :param int chunk_length: the length of the chunks to split the audio into, in seconds. Default is 15 seconds
-    :param str model_id: the model id to use for the transcription. Default is None, which will use the default model facebook/hubert-large-ls960-ft
+    :param int chunk_length: the length of the chunks to split the audio into, in seconds. Default is 30 seconds
+    :param str model_id: the model id to use for the transcription. Default is openai/whisper-base.en
     :param bool basic_spelling: if True, use basic spelling correction instead of neural spell correction
     :param bool move_comp: if True, move the completed files to a new folder
     :param bool join_text: if True, join all lines of text into one long string
+    :param bool print_memory_usage: if True, print the memory usage of the system during the transcription
     :param bool verbose: if True, print out more information
 
     -------
@@ -448,11 +611,20 @@ def transcribe_dir(
     print(f"\nLoading models @ {get_timestamp(True)} - may take some time...")
     print("if RT seems excessive, try --verbose flag or checking logfile")
 
-    wav_model = (
-        "facebook/hubert-large-ls960-ft" if model_id is None else model_id
-    )  # load the model
-    tokenizer, model = load_transcription_objects(wav_model)
+    _is_whisper = "whisper" in model_id.lower()
 
+    if _is_whisper:
+        logging.info("whisper model detected, using special settings")
+        if chunk_length != 30:
+            warnings.warn(
+                f"you have set chunk_length to {chunk_length}, but whisper models default to 30s chunks. strange things may happen"
+            )
+
+    processor, model = (
+        load_whisper_modules(model_id)
+        if _is_whisper
+        else load_wav2vec2_modules(model_id)
+    )
     # load the spellchecker models. suppressing outputs
     orig_out = sys.__stdout__
     sys.stdout = NullIO()
@@ -487,12 +659,26 @@ def transcribe_dir(
         total=len(approved_files),
         desc="transcribing...",
     ):
-        t_results = transcribe_video_wav2vec(
-            ts_model=model,
-            ts_tokenizer=tokenizer,
-            src_dir=directory,
-            clip_name=filename,
-            chunk_dur=chunk_length,
+        t_results = (
+            transcribe_video_whisper(
+                model=model,
+                processor=processor,
+                clip_directory=directory,
+                clip_name=filename,
+                chunk_dur=chunk_length,
+                print_memory_usage=print_memory_usage,
+                verbose=verbose,
+            )
+            if _is_whisper
+            else transcribe_video_wav2vec(
+                model=model,
+                processor=processor,
+                clip_directory=directory,
+                clip_name=filename,
+                chunk_dur=chunk_length,
+                print_memory_usage=print_memory_usage,
+                verbose=verbose,
+            )
         )
 
         if move_comp:
@@ -549,20 +735,12 @@ def get_parser():
         help="if specified, will move files that finished transcription to the completed folder",
         # use case here is if there are so many files that run into CUDA memory issues resulting in a crash
     )
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        required=False,
-        default=False,
-        action="store_true",
-        help="print out more information",
-    )
 
     parser.add_argument(
         "-m",
         "--model",
         required=False,
-        default="facebook/hubert-large-ls960-ft",
+        default="openai/whisper-base.en",
         help="huggingface ASR model name. try 'facebook/wav2vec2-base-960h' if issues running default.",
     )
 
@@ -570,9 +748,9 @@ def get_parser():
         "-cl",
         "--chunk-length",
         required=False,
-        default=15,  # pass lower value if running out of memory / GPU memory
+        default=30,
         type=int,
-        help="Duration of .wav chunks (in seconds) that the transformer model will be fed",
+        help="Duration of .wav chunks (in seconds) that the transformer model will be fed. decrease if you run into memory issues",
     )
 
     parser.add_argument(
@@ -589,6 +767,22 @@ def get_parser():
         default=False,
         action="store_true",
         help="Use the basic spelling correction pipeline with symSpell",
+    )
+    parser.add_argument(
+        "--print-memory-usage",
+        required=False,
+        default=False,
+        action="store_true",
+        help="Print memory usage updates during transcription",
+    )
+
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        required=False,
+        default=False,
+        action="store_true",
+        help="print out more information",
     )
 
     return parser
@@ -607,6 +801,7 @@ if __name__ == "__main__":
     model_id = str(args.model)
     join_text = args.join_text
     basic_spelling = args.basic_spelling
+    print_memory_usage = args.print_memory_usage
     is_verbose = args.verbose
 
     output_text, output_metadata = transcribe_dir(
@@ -616,6 +811,7 @@ if __name__ == "__main__":
         move_comp=move_comp,
         join_text=join_text,
         basic_spelling=basic_spelling,
+        print_memory_usage=print_memory_usage,
         verbose=is_verbose,
     )
 
