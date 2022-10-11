@@ -263,9 +263,9 @@ def transcribe_video_whisper(
     chunk_directory = prep_transc_pydub(
         clip_name, clip_directory, ac_storedir, chunk_dur, verbose=verbose
     )
-    torch_validate_cuda()
     gc.collect()
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    logging.info(f"transcribing on {device}")
     full_transc = []
     GPU_update_incr = (
         math.ceil(len(chunk_directory) / 2) if len(chunk_directory) > 1 else 1
@@ -390,9 +390,9 @@ def transcribe_video_wav2vec(
     chunk_directory = prep_transc_pydub(
         clip_name, clip_directory, ac_storedir, chunk_dur, verbose=verbose
     )  # split the video into chunks
-    torch_validate_cuda()
     gc.collect()
     device = "cuda" if torch.cuda.is_available() else "cpu"  # set device
+    logging.info(f"transcribing on {device}")
     full_transc = []
     GPU_update_incr = (
         math.ceil(len(chunk_directory) / 2) if len(chunk_directory) > 1 else 1
