@@ -284,6 +284,7 @@ def transcribe_video_whisper(
             input_features = processor(
                 audio_input, truncation=True, padding="max_length", return_tensors="pt"
             ).input_features  # audio to tensor
+            input_features = input_features.to(device)  # send to device
             predicted_ids = model.generate(
                 input_features, max_new_tokens=chunk_max_new_tokens
             )
