@@ -726,14 +726,6 @@ def get_parser():
         help="if specified, will move files that finished transcription to the completed folder",
         # use case here is if there are so many files that run into CUDA memory issues resulting in a crash
     )
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        required=False,
-        default=False,
-        action="store_true",
-        help="print out more information",
-    )
 
     parser.add_argument(
         "-m",
@@ -766,6 +758,15 @@ def get_parser():
         default=False,
         action="store_true",
         help="Use the basic spelling correction pipeline with symSpell",
+    )
+
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        required=False,
+        default=False,
+        action="store_true",
+        help="print out more information",
     )
 
     return parser
