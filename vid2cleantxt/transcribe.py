@@ -236,6 +236,7 @@ def transcribe_video_whisper(
     chunk_max_new_tokens=512,
     temp_dir: str = "audio_chunks",
     manually_clear_cuda_cache=False,
+    display_memory_usage=False,
     verbose=False,
 ) -> dict:
     """
@@ -253,7 +254,7 @@ def transcribe_video_whisper(
     :return dict: a dictionary containing the transcribed text, the metadata
 
     """
-    logging.info(f"Starting to transcribe {clip_name} @ {get_timestamp()}")
+    logging.info(f"Starting to transcribe {clip_name}")
     if verbose:
         print(f"Starting to transcribe {clip_name} @ {get_timestamp()}")
     ac_storedir = join(clip_directory, temp_dir)
@@ -272,7 +273,7 @@ def transcribe_video_whisper(
     pbar = tqdm(total=len(chunk_directory), desc="Transcribing video")
     for i, audio_chunk in enumerate(chunk_directory):
 
-        if (i % GPU_update_incr == 0) and (GPU_update_incr != 0):
+        if (i % GPU_update_incr == 0) and (GPU_update_incr != 0) and display_memory_usage:
             check_runhardware()  # utilization check
             gc.collect()
 
@@ -297,11 +298,11 @@ def transcribe_video_whisper(
                 0
             ]  # decode the tensor to text
         except Exception as e:
-            logging.error(
-                f"Error transcribing chunk {audio_chunk} in {clip_name} @ {get_timestamp()}"
+            logging.warning(
+                f"Error transcribing chunk {i} in {clip_name}"
             )
-            logging.error(e)
-            warnings.warn("Error transcribing chunk - see log for details")
+            logging.warning(e)
+            warnings.warn(f"Error transcribing chunk {i} - see log for details")
             this_transc = ""
         this_transc = (
             "".join(this_transc) if isinstance(this_transc, list) else this_transc
@@ -374,7 +375,7 @@ def transcribe_video_wav2vec(
     :param bool verbose: whether to print the transcribed text locations to the console. default False
     :return dict: a dictionary containing the transcribed text, the metadata
     """
-    logging.info(f"Starting to transcribe {clip_name} @ {get_timestamp()}")
+    logging.info(f"Starting to transcribe {clip_name}")
     if verbose:
         print(f"Starting to transcribe {clip_name} @ {get_timestamp()}")
     ac_storedir = join(clip_directory, temp_dir)
@@ -426,11 +427,11 @@ def transcribe_video_wav2vec(
                 "".join(this_transc) if isinstance(this_transc, list) else this_transc
             )
         except Exception as e:
-            logging.error(
-                f"Error transcribing chunk {audio_chunk} in {clip_name} @ {get_timestamp()}"
+            logging.warning(
+                f"Error transcribing chunk {i} in {clip_name}"
             )
-            logging.error(e)
-            warnings.warn("Error transcribing chunk - see log for details   ")
+            logging.warning(e)
+            warnings.warn(f"Error transcribing chunk {i} - see log for details   ")
             this_transc = ""
 
         full_transc.append(f"{this_transc}\n")
@@ -508,7 +509,7 @@ def postprocess_transc(
     str, filepath to the "complete" output directory
     """
     logging.info(
-        f"Starting postprocessing of transcribed text @ {get_timestamp()} with params {locals()}"
+        f"Starting postprocessing of transcribed text with params {locals()}"
     )
     if checker is None:
         checker = (
