@@ -14,39 +14,39 @@ TL;DR check out [this Colab notebook](https://colab.research.google.com/gist/psz
 
 <!-- TOC -->
 
-- [Motivation](#motivation)
-- [Overview](#overview)
-  - [Example Output](#example-output)
-  - [Pipeline Intro](#pipeline-intro)
-- [Quickstart](#quickstart)
-  - [Installation](#installation)
-    - [As a Python package](#as-a-python-package)
-    - [Install from source](#install-from-source)
-    - [install details & gotchas](#install-details--gotchas)
-  - [example usage](#example-usage)
-- [Notebooks on Colab](#notebooks-on-colab)
-- [Details & Application](#details--application)
-  - [How long does this take to run?](#how-long-does-this-take-to-run)
-  - [Now I have a bunch of long text files. How are these useful?](#now-i-have-a-bunch-of-long-text-files-how-are-these-useful)
-    - [Visualization and Analysis](#visualization-and-analysis)
-    - [Text Extraction / Manipulation](#text-extraction--manipulation)
-  - [Text Summarization](#text-summarization)
-    - [TextHero example use case](#texthero-example-use-case)
-- [ScatterText example use case](#scattertext-example-use-case)
-- [Design Choices & Troubleshooting](#design-choices--troubleshooting)
-  - [What python package dependencies does this repo have?](#what-python-package-dependencies-does-this-repo-have)
-  - [My computer crashes once it starts running the wav2vec2 model](#my-computer-crashes-once-it-starts-running-the-wav2vec2-model)
-  - [The transcription is not perfect, and therefore I am mad](#the-transcription-is-not-perfect-and-therefore-i-am-mad)
-  - [How can I improve the performance of the model from a word-error-rate perspective?](#how-can-i-improve-the-performance-of-the-model-from-a-word-error-rate-perspective)
-  - [Why use transformer models instead of SpeechRecognition or other transcription methods?](#why-use-transformer-models-instead-of-speechrecognition-or-other-transcription-methods)
-  - [Errors](#errors)
-- [Examples](#examples)
-- [Future Work, Collaboration, & Citations](#future-work-collaboration--citations)
-  - [Project Updates](#project-updates)
-  - [Future Work](#future-work)
-  - [I've found x repo / script / concept that I think you should incorporate or collaborate with the author](#ive-found-x-repo--script--concept-that-i-think-you-should-incorporate-or-collaborate-with-the-author)
-  - [Citations](#citations)
-    - [Video Citations](#video-citations)
+-   [Motivation](#motivation)
+-   [Overview](#overview)
+    -   [Example Output](#example-output)
+    -   [Pipeline Intro](#pipeline-intro)
+-   [Quickstart](#quickstart)
+    -   [Installation](#installation)
+        -   [As a Python package](#as-a-python-package)
+        -   [Install from source](#install-from-source)
+        -   [install details & gotchas](#install-details--gotchas)
+    -   [example usage](#example-usage)
+-   [Notebooks on Colab](#notebooks-on-colab)
+-   [Details & Application](#details--application)
+    -   [How long does this take to run?](#how-long-does-this-take-to-run)
+    -   [Now I have a bunch of long text files. How are these useful?](#now-i-have-a-bunch-of-long-text-files-how-are-these-useful)
+        -   [Visualization and Analysis](#visualization-and-analysis)
+        -   [Text Extraction / Manipulation](#text-extraction--manipulation)
+    -   [Text Summarization](#text-summarization)
+        -   [TextHero example use case](#texthero-example-use-case)
+-   [ScatterText example use case](#scattertext-example-use-case)
+-   [Design Choices & Troubleshooting](#design-choices--troubleshooting)
+    -   [What python package dependencies does this repo have?](#what-python-package-dependencies-does-this-repo-have)
+    -   [My computer crashes once it starts running the wav2vec2 model](#my-computer-crashes-once-it-starts-running-the-wav2vec2-model)
+    -   [The transcription is not perfect, and therefore I am mad](#the-transcription-is-not-perfect-and-therefore-i-am-mad)
+    -   [How can I improve the performance of the model from a word-error-rate perspective?](#how-can-i-improve-the-performance-of-the-model-from-a-word-error-rate-perspective)
+    -   [Why use transformer models instead of SpeechRecognition or other transcription methods?](#why-use-transformer-models-instead-of-speechrecognition-or-other-transcription-methods)
+    -   [Errors](#errors)
+-   [Examples](#examples)
+-   [Future Work, Collaboration, & Citations](#future-work-collaboration--citations)
+    -   [Project Updates](#project-updates)
+    -   [Future Work](#future-work)
+    -   [I've found x repo / script / concept that I think you should incorporate or collaborate with the author](#ive-found-x-repo--script--concept-that-i-think-you-should-incorporate-or-collaborate-with-the-author)
+    -   [Citations](#citations)
+        -   [Video Citations](#video-citations)
 
 <!-- /TOC -->
 
@@ -66,7 +66,10 @@ Example output text of a video transcription of [JFK's speech on going to the mo
 
 **vid2cleantxt output:**
 
-> Now look into space to the moon and to the planets beyond and we have vowed that we shall not see it governed by a hostile flag of conquest but. By a banner of freedom and peace we have vowed that we shall not see space filled with weapons of man's destruction but with instruments of knowledge and understanding yet the vow. S of this nation can only be fulfilled if we in this nation are first and therefore we intend to be first. In short our leadership in science and industry our hopes for peace and security our obligations to ourselves as well as others all require. Us to make this effort to solve these mysteries to solve them for the good of all men and to become the world's leading space fearing nationwide set sail on this new sea. Because there is new knowledge to be gained and new rights to be won and they must be won and used for the progress of all before for space science like nuclear science and all techniques. Logo has no conscience of its own whether it will become a force for good or ill depends on man and only if the united states occupies a position of pre eminence. Can we help decide whether this new ocean will be a sea of peace or a new terrifying theatre of war I do not say that we should or will go on. ... (truncated for brevity)
+> Now look into space to the moon and to the planets beyond and we have vowed that we shall not see it governed by a hostile flag of conquest but by a banner of freedom and peace we have vowed that we shall not see space filled with weapons of mass destruction but with instruments of knowledge and understanding yet the vow of. Of. To. Of. The. In outer space as yet its hazards are hostile to us all its conquest deserves the best of all mankind and its opportunity for peaceful cooperation may never come again but why some say the moon why choose this as our goal and they may well ask why climb the highest mountain why 35 years ago fly the atlantic why does. We choose to go to the moon we choose to go to the moon we choose to go to the moon and do the other things not because they are easy but because they are hard because that goal will serve to organize and measure the best of our energies and skills because that challenge is one of the most important goals of our lives. It is for these reasons that i regard the decision last year ...
+
+-   model = `openai/whisper-small.en`
+-
 
 See the [demo notebook](https://colab.research.google.com/gist/pszemraj/9678129fe0b552e114e3576606446dee/vid2cleantxt-minimal-example.ipynb) for the full-text output.
 
