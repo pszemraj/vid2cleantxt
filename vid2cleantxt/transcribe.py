@@ -233,7 +233,7 @@ def transcribe_video_whisper(
     clip_directory,
     clip_name: str,
     chunk_dur: int = 30,
-    chunk_max_new_tokens=512,
+    chunk_max_new_tokens=446,
     temp_dir: str = "audio_chunks",
     manually_clear_cuda_cache=False,
     print_memory_usage=False,
@@ -247,7 +247,7 @@ def transcribe_video_whisper(
     :param clip_directory: the directory of the video file
     :param str clip_name: the name of the video file
     :param int chunk_dur: the duration of each chunk in seconds, default 30
-    :param int chunk_max_new_tokens: max new tokens generated per chunk, default 512 (arbitrary upper bound)
+    :param int chunk_max_new_tokens: max new tokens generated per chunk, default 446 (arbitrary upper bound)
     :param str temp_dir: the directory to store the audio chunks in. default "audio_chunks"
     :param bool manually_clear_cuda_cache: whether to manually clear the cuda cache after each chunk. default False
     :param bool print_memory_usage: whether to print the memory usage at set interval while transcribing. default False
